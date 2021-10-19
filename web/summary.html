@@ -1,0 +1,178 @@
+<html>
+    <head>
+        <title>Summary</title>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.js"
+                integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+                crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.3/ansi_up.js"></script>
+        <script src="lib.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <div id="container">
+<div id="toolbar">
+    <div class="highlightable button view-mode-group" id="view-mode-tiles" title="Tiles View" onclick="setViewMode('tiles')">
+        <span class="material-icons">grid_view</span>
+    </div>
+    <div class="highlightable button view-mode-group" id="view-mode-table" title="Table View" onclick="setViewMode('table')">
+        <span class="material-icons">table_view</span>
+    </div>
+</div>
+<div id="status">
+    <div id="status-tiles" v-if="mode == 'tiles'">
+        <div class="status-tile highlightable clickable" :class="badnessClass(site)" v-for="site in sort('site_id', sites)"
+             :onclick="navigate('site.html?site_id=' + site.site_id)">
+            <div class="site-id">
+                <div class="site-running" v-if="site.running"><span class="material-icons">cached</span></div>
+                <div class="site-label">
+                    {{ site.site_id }}
+                </div>
+                <div class="branch-tiles">
+                    <div class="branch-tile highlightable clickable" :class="badnessClass(branch)" v-for="branch in limit(badnessSort(site.branches), 6)"
+                        :onclick="navigate('run.html?site_id=' + site.site_id + '&run_id=' + site.run_id + '#branch-' + branch.name)">
+                        {{ branch.name }}
+                        <div class="counts">
+                            <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
+                            <img class="check-mark" src="checkmark.png" v-if="branch.failed_count == 0"/>
+                        </div>
+                    </div>
+                    <div class="branch-ellipsis" v-if="site.branches.length > 6">
+                        ...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="status-table" v-if="mode == 'table'">
+        <table>
+            <tr>
+                <th class="split-cell">
+                    <span class="split-cell-top-right">Branch</span>
+                    <span class="split-cell-bottom-left">Site</span>
+                </th>
+                <th v-for="branch in allBranches">
+                    <div class="branch-heading highlightable clickable" :class="badnessClass(branch)"
+                         :onclick="navigate('branch.html?branch=' + branch.name)">
+                        {{ branch.name }}
+                        <div class="counts">
+                            <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
+                            <img class="check-mark" src="checkmark.png" v-if="branch.failed_count == 0"/>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+            <tr v-for="site in sites">
+                <th>
+                    <div class="site-heading highlightable clickable" :class="badnessClass(site)"
+                         :onclick="navigate('site.html?site_id=' + site.site_id)">
+                        {{ site.site_id }}
+                        <div class="counts">
+                            <span class="failed-count" v-if="site.failed_count > 0">{{ site.failed_count }}</span>
+                            <img class="check-mark" src="checkmark.png" v-if="site.failed_count == 0"/>
+                        </div>
+                    </div>
+                </th>
+                <td class="branch-status" v-for="branch in allBranches">
+                    <div class="site-branch-cell highlightable clickable" :class="badnessClass(branch.sites[site.site_id])" v-if="site.site_id in branch.sites"
+                        :onclick="navigate('branch.html?site_id=' + site.site_id + '&branch=' + branch.name)">
+                        &nbsp;
+                        <div class="counts">
+                            <span class="failed-count" v-if="branch.sites[site.site_id].failed_count > 0">{{ branch.sites[site.site_id].failed_count }}</span>
+                            <img class="check-mark" src="checkmark.png" v-if="branch.sites[site.site_id].failed_count == 0"/>
+                        </div>
+                    </div>
+                    <div class="site-branch-cell absent" v-if="!(site.site_id in branch.sites)">
+                        &nbsp;
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+        </div>
+    <script>
+
+        var sites = [
+        ];
+
+        var siteStatus = new Vue({
+            el: "#container",
+            data: {
+                sites: sites,
+                mode: ''
+            },
+            methods: globalMethods,
+            computed: {
+                allBranches: function() {
+                    var unique = {};
+                    for (var i = 0; i < this.sites.length; i++) {
+                        var site = this.sites[i];
+                        var branches = site.branches;
+                        for (var j = 0; j < branches.length; j++) {
+                            var branch = branches[j];
+                            if (branch.name in unique) {
+                                var existing = unique[branch.name];
+                                existing['failed_count'] += branch['failed_count'];
+                                existing['completed_count'] += branch['completed_count'];
+                            }
+                            else {
+                                unique[branch.name] = {... branch};
+                                unique[branch.name]['sites'] = {};
+                            }
+                            unique[branch.name]['sites'][site.site_id] = branch;
+                        }
+                    }
+
+                    values = [];
+                    for (var k in unique) {
+                        values.push(unique[k]);
+                    }
+                    return this.sort('name', values);
+                },
+                branchIndexMap: function() {
+                    var all = this.allBranches;
+                    var map = {};
+                    for (var i = 0; i < all.length; i++) {
+                        map[all[i].name] = i;
+                    }
+                    return map;
+                }
+            }
+        });
+
+        set = function(dst, src) {
+            dst.length = 0;
+            for (var i = 0; i < src.length; i++) {
+                dst.push(src[i]);
+            }
+        }
+
+        $.get("summary", function(data) {
+            console.log(data);
+            set(sites, data);
+        });
+
+        var setViewMode = function(viewMode) {
+            if (viewMode === undefined) {
+                viewMode = Cookies.get('viewMode');
+            }
+            if (viewMode === undefined) {
+                viewMode = 'tiles';
+            }
+            Cookies.set('viewMode', viewMode);
+            $('.view-mode-group').removeClass('selected');
+            $('#view-mode-' + viewMode).addClass('selected');
+            siteStatus.mode = viewMode;
+        }
+
+        setViewMode();
+
+    </script>
+    </body>
+</html>

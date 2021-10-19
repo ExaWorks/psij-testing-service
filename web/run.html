@@ -1,0 +1,144 @@
+<html>
+    <head>
+        <title>Test runs</title>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.js"
+                integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+                crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.3/ansi_up.js"></script>
+        <script src="lib.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <div id="container">
+<div id="toolbar">
+</div>
+<div id="status">
+    <h1 class="page-name">Site: {{ run.site_id }}, run: <span :title="run.run_id">{{ shortenId(run.run_id) }}</span></h1>
+    <div class="branch-list-summary">
+        Branches:
+        <div class="run-branch" v-for="branch in run.branches">
+            <div class="site-branch-cell highlightable" :class="badnessClass(branch)"
+                :onclick="navigate('#branch-' + branch.name)">
+                {{ branch.name }}
+                <div class="counts">
+                    <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
+                    <img class="check-mark" src="checkmark.png" v-if="branch.failed_count == 0"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="branch-list">
+        <div class="branch" v-for="branch in run.branches">
+            <h2 class="run-branch">
+                <a :name="'branch-' + branch.name"></a>
+                Branch {{ branch.name }}
+            </h2>
+            <v-expansion-panels multiple flat accordion :value="[2]">
+                <v-expansion-panel class="highlightable">
+                    <v-expansion-panel-header>Environment</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                        <table class="run-env">
+                            <colgroup>
+                                <col span="1" class="col-env-name">
+                                <col span="1" class="col-env-value">
+                            </colgroup>
+                            <tr>
+                                <th class="env-name">Name</th>
+                                <th class="env-value">Value</th>
+                            </tr>
+                            <tr v-for="(value, key) in branch.env">
+                                <td class="env-name">{{ key }}</td>
+                                <td class="env-value" v-html="formatEnvValue(key, value)"></td>
+                            </tr>
+                        </table>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+                <v-expansion-panel class="highlightable">
+                    <v-expansion-panel-header>Config</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                        <table class="run-env">
+                            <colgroup>
+                                <col span="1" class="col-env-name">
+                                <col span="1" class="col-env-value">
+                            </colgroup>
+                            <tr>
+                                <th class="env-name">Name</th>
+                                <th class="env-value">Value</th>
+                            </tr>
+                            <tr v-for="(value, key) in branch.config">
+                                <td class="env-name">{{ key }}</td>
+                                <td class="env-value" v-html="formatEnvValue(key, value)"></td>
+                            </tr>
+                        </table>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+
+                <v-expansion-panel class="highlightable">
+                    <v-expansion-panel-header>Tests</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                        <div class="branch-tests">
+                            <v-expansion-panels multiple flat accordion>
+                                    <v-expansion-panel class="highlightable" :class="testStatusClass(test)" v-for="test in branch.tests">
+                                        <v-expansion-panel-header>
+                                            {{ test.module + "::" + test.test_name }}
+                                            <!--<div class="test-status">{{ testStatusText(test) }}</div>-->
+                                            <div class="test-status"><span class="material-icons">{{testStatusIcon(test)}}</span></div>
+                                        </v-expansion-panel-header>
+                                        <v-expansion-panel-content>
+                                            <div class="listing test-failure" v-if="hasReport(test)" v-html="renderReport(test)"></div>
+                                            <table class="run-env">
+                                                <colgroup>
+                                                    <col span="1" class="col-env-name">
+                                                    <col span="1" class="col-env-value">
+                                                </colgroup>
+                                                <tr>
+                                                    <th class="env-name">Name</th>
+                                                    <th class="env-value">Value</th>
+                                                </tr>
+                                                <tr v-for="(value, key) in test">
+                                                    <td class="env-name">{{ key }}</td>
+                                                    <td class="env-value" v-html="formatEnvValue(key, value)"></td>
+                                                </tr>
+                                            </table>
+                                        </v-expansion-panel-content>
+                                    </v-expansion-panel>
+                            </v-expansion-panels>
+                        </div>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+            </v-expansion-panels>
+        </div>
+    </div>
+</div>
+        </div>
+    <script>
+        var siteStatus = new Vue({
+            el: "#container",
+            vuetify: new Vuetify(),
+            data: {
+                run: {}
+            },
+            methods: globalMethods,
+            updated: function() {
+                console.log(window.location.href);
+                if (window.location.href.includes("#")) {
+                    window.location.href = window.location.href;
+                    /* Weird, I know, but if the URL points to an anchor, the page won't magically jump
+                     to it after the rendering if it wasn't in the pre-rendered page. */
+                }
+            }
+        });
+
+        $.get("run?site_id=" + urlParam("site_id") + "&run_id=" + urlParam("run_id"), function(data) {
+            siteStatus.run = data;
+        });
+
+    </script>
+    </body>
+</html>
