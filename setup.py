@@ -9,7 +9,7 @@ from distutils.command.build import build
 
 if __name__ == '__main__':
     setup(
-        name='psi-j-testing-server',
+        name='psi-j-testing-service',
         version='0.1',
 
         description='''Aggregation server for PSI/J testing and test reports.''',
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         author='The ExaWorks Team',
         author_email='hategan@mcs.anl.gov',
 
-        url='https://github.com/exaworks/psi-j-testing-server',
+        url='https://github.com/exaworks/psi-j-testing-service',
 
         classifiers=[
             'Programming Language :: Python :: 3',
@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
         entry_points={
             'console_scripts': [
-                'psi-j-testing-server = psij.testing.server:main'
+                'psi-j-testing-service = psij.testing.service:main'
             ]
         },
 
