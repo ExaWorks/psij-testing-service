@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=`cat ../RELEASE`
+VERSION=`cat ../../RELEASE`
 
 echo "Version: $VERSION"
 
