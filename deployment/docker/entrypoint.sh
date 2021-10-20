@@ -5,4 +5,5 @@ service nginx start
 chown -R mongodb:mongodb /var/lib/mongodb
 service mongodb start
 
-psi-j-testing-service >>/service.log 2>&1
+echo "Running testing service..."
+psi-j-testing-service 2>&1 | tee -a service.log
