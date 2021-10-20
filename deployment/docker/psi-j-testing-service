@@ -1,0 +1,122 @@
+#!/bin/bash
+#
+# PSI/J testing server
+#
+### BEGIN INIT INFO
+# Provides: psi-j-testing-server  
+# Required-Start:	$local_fs $remote_fs $mongodb
+# Required-Stop:	$local_fs $remote_fs $mongodb
+# Default-Start:	2 3 4 5
+# Default-Stop:		0 1 6
+# Short-Description: PSI/J testing server
+# Description: PSI/J testing server
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+PIDFILE=/run/psi-j-testing-server.pid
+RETVAL=0
+DESC="PSI/J testing service"
+NAME=psi-j-testing-service
+DAEMONUSER=testsrv
+
+is_running() {
+    [ -e $PIDFILE ] && cat /proc/`cat $PIDFILE`/cmdline | grep 'psi-j-testing-service$' > /dev/null
+    errcode=$?
+    return $errcode
+}
+
+start() {
+    if is_running; then
+        log_progress_msg "already running"
+        errorcode=0
+    else
+        start-stop-daemon --background --start --quiet --pidfile $PIDFILE \
+            --make-pidfile --chuid $DAEMONUSER \
+            --startas /bin/bash -- -c "exec psi-j-testing-service >>/var/log/psi-j-testing-service/service.log 2>&1"
+        errorcode=$?
+    fi
+    return $errorcode
+}
+
+stop() {
+    if ! is_running; then
+        log_progress_msg "service is not running"
+        errorcode=0
+    else
+        start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+            --retry 300 --user $DAEMONUSER \
+            --exec "psi-j-testing-server"
+        errorcode=$?
+    fi
+    return $errorcode
+}
+
+force_stop() {
+    if [ -e "$PIDFILE" ]; then
+        PID=`cat $PIDFILE`
+        if running; then
+            kill -TERM $PID
+            sleep 2
+            if running; then
+                kill -KILL $PID
+            fi
+        fi
+    fi
+    rm $PIDFILE
+}
+
+case "$1" in
+  start)
+    log_daemon_msg "Starting $DESC" "$NAME"
+    if ! start; then
+        log_end_msg 1
+    else
+        sleep 1
+        if is_running; then
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+    fi
+    ;;
+
+  stop)
+    log_daemon_msg "Stopping $DESC" "$NAME"
+    if ! stop; then
+        log_end_msg 1
+    else
+        log_end_msg 0
+    fi
+    ;;
+  status)
+    ;;
+  force-stop)
+        $0 stop
+        if running; then
+            force_stop
+        fi
+        log_end_msg 0
+    ;;
+  reload)
+    log_warning_msg "Reloading not implemented"
+    ;;
+  restart|force-reload)
+    log_daemon_msg "Restarting $DESC" "$NAME"
+    if stop; then
+        if start; then
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+    else
+        log_end_msg 1
+    fi
+	;;
+
+  *)
+	echo "Usage: $0 [start|stop|status|reload|restart]"
+	exit 1
+esac
+
+exit $RETVAL

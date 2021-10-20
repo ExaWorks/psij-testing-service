@@ -36,6 +36,7 @@ if [ "$INTERACTIVE" == 1 ]; then
         --volume=$PWD/data:/var/lib/mongodb \
         --volume=$PWD/webroot:/var/www/html \
         --volume=$PWD/certs:/etc/ssl/exaworks \
+        --volume=/etc/letsencrypt:/etc/letsencrypt \
         hategan/psi-j-testing-service:$VERSION /bin/bash
 else
     docker run \
@@ -46,5 +47,6 @@ else
         --volume=$PWD/data:/var/lib/mongodb \
         --volume=$PWD/webroot:/var/www/html \
         --volume=$PWD/certs:/etc/ssl/exaworks \
+        --volume=/etc/letsencrypt:/etc/letsencrypt \
         hategan/psi-j-testing-service:$VERSION
 fi
