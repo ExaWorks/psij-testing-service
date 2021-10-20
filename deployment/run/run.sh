@@ -30,7 +30,7 @@ mkdir -p webroot
 
 if [ "$INTERACTIVE" == 1 ]; then
     docker run \
-        -i \
+        -it \
         -p 80:80 \
         -p 443:443 \
         --volume=$PWD/data:/var/lib/mongodb \
