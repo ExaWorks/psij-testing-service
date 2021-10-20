@@ -30,6 +30,15 @@ mkdir -p webroot
 
 if [ "$INTERACTIVE" == 1 ]; then
     docker run \
+        -i \
+        -p 80:80 \
+        -p 443:443 \
+        --volume=$PWD/data:/var/lib/mongodb \
+        --volume=$PWD/webroot:/var/www/html \
+        --volume=$PWD/certs:/etc/ssl/exaworks \
+        hategan/psi-j-testing-service:$VERSION /bin/bash
+else
+    docker run \
         -d \
         -p 80:80 \
         -p 443:443 \
@@ -38,3 +47,4 @@ if [ "$INTERACTIVE" == 1 ]; then
         --volume=$PWD/webroot:/var/www/html \
         --volume=$PWD/certs:/etc/ssl/exaworks \
         hategan/psi-j-testing-service:$VERSION
+fi
