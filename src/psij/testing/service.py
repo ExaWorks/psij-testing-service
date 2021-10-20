@@ -312,9 +312,12 @@ def upgrade_db(v: Version) -> Version:
 
 def check_db() -> None:
     connect(db='psi-j-testing-aggregator')
-    v = Version.objects()
-    if len(v) == 0:
+    vs = Version.objects()
+    if len(vs) == 0:
         v = Version(version=0).save()
+        v.reload()
+    else:
+        v = vs[0]
 
     while v.version < CODE_DB_VERSION:
         v = upgrade_db(v)
