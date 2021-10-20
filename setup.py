@@ -41,7 +41,6 @@ if __name__ == '__main__':
             ]
         },
 
-        install_requires=[
-        ],
+        install_requires=pathlib.Path('requirements.txt').read_text().split('\n'),
         python_requires='>=3.6'
     )
