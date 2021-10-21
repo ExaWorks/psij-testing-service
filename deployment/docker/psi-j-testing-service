@@ -21,7 +21,7 @@ NAME=psi-j-testing-service
 DAEMONUSER=testsrv
 
 is_running() {
-    [ -e $PIDFILE ] && cat /proc/`cat $PIDFILE`/cmdline | grep 'psi-j-testing-service$' > /dev/null
+    [ -e $PIDFILE ] && cat /proc/`cat $PIDFILE`/cmdline 2>/dev/null | grep 'psi-j-testing-service$' > /dev/null
     errcode=$?
     return $errcode
 }
