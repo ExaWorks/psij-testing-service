@@ -413,3 +413,69 @@ td.run-id {
 .ansi-red-fg {
     color: rgb(180, 0, 0);
 }
+
+#status-calendar table {
+    position: relative;
+}
+
+#status-calendar table tr:first-child th {
+    position: sticky;
+    top: 0pt;
+}
+
+.calendar-month {
+    height: 14pt;
+    font-weight: normal;
+    font-size: 11pt;
+    width: 60pt;
+}
+
+.calendar-day {
+    height: 18pt;
+    font-weight: normal;
+    font-size: 11pt;
+    padding-bottom: 4pt;
+    border-bottom: 2pt solid #e0e0e0;
+    margin-bottom: 2pt;
+}
+
+.calendar-site {
+    text-align: right;
+    font-weight: normal;
+    font-size: 11pt;
+    height: 24pt;
+    padding: 4pt;
+    border-radius: 4pt;
+}
+
+.calendar-tile {
+    width: 8pt;
+    height: 8pt;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 100pt;
+}
+
+.calendar-tile.state-somewhat-bad {
+    background-color: #f0f0d0;
+}
+
+.calendar-tile.state-really-bad {
+    background-color: #ff4d4d;
+}
+
+.calendar-tile.state-good {
+    background-color: #6aff4d;
+}
+
+.calendar-tile.state-unknown {
+    background-color: #e0e0e0;
+}
+
+.bg {
+    background-color: #f0f0f0;
+}
+
+.calendar-cell {
+    text-align: center;
+}

@@ -9,6 +9,7 @@
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.3/ansi_up.js"></script>
         <script src="lib.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
         <link rel="stylesheet" href="style.css">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
@@ -20,6 +21,9 @@
     <v-breadcrumbs :items="breadcrumbs()"></v-breadcrumbs>
 </div>
 <div id="toolbar">
+    <div class="highlightable button view-mode-group" id="view-mode-calendar" title="Calendar View" onclick="setViewMode('calendar')">
+        <span class="material-icons">calendar_today</span>
+    </div>
     <div class="highlightable button view-mode-group" id="view-mode-tiles" title="Tiles View" onclick="setViewMode('tiles')">
         <span class="material-icons">grid_view</span>
     </div>
@@ -28,6 +32,28 @@
     </div>
 </div>
 <div id="status">
+    <div id="status-calendar" v-if="mode == 'calendar'">
+        <table>
+            <tr>
+                <th class="bg">&nbsp;</th>
+                <th class="bg" v-for="day in daysRange(now, 8)">
+                    <div class="calendar-month">{{ day.month }}</div>
+                    <div class="calendar-day">{{ day.day }}</div>
+                </th>
+            </tr>
+            <tr v-for="site in sort('site_id', sites)">
+                <th class="calendar-site highlightable clickable"
+                    :onclick="navigate('site.html?site_id=' + site.site_id)">
+                    {{ site.site_id }}
+                </th>
+                <td class="calendar-cell" v-for="day in daysRange(now, 8)">
+                    <div class="calendar-tile" :class="calendarTileClass(site, day)" :style="calendarTileStyle(site, day)">
+                        &nbsp;
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
     <div id="status-tiles" v-if="mode == 'tiles'">
         <div class="status-tile highlightable clickable" :class="badnessClass(site)" v-for="site in sort('site_id', sites)"
              :onclick="navigate('site.html?site_id=' + site.site_id)">
@@ -108,7 +134,8 @@
             el: "#container",
             data: {
                 sites: sites,
-                mode: ''
+                mode: '',
+                now: Date.today()
             },
             methods: globalMethods,
             computed: {

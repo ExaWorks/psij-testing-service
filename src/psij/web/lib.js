@@ -17,6 +17,16 @@ var urlParam = function(paramName) {
     return p.get(paramName);
 }
 
+var getDayData = function(site, day) {
+    if (day.month_num in site["months"]) {
+        var month = site["months"][day.month_num];
+        if (day.day in month) {
+            return month[day.day];
+        }
+    }
+    return null;
+}
+
 var ansi_up = new AnsiUp();
 ansi_up.use_classes = true;
 
@@ -176,6 +186,98 @@ var globalMethods = {
         else {
             return "";
         }
+    },
+    daysRange: function(now, ndays) {
+        var days = [];
+        var crt = now.clone();
+        crt.addDays(-ndays + 1);
+        var change = false;
+        for (var i = 0; i < ndays; i++) {
+            var day = crt.getDate();
+            var entry = new Object();
+            days.push(entry);
+            entry.day = day;
+            entry.monthChange = false;
+            entry.cls = "month-none";
+            entry.month_num = crt.getMonth() + 1;
+            if (day == 1) {
+                entry.monthChange = true;
+                if (i > 0) {
+                    crt.addDays(-1);
+                    days[i - 1].month = crt.toString("MMMM");
+                    crt.addDays(1);
+                }
+                days[i].month = crt.toString("MMMM");
+                change = true;
+            }
+            crt.addDays(1);
+        }
+        if (!change) {
+            days[0].month = crt.toString("MMMM");
+        }
+        return days;
+    },
+    calendarTileClass: function(site, day) {
+        var d = getDayData(site, day);
+        if (d == null || (d.completed_count == 0 && d.failed_count == 0)) {
+            return "state-unknown";
+        }
+        else {
+            return this.badnessClass(d);
+        }
+    },
+    calendarTileStyle: function(site, day) {
+        var d = getDayData(site, day);
+        var color;
+        if (d != null) {
+            var completed = d.completed_count;
+            var failed = d.failed_count;
+
+            if (completed == 0 && failed == 0) {
+                color = "#f0f0f0";
+            }
+            else if (completed > 0 && failed > completed / 2) {
+                // real bad
+                color = "#ff4d4d";
+            }
+            else if (failed == 0) {
+                // no failures
+                color = "#6aff4d";
+            }
+            else {
+                // less than half failures
+                var h = 0.20 - failed / completed * 2 * 0.20;
+                var s = 0.7;
+                var v = 0.95;
+
+                var region = Math.floor(h * 6);
+                var f = h * 6 - region;
+                var p = v * (1 - s);
+                var q = v * (1 - f * s);
+                var t = v * (1 - (1 - f) * s);
+
+                var r, g;
+                var b = p;
+                if (region == 0) {
+                    r = v;
+                    g = t;
+                }
+                else {
+                    r = q;
+                    g = v;
+                }
+                color = "rgba(" +
+                    (r * 255).toFixed() + ", " +
+                    (g * 255).toFixed() + ", " +
+                    (b * 255).toFixed() + ")";
+            }
+        }
+        else {
+            color = "#e0e0e0";
+        }
+
+        return "background-color: " + color;
+    },
     breadcrumbs: function() {
         var b = [{text: "PSI/J Tests", href: "summary.html"}];
         var level = 0;

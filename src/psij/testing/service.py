@@ -73,6 +73,9 @@ class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
             return obj.strftime('%a, %b %d, %Y - %H:%M:%S')
+        if isinstance(obj, datetime.date):
+            return '{"date": true, "year": %s, "month": %s, "day": %s}' % (obj.year, obj.month,
+                                                                           obj.day)
         if isinstance(obj, ObjectId):
             return str(obj)
         return super().default(obj)
@@ -215,6 +218,36 @@ class TestingAggregatorApp(object):
             site_data['running'] = any_running
             site_data['completed_count'] = site_completed_count
             site_data['failed_count'] = site_failed_count
+            site_data['months'] = {}
+
+            date_start = datetime.date.today()
+            for days in range(8):
+                date_end = date_start + datetime.timedelta(days=1)
+                t_start = datetime.datetime.combine(date_start, datetime.datetime.min.time())
+                t_end = datetime.datetime.combine(date_end, datetime.datetime.min.time())
+                envs = RunEnv.objects(site_id=site.site_id).filter(run_start_time__gte=t_start,
+                                                                   run_start_time__lt=t_end)
+                print("%s: %s" % (t_start, len(envs)))
+                total_failed = 0
+                total_completed = 0
+
+                for env in envs:
+                    total_failed += env.failed_count
+                    total_completed += env.completed_count
+
+                month = date_start.month
+                if month not in site_data['months']:
+                    month_data = {}  # type Dict[int, object]
+                    site_data['months'][month] = month_data
+                else:
+                    month_data = site_data['months'][month]
+
+                month_data[date_start.day] = {
+                    'completed_count': total_completed,
+                    'failed_count': total_failed
+                }
+                date_start = date_start + datetime.timedelta(days=-1)
+
 
         return resp
 
