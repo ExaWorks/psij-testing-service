@@ -8,7 +8,7 @@ RUN useradd -ms /bin/bash testsrv
 RUN apt-get update
 RUN apt-get upgrade
 
-RUN DEBIAN_FRONTEND="noninteractive" TZ="UTC" apt-get install -y python3.9 python3-pip mongodb nginx mc
+RUN DEBIAN_FRONTEND="noninteractive" TZ="UTC" apt-get install -y python3.9 python3-pip mongodb nginx wget mc
 
 WORKDIR ~/
 
