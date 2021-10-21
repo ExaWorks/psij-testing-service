@@ -17,6 +17,7 @@ RUN pip install $GIT_BASE/v$SERVICE_VERSION.tar.gz
 COPY nginx.conf /etc/nginx
 COPY psi-j-testing-service /etc/init.d
 COPY entrypoint.sh /
+COPY update-psi-j-testing-service /usr/bin
 RUN mkdir /var/log/psi-j-testing-service
 RUN chown testsrv:testsrv /var/log/psi-j-testing-service
 

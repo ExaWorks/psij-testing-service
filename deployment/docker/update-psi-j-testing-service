@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -e
+
+URL_BASE=https://github.com/ExaWorks/psi-j-testing-service/tree/v
+FORCE=0
+
+if [ "$1" == "--force" ]; then
+    FORCE=1
+    shift
+fi
+
+TARGET_VERSION="$1"
+
+if [ "$TARGET_VERSION" == "" ]; then
+    echo "Usage: update-psi-j-testing-service [--force] <target_version>"
+    exit 1
+fi
+
+if ! wget -q --method=HEAD "$URL_BASE$TARGET_VERSION"; then
+    echo "Error: no such version. Please check that the repo has a 'v$TARGET_VERSION' tag"
+    exit 2
+fi
+
+CURRENT_VERSION=`pip show psi-j-testing-service|grep Version|awk '{print $2}'`
+
+LOWER_VERSION=`echo -e "$CURRENT_VERSION\n$TARGET_VERSION"| sort -V | head -n 1`
+
+if [ "$FORCE" == "0" ]; then
+    if [ "$TARGET_VERSION" == "$LOWER_VERSION" ]; then
+        echo "Error: target version ($TARGET_VERSION) is lower than the currently"
+        echo "installed version ($CURRENT_VERSION). If you are sure you want to "
+        echo "downgrade, use the --force flag."
+        exit 3
+    fi
+fi
+
+echo "Upgrade from $CURRENT_VERSION to $TARGET_VERSION (y/n)?"
+
+read ANSWER
+
+if [ "$ANSWER" == "y" ]; then
+    sudo pip install "$URL_BASE$TARGET_VERSION"
+    sudo service psi-j-testing-service restart
+else
+    echo "OK. Baling out..."
+fi
