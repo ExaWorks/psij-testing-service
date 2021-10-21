@@ -40,8 +40,8 @@ echo "Upgrade from $CURRENT_VERSION to $TARGET_VERSION (y/n)?"
 read ANSWER
 
 if [ "$ANSWER" == "y" ]; then
-    sudo pip install "$URL_BASE$TARGET_VERSION"
-    sudo service psi-j-testing-service restart
+    pip install "$URL_BASE$TARGET_VERSION"
+    service psi-j-testing-service restart
 else
     echo "OK. Baling out..."
 fi
