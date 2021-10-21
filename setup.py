@@ -11,7 +11,7 @@ from distutils.command.build import build
 if __name__ == '__main__':
     setup(
         name='psi-j-testing-service',
-        version='0.1.0',
+        version=pathlib.Path('RELEASE').read_text(),
 
         description='''Aggregation server for PSI/J testing and test reports.''',
 
