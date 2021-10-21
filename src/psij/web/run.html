@@ -16,10 +16,14 @@
     </head>
     <body>
         <div id="container">
-<div id="toolbar">
+<div id="breadcrumbs">
+    <v-breadcrumbs :items="breadcrumbs()"></v-breadcrumbs>
 </div>
+<div id="toolbar">
+    &nbsp;
+</div>
+
 <div id="status">
-    <h1 class="page-name">Site: {{ run.site_id }}, run: <span :title="run.run_id">{{ shortenId(run.run_id) }}</span></h1>
     <div class="branch-list-summary">
         Branches:
         <div class="run-branch" v-for="branch in run.branches">
@@ -122,7 +126,8 @@
             el: "#container",
             vuetify: new Vuetify(),
             data: {
-                run: {}
+                run: {run_id: ""},
+                site: {site_id: ""}
             },
             methods: globalMethods,
             updated: function() {
@@ -137,6 +142,7 @@
 
         $.get("run?site_id=" + urlParam("site_id") + "&run_id=" + urlParam("run_id"), function(data) {
             siteStatus.run = data;
+            siteStatus.site.site_id = data["site_id"];
         });
 
     </script>

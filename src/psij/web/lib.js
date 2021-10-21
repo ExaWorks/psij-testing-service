@@ -176,6 +176,22 @@ var globalMethods = {
         else {
             return "";
         }
+    breadcrumbs: function() {
+        var b = [{text: "PSI/J Tests", href: "summary.html"}];
+        var level = 0;
+        if (window.location.pathname.startsWith("/site.html")) {
+            level = 1;
+        }
+        if (window.location.pathname.startsWith("/run.html")) {
+            level = 2;
+        }
+        if (level >= 1) {
+            b.push({text: "Site " + this.site.site_id})
+        }
+        if (level >= 2) {
+            b.push({text: "Run " + this.shortenId(this.run.run_id)})
+        }
+        return b;
     }
 }
 

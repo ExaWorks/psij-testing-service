@@ -16,6 +16,9 @@
     </head>
     <body>
         <div id="container">
+<div id="breadcrumbs">
+    <v-breadcrumbs :items="breadcrumbs()"></v-breadcrumbs>
+</div>
 <div id="toolbar">
     <div class="highlightable button view-mode-group" id="view-mode-tiles" title="Tiles View" onclick="setViewMode('tiles')">
         <span class="material-icons">grid_view</span>
@@ -163,7 +166,7 @@
                 viewMode = Cookies.get('viewMode');
             }
             if (viewMode === undefined) {
-                viewMode = 'tiles';
+                viewMode = 'calendar';
             }
             Cookies.set('viewMode', viewMode);
             $('.view-mode-group').removeClass('selected');

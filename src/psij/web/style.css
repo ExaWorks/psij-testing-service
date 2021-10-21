@@ -125,8 +125,31 @@ body {
 #toolbar {
     width: 100%;
     text-align: right;
-    margin-bottom: 8pt;
+    margin-bottom: 32pt;
 }
+
+#breadcrumbs {
+    float: left;
+}
+
+#breadcrumbs .v-breadcrumbs {
+    margin: 0pt;
+    padding-bottom: 4pt;
+    padding-top: 4pt;
+}
+
+#breadcrumbs li:not(.v-breadcrumbs__divider) {
+    display: inline-block;
+    box-shadow: 1pt 1pt 3pt #606060;
+    cursor: pointer;
+    background-color: #ffffff;
+    padding: 4pt;
+}
+
+#breadcrumbs li:hover:not(.v-breadcrumbs__divider) {
+    box-shadow: 1pt 1pt 5pt #80a0ff !important;
+}
+
 
 #toolbar .button {
     display: inline-block;
@@ -247,6 +270,10 @@ td.run-id {
 
 #run-table .site-branch-cell .counts {
     float: right;
+}
+
+.branch-list-summary {
+    margin-bottom: 16pt;
 }
 
 .branch-list h2 {

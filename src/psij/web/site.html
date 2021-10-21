@@ -16,10 +16,13 @@
     </head>
     <body>
         <div id="container">
+<div id="breadcrumbs">
+    <v-breadcrumbs :items="breadcrumbs()"></v-breadcrumbs>
+</div>
 <div id="toolbar">
+    &nbsp;
 </div>
 <div id="status">
-    <h1 class="page-name">Site: {{ site.site_id }}</h1>
     <table id="run-table">
         <colgroup>
             <col span="1" id="col-run-time">
@@ -55,7 +58,7 @@
         var siteStatus = new Vue({
             el: "#container",
             data: {
-                site: {}
+                site: {site_id: ""}
             },
             methods: globalMethods
         });
