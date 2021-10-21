@@ -46,7 +46,7 @@ stop() {
     else
         start-stop-daemon --stop --quiet --pidfile $PIDFILE \
             --retry 300 --user $DAEMONUSER \
-            --exec "psi-j-testing-server"
+            --startas /bin/bash -- -c "exec psi-j-testing-service"
         errorcode=$?
     fi
     return $errorcode
