@@ -46,8 +46,9 @@ body {
     display: inline-block;
     width: 95pt;
     height: 16pt;
-    font-size: 10pt;
+    font-size: 8.5pt;
     padding: 2pt;
+    padding-top: 1pt;
     border: 1pt solid #a0a0a0;
     margin-top: -1pt;
     margin-left: -1pt;
@@ -81,11 +82,16 @@ body {
 }
 
 .failed-count {
-    padding: 2pt;
+    display: inline-block;
+    padding-top: 1pt;
+    padding-left: 4pt;
+    padding-right: 4pt;
     padding-bottom: 1pt;
     background-color: rgba(255, 0, 0, 0.60);
     color: #ffffff;
     border-radius: 2pt;
+    height: 16pt;
+    margin-top: -2pt;
 }
 
 .status-tile.state-somewhat-bad {
