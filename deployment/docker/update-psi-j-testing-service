@@ -2,7 +2,7 @@
 
 set -e
 
-URL_BASE=https://github.com/ExaWorks/psi-j-testing-service/tree/v
+URL_BASE=https://github.com/ExaWorks/psi-j-testing-service/archive/refs/tags/v
 FORCE=0
 
 if [ "$1" == "--force" ]; then
@@ -17,7 +17,7 @@ if [ "$TARGET_VERSION" == "" ]; then
     exit 1
 fi
 
-if ! wget -q --method=HEAD "$URL_BASE$TARGET_VERSION"; then
+if ! wget -q --method=HEAD "$URL_BASE$TARGET_VERSION.tar.gz"; then
     echo "Error: no such version. Please check that the repo has a 'v$TARGET_VERSION' tag"
     exit 2
 fi
@@ -40,7 +40,7 @@ echo "Upgrade from $CURRENT_VERSION to $TARGET_VERSION (y/n)?"
 read ANSWER
 
 if [ "$ANSWER" == "y" ]; then
-    pip install "$URL_BASE$TARGET_VERSION"
+    pip install "$URL_BASE$TARGET_VERSION.tar.gz"
     service psi-j-testing-service restart
 else
     echo "OK. Baling out..."
