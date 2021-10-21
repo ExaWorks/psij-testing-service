@@ -294,8 +294,9 @@ class Server:
         cherrypy.config.update({'server.socket_port': self.port})
         cherrypy.quickstart(TestingAggregatorApp(), '/', {
             '/': {
+                'tools.staticdir.root': str(Path(__file__).parent.parent.absolute() / 'web'),
                 'tools.staticdir.on': True,
-                'tools.staticdir.dir': str(Path().absolute() / 'web'),
+                'tools.staticdir.dir': '',
                 'tools.json_out.handler': json_handler
             }
         })

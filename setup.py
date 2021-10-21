@@ -1,5 +1,6 @@
 import distutils
 import io
+import os
 import pathlib
 
 from setuptools import setup, find_packages
@@ -27,11 +28,11 @@ if __name__ == '__main__':
 
         packages=find_packages(where='src'),
         package_dir={'': 'src'},
-
+        
         package_data={
-            '': ['README.md', 'LICENSE', 'web']
+            '': ['README.md', 'LICENSE', 'RELEASE'],
+            'psij': [x.path[9:] for x in os.scandir('src/psij/web') if x.is_file()]
         },
-
 
         scripts=[],
 
