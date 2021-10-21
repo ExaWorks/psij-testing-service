@@ -112,11 +112,11 @@ case "$1" in
     else
         log_end_msg 1
     fi
-	;;
+    ;;
 
   *)
-	echo "Usage: $0 [start|stop|status|reload|restart]"
-	exit 1
+    echo "Usage: $0 [start|stop|status|reload|restart]"
+    exit 1
 esac
 
 exit $RETVAL
