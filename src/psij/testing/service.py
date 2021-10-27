@@ -188,7 +188,10 @@ class TestingAggregatorApp(object):
         resp = []
         for site in Site.objects().order_by('site_id'):
             # find last run for site
-            env = RunEnv.objects(site_id=site.site_id).order_by('-run_start_time')[0]
+            try:
+                env = RunEnv.objects(site_id=site.site_id).order_by('-run_start_time')[0]
+            except IndexError:
+                continue
             run_id = env.run_id
             # now find all envs/branches with this run id
             envs = RunEnv.objects(site_id=site.site_id, run_id=run_id)
