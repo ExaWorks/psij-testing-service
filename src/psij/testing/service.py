@@ -223,7 +223,7 @@ class TestingAggregatorApp(object):
             site_data['failed_count'] = site_failed_count
             site_data['months'] = {}
 
-            date_start = datetime.date.today()
+            date_start = datetime.datetime.now(datetime.timezone.utc)
             for days in range(8):
                 date_end = date_start + datetime.timedelta(days=1)
                 t_start = datetime.datetime.combine(date_start, datetime.datetime.min.time())

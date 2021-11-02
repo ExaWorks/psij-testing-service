@@ -189,31 +189,31 @@ var globalMethods = {
     },
     daysRange: function(now, ndays) {
         var days = [];
-        var crt = now.clone();
-        crt.addDays(-ndays + 1);
+        var crt = moment(now);
+        crt.add(-ndays + 1, "days");
         var change = false;
         for (var i = 0; i < ndays; i++) {
-            var day = crt.getDate();
+            var day = crt.date();
             var entry = new Object();
             days.push(entry);
             entry.day = day;
             entry.monthChange = false;
             entry.cls = "month-none";
-            entry.month_num = crt.getMonth() + 1;
+            entry.month_num = crt.month() + 1;
             if (day == 1) {
                 entry.monthChange = true;
                 if (i > 0) {
-                    crt.addDays(-1);
-                    days[i - 1].month = crt.toString("MMMM");
-                    crt.addDays(1);
+                    crt.add(-1, "days");
+                    days[i - 1].month = crt.format("MMMM");
+                    crt.add(1, "days");
                 }
-                days[i].month = crt.toString("MMMM");
+                days[i].month = crt.format("MMMM");
                 change = true;
             }
-            crt.addDays(1);
+            crt.add(1, "days");
         }
         if (!change) {
-            days[0].month = crt.toString("MMMM");
+            days[0].month = crt.format("MMMM");
         }
         return days;
     },
