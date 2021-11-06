@@ -42,7 +42,9 @@
                 <div class="run-branch" v-for="branch in run.branches">
                     <div class="site-branch-cell highlightable" :class="badnessClass(branch)"
                         :onclick="navigate('run.html?site_id=' + site.site_id + '&run_id=' + run.run_id + '#branch-' + branch.name)">
-                        {{ branch.name }}
+                        <div class="site-branch-cell-name">
+                            {{ branch.name }}
+                        </div>
                         <div class="counts">
                             <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
                             <img class="check-mark" src="checkmark.png" v-if="branch.failed_count == 0"/>
