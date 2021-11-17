@@ -134,6 +134,11 @@ body {
     margin-bottom: 32pt;
 }
 
+#toolbar .spacer {
+    display: inline-block;
+    width: 8pt;
+}
+
 #breadcrumbs {
     float: left;
 }
