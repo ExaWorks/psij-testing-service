@@ -27,6 +27,38 @@ var getDayData = function(site, day) {
     return null;
 }
 
+var settingsDefaults = function(dict) {
+    for (var k in dict) {
+        var val = Cookies.get(k);
+        if (val == undefined) {
+            Cookies.set(k, dict[k]);
+        }
+    }
+};
+
+var makeSetting = function(name, callback) {
+    return {
+        get: function() {
+            return Cookies.get(name);
+        },
+
+        set: function(val) {
+            Cookies.set(name, val);
+            callback();
+        }
+    }
+};
+
+var settings = function(...names) {
+    var obj = {};
+    for (var i = 0; i < names.length; i++) {
+        var name = names[i];
+        obj[name] = Cookies.get(name);
+    }
+
+    return obj;
+};
+
 var ansi_up = new AnsiUp();
 ansi_up.use_classes = true;
 

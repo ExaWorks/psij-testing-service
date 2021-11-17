@@ -183,14 +183,27 @@ class TestingAggregatorApp(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def summary(self) -> object:
+    def summary(self, inactiveTimeout: str = "10") -> object:
         # get latest batch of tests on each site and return totals for passed/failed
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        try:
+            iInactiveTimeout = int(inactiveTimeout)
+            date_limit = now - datetime.timedelta(days=iInactiveTimeout)
+        except ValueError:
+            iInactiveTimeout = 0
+        if iInactiveTimeout <= 0:
+            date_limit = datetime.date.min
+
+        time_limit = datetime.datetime.combine(date_limit, datetime.datetime.min.time())
         resp = []
         for site in Site.objects().order_by('site_id'):
             # find last run for site
             try:
                 env = RunEnv.objects(site_id=site.site_id).order_by('-run_start_time')[0]
             except IndexError:
+                continue
+            if env.run_start_time < time_limit:
                 continue
             run_id = env.run_id
             # now find all envs/branches with this run id
@@ -223,7 +236,7 @@ class TestingAggregatorApp(object):
             site_data['failed_count'] = site_failed_count
             site_data['months'] = {}
 
-            date_start = datetime.datetime.now(datetime.timezone.utc)
+            date_start = now
             for days in range(8):
                 date_end = date_start + datetime.timedelta(days=1)
                 t_start = datetime.datetime.combine(date_start, datetime.datetime.min.time())
