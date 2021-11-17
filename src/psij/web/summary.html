@@ -66,7 +66,9 @@
                 <div class="branch-tiles">
                     <div class="branch-tile highlightable clickable" :class="badnessClass(branch)" v-for="branch in limit(badnessSort(site.branches), 6)"
                         :onclick="navigate('run.html?site_id=' + site.site_id + '&run_id=' + site.run_id + '#branch-' + branch.name)">
-                        {{ branch.name }}
+                        <div class="branch-tile-name">
+                            {{ branch.name }}
+                        </div>
                         <div class="counts">
                             <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
                             <img class="check-mark" src="checkmark.png" v-if="branch.failed_count == 0"/>

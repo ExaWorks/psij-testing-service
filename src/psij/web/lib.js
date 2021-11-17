@@ -138,7 +138,7 @@ var globalMethods = {
                     return '<span class="material-icons env-missing-value">cancel</span>'
                 }
                 else {
-                    return '<div class="listing listing-text">' + value + '</div>';
+                    return '<div class="listing listing-text listing-log">' + value + '</div>';
                 }
             case "git_local_change_summary":
                 return '<div class="listing listing-text"> ' + value + '</div>';

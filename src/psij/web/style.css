@@ -43,6 +43,7 @@ body {
 }
 
 .branch-tile {
+    position: relative;
     display: inline-block;
     width: 95pt;
     height: 16pt;
@@ -54,6 +55,19 @@ body {
     margin-left: -1pt;
     background-color: #c0ffa0;
     z-index: 10;
+}
+
+.branch-tile-name {
+    width: 80pt;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.branch-tile .counts {
+    position: absolute;
+    right: 1pt;
+    top: 1pt;
+    height: 16pt;
 }
 
 .highlightable:hover {
@@ -190,15 +204,24 @@ body {
 
 
 .site-branch-cell {
-    width: 100pt;
+    position: relative;
+    width: 128pt;
     border: 1pt solid #a0a0a0;
     margin: 4pt;
     padding: 4pt;
     text-align: center;
 }
 
+.site-branch-cell-name {
+    width: 100pt;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .site-branch-cell .counts {
-    float: none;
+    position: absolute;
+    top: 6pt;
+    right: 2pt;
 }
 
 .site-branch-cell.state-somewhat-bad {
@@ -351,6 +374,11 @@ td.run-id {
     overflow: auto;
     padding: 4pt;
     margin-top: -4pt;
+}
+
+.listing-log {
+    max-height: 256pt;
+    white-space: pre-wrap;
 }
 
 .env-missing-value.material-icons {
