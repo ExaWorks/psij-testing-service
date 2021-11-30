@@ -43,5 +43,5 @@ if [ "$ANSWER" == "y" ]; then
     pip install "$URL_BASE$TARGET_VERSION.tar.gz"
     service psi-j-testing-service restart
 else
-    echo "OK. Baling out..."
+    echo "OK. Bailing out..."
 fi
