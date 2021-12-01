@@ -83,8 +83,11 @@
                     {{ site.site_id }}
                 </th>
                 <td class="calendar-cell" v-for="day in daysRange(now, 8)">
-                    <div class="calendar-tile" :class="calendarTileClass(site, day)" :style="calendarTileStyle(site, day)">
-                        &nbsp;
+                    <div class="calendar-tile">
+                        <div class="calendar-bubble" v-for="branch in branchSort(getDayData(site, day).branches)"
+                                   :class="calendarBubbleClass(site, day, branch)" :style="calendarBubbleStyle(site, day, branch)">
+                            &nbsp;
+                        </div>
                     </div>
                 </td>
             </tr>

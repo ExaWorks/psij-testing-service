@@ -98,6 +98,20 @@ var globalMethods = {
             return badness(a) - badness(b);
         });
     },
+    branchSort: function(lst) {
+        var sorted = lst.slice().sort((a, b) => {
+            if (a.name == "main") {
+                // main goes first
+                return -1;
+            }
+            if (b.name == "main") {
+                return 1;
+            }
+            return a.name.localeCompare(b.name);
+        });
+        console.log("Sorted: ", sorted);
+        return sorted;
+    },
     navigate: function(loc) {
         console.log(loc);
         return "event.stopPropagation(); window.location=\"" + loc + "\"";
@@ -249,16 +263,19 @@ var globalMethods = {
         }
         return days;
     },
-    calendarTileClass: function(site, day) {
+    calendarBubbleClass: function(site, day, branch) {
+        var size = function(branch) {
+            return branch.name == "main" ? "bubble-large" : "bubble-small";
+        }
         var d = getDayData(site, day);
         if (d == null || (d.completed_count == 0 && d.failed_count == 0)) {
-            return "state-unknown";
+            return "state-unknown, " + size(branch);
         }
         else {
-            return this.badnessClass(d);
+            return this.badnessClass(d) + ", " + size(branch);
         }
     },
-    calendarTileStyle: function(site, day) {
+    calendarBubbleStyle: function(site, day) {
         var d = getDayData(site, day);
         var color;
         if (d != null) {
@@ -310,6 +327,7 @@ var globalMethods = {
 
         return "background-color: " + color;
     },
+    getDayData: getDayData,
     breadcrumbs: function() {
         var b = [{text: "PSI/J Tests", href: "summary.html"}];
         var level = 0;
