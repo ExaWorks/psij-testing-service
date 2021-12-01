@@ -53,6 +53,12 @@
                                               suffix="days" v-model="inactiveTimeout"></v-text-field>
                             </v-col>
                         </v-row>
+                        <v-row>
+                            <v-col cols="12" sm="6" md="12">
+                                <v-checkbox label="Show branch bubbles in calendar view"
+                                              v-model="showBranchBubbles"></v-checkbox>
+                            </v-col>
+                        </v-row>
                     </v-container>
                 </v-card-text>
 
@@ -171,7 +177,7 @@
         var sites = [
         ];
 
-        settingsDefaults({"viewMode": "calendar", "inactiveTimeout": 10});
+        settingsDefaults({"viewMode": "calendar", "inactiveTimeout": 10, "showBranchBubbles": false});
 
         set = function(dst, src) {
             dst.length = 0;
@@ -200,6 +206,7 @@
             methods: globalMethods,
             computed: {
                 inactiveTimeout: makeSetting("inactiveTimeout", update),
+                showBranchBubbles: makeSetting("showBranchBubbles", update, "bool"),
                 allBranches: function() {
                     var unique = {};
                     for (var i = 0; i < this.sites.length; i++) {

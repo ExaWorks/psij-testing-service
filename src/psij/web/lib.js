@@ -36,10 +36,16 @@ var settingsDefaults = function(dict) {
     }
 };
 
-var makeSetting = function(name, callback) {
+var makeSetting = function(name, callback, type) {
     return {
         get: function() {
-            return Cookies.get(name);
+            var val = Cookies.get(name);
+            if (type == "bool") {
+                return val == "true";
+            }
+            else {
+                return val;
+            }
         },
 
         set: function(val) {
@@ -58,6 +64,10 @@ var settings = function(...names) {
 
     return obj;
 };
+
+var setting = function(name) {
+    return Cookies.get(name);
+}
 
 var ansi_up = new AnsiUp();
 ansi_up.use_classes = true;
@@ -99,6 +109,9 @@ var globalMethods = {
         });
     },
     branchSort: function(lst) {
+        if (setting("showBranchBubbles") != "true") {
+            return lst.filter(branch => branch.name == "main");
+        }
         var sorted = lst.slice().sort((a, b) => {
             if (a.name == "main") {
                 // main goes first
@@ -109,7 +122,6 @@ var globalMethods = {
             }
             return a.name.localeCompare(b.name);
         });
-        console.log("Sorted: ", sorted);
         return sorted;
     },
     navigate: function(loc) {
@@ -344,7 +356,8 @@ var globalMethods = {
             b.push({text: "Run " + this.shortenId(this.run.run_id)})
         }
         return b;
-    }
+    },
+    setting: setting
 }
 
 $(document).ready(function() {
