@@ -34,6 +34,7 @@ class Site(Document):
     key = StringField(required=True)
     last_seen = DateTimeField(required=True)
     crt_maintainer_email = StringField()
+    ip = StringField()
 
 
 class Test(Document):
@@ -162,6 +163,7 @@ class TestingAggregatorApp(object):
         entries = Site.objects(site_id=id)
         entry = entries.first()
         if entry:
+            entry.ip = cherrypy.request.remote.ip
             if key == entry.key:
                 return self._update(entry)
             else:
@@ -173,7 +175,7 @@ class TestingAggregatorApp(object):
                     return None
         else:
             # nothing yet
-            return self._update(Site(site_id=id, key=key))
+            return self._update(Site(site_id=id, key=key, ip=cherrypy.request.remote.ip))
 
     def _update(self, entry: Site) -> Site:
         entry.last_seen = datetime.datetime.utcnow()
