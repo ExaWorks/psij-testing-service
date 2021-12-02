@@ -320,7 +320,10 @@ var globalMethods = {
             level = 2;
         }
         if (level >= 1) {
-            b.push({text: "Site " + this.site.site_id})
+            b.push({
+                text: "Site " + this.site.site_id,
+                href: "/site.html?site_id=" + this.site.site_id
+            })
         }
         if (level >= 2) {
             b.push({text: "Run " + this.shortenId(this.run.run_id)})
