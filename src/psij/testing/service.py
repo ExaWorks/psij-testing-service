@@ -199,7 +199,7 @@ class TestingAggregatorApp(object):
 
         time_limit = datetime.datetime.combine(date_limit, datetime.datetime.min.time())
         resp = []
-        for site in Site.objects().order_by('site_id'):
+        for site in Site.objects(last_seen__gte=time_limit).order_by('site_id'):
             # find last run for site
             try:
                 env = RunEnv.objects(site_id=site.site_id).order_by('-run_start_time')[0]
