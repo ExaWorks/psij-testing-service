@@ -27,6 +27,21 @@ var getDayData = function(site, day) {
     return null;
 }
 
+var getBranchData = function(branch, dayData) {
+    if (branch == null) {
+        return dayData;
+    }
+    var name = branch.name;
+    if (dayData != null) {
+        for (var i = 0; i < dayData.branches.length; i++) {
+            if (dayData.branches[i].name == name) {
+                return dayData.branches[i];
+            }
+        }
+    }
+    return null;
+}
+
 var settingsDefaults = function(dict) {
     for (var k in dict) {
         var val = Cookies.get(k);
@@ -279,7 +294,7 @@ var globalMethods = {
         var size = function(branch) {
             return branch.name == "main" ? "bubble-large" : "bubble-small";
         }
-        var d = getDayData(site, day);
+        var d = getBranchData(branch, getDayData(site, day));
         if (d == null || (d.completed_count == 0 && d.failed_count == 0)) {
             return "state-unknown, " + size(branch);
         }
@@ -287,8 +302,8 @@ var globalMethods = {
             return this.badnessClass(d) + ", " + size(branch);
         }
     },
-    calendarBubbleStyle: function(site, day) {
-        var d = getDayData(site, day);
+    calendarBubbleStyle: function(site, day, branch) {
+        var d = getBranchData(branch, getDayData(site, day));
         var color;
         if (d != null) {
             var completed = d.completed_count;
