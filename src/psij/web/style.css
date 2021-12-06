@@ -214,7 +214,10 @@ body {
     border: 1pt solid #a0a0a0;
     margin: 4pt;
     padding: 4pt;
+    padding-right: 8pt;
     text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .site-branch-cell-name {
