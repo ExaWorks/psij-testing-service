@@ -260,10 +260,33 @@ class TestingAggregatorApp(object):
                 else:
                     month_data = site_data['months'][month]
 
+                branches = []
                 month_data[date_start.day] = {
                     'completed_count': total_completed,
-                    'failed_count': total_failed
+                    'failed_count': total_failed,
+                    'branches': branches
                 }
+
+
+                bs = {}
+                for env in envs:
+                    if env.branch not in bs:
+                        bs[env.branch] = {
+                            'completed_count': 0,
+                            'failed_count': 0
+                        }
+                    bs[env.branch]['completed_count'] += env.completed_count
+                    bs[env.branch]['failed_count'] += env.failed_count
+
+                for k, v in bs.items():
+                    branches.append({
+                        'completed_count': v['completed_count'],
+                        'failed_count': v['failed_count'],
+                        'name': k
+                    })
+
+
+
                 date_start = date_start + datetime.timedelta(days=-1)
 
 

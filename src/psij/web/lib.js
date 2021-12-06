@@ -36,10 +36,16 @@ var settingsDefaults = function(dict) {
     }
 };
 
-var makeSetting = function(name, callback) {
+var makeSetting = function(name, callback, type) {
     return {
         get: function() {
-            return Cookies.get(name);
+            var val = Cookies.get(name);
+            if (type == "bool") {
+                return val == "true";
+            }
+            else {
+                return val;
+            }
         },
 
         set: function(val) {
@@ -58,6 +64,10 @@ var settings = function(...names) {
 
     return obj;
 };
+
+var setting = function(name) {
+    return Cookies.get(name);
+}
 
 var ansi_up = new AnsiUp();
 ansi_up.use_classes = true;
@@ -97,6 +107,22 @@ var globalMethods = {
         return lst.slice().sort((a, b) => {
             return badness(a) - badness(b);
         });
+    },
+    branchSort: function(lst) {
+        if (setting("showBranchBubbles") != "true") {
+            return lst.filter(branch => branch.name == "main");
+        }
+        var sorted = lst.slice().sort((a, b) => {
+            if (a.name == "main") {
+                // main goes first
+                return -1;
+            }
+            if (b.name == "main") {
+                return 1;
+            }
+            return a.name.localeCompare(b.name);
+        });
+        return sorted;
     },
     navigate: function(loc) {
         console.log(loc);
@@ -249,16 +275,19 @@ var globalMethods = {
         }
         return days;
     },
-    calendarTileClass: function(site, day) {
+    calendarBubbleClass: function(site, day, branch) {
+        var size = function(branch) {
+            return branch.name == "main" ? "bubble-large" : "bubble-small";
+        }
         var d = getDayData(site, day);
         if (d == null || (d.completed_count == 0 && d.failed_count == 0)) {
-            return "state-unknown";
+            return "state-unknown, " + size(branch);
         }
         else {
-            return this.badnessClass(d);
+            return this.badnessClass(d) + ", " + size(branch);
         }
     },
-    calendarTileStyle: function(site, day) {
+    calendarBubbleStyle: function(site, day) {
         var d = getDayData(site, day);
         var color;
         if (d != null) {
@@ -310,6 +339,7 @@ var globalMethods = {
 
         return "background-color: " + color;
     },
+    getDayData: getDayData,
     breadcrumbs: function() {
         var b = [{text: "PSI/J Tests", href: "summary.html"}];
         var level = 0;
@@ -329,7 +359,8 @@ var globalMethods = {
             b.push({text: "Run " + this.shortenId(this.run.run_id)})
         }
         return b;
-    }
+    },
+    setting: setting
 }
 
 $(document).ready(function() {

@@ -491,11 +491,32 @@ td.run-id {
 }
 
 .calendar-tile {
-    width: 8pt;
-    height: 8pt;
     margin-left: auto;
     margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: 10pt;
+    align-content: center;
+}
+
+.calendar-bubble {
     border-radius: 100pt;
+    border: 0.5px solid rgba(0, 0, 0, 0.2);
+    display: inline-block;
+}
+
+.calendar-bubble.bubble-large {
+    width: 8pt;
+    height: 8pt;
+    margin-right: 2pt;
+}
+
+.calendar-bubble.bubble-small {
+    width: 3pt;
+    height: 3pt;
+    margin-right: 1pt;
+    margin-bottom: 1pt;
 }
 
 .calendar-tile.state-somewhat-bad {
