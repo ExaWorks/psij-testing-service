@@ -83,7 +83,7 @@
                     <div class="calendar-day">{{ day.day }}</div>
                 </th>
             </tr>
-            <tr v-for="site in sort('site_id', sites)">
+            <tr v-for="site in sitesSort(sites)">
                 <th class="calendar-site highlightable clickable"
                     :onclick="navigate('site.html?site_id=' + site.site_id)">
                     {{ site.site_id }}

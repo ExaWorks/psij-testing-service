@@ -100,6 +100,16 @@ var globalMethods = {
             return av > bv ? 1 : (av == bv) ? 0 : -1;
         });
     },
+    sitesSort: function(sites) {
+        var copy = sites.slice();
+        for (var i = 0; i < copy.length; i++) {
+            var site = copy[i];
+            site.key = site.site_id.split('.').reverse().join('.');
+            console.log(site.key)
+        }
+        strComp = function(a, b) {if (a > b) return 1; else if (a == b) return 0; else return -1;};
+        return copy.sort((a, b) => strComp(a.key, b.key));
+    },
     limit: function(array, n) {
         if (array.length > n) {
             return array.slice(0, n);
