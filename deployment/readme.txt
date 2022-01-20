@@ -29,3 +29,6 @@ for automatic renewal:
   will automatically mount /etc/letsencrypt into the container 
   if it's there on the host
 
+It may also be necessary to restart nginx when the certificate
+is updated by certbot. To do so, log into the server, get a shell
+into the container (as above) and run 'service nginx restart'.
