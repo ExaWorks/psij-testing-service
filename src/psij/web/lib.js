@@ -366,7 +366,7 @@ var globalMethods = {
     },
     getDayData: getDayData,
     breadcrumbs: function() {
-        var b = [{text: "PSI/J Tests", href: "summary.html"}];
+        var b = [{text: CUSTOMIZATION.projectName + " Tests", href: "summary.html"}];
         var level = 0;
         if (window.location.pathname.startsWith("/site.html")) {
             level = 1;

@@ -1,17 +1,32 @@
 Contains files need to deploy the service.
 
-To upgrade the container:
+To make a release of the service:
 - decide on a release of the service
 - update the version in RELEASE to '<major>.<minor>.<patch>'
 - tag with 'v<major>.<minor>.<patch>' !important;
 - run 'build.sh <major>.<minor>.<patch>' to build and push docker image
-- on the deployment machine, stop the current container
-- run 'run.sh <major>.<minor>.<patch>'
+
+
+To deploy the service(s):
+- make a release as above for deployment
+- edit config and fill in appropriate values if necessary
+- run deploy.sh from the deploy directory. This will:
+    - install or upgrade nginx
+    - start or upgrade the PSI/J and SDK containers to the version
+    specified in the config file
+- set up the ssl certificate
+    - this depends on where the certificate is obtained from
+    - for letencrypt, follow the instructions provided by 
+    letsencrypt
+
+To upgrade the container:
+- stop and delete the two containers running the service instances
+- follow the deployment instructions above
 
 To upgrade the service with minimal downtime:
-- exec into the container (do a 'docker ps' to figure out the id),
-  then 'docker exec -it <container> /bin/bash'
-- run 'update-psi-j-testing-service <major>.<minor>.<patch>'
+- make a release as above
+- run 'upgrade.sh <major>.<minor>.<patch>' from the deploy directory
+
 
 There might be some manual work involved in initially 
 getting SSL certs, but the following scheme is designed 
@@ -28,7 +43,3 @@ for automatic renewal:
   will not work outside of the volume mount, so the run script
   will automatically mount /etc/letsencrypt into the container 
   if it's there on the host
-
-It may also be necessary to restart nginx when the certificate
-is updated by certbot. To do so, log into the server, get a shell
-into the container (as above) and run 'service nginx restart'.
