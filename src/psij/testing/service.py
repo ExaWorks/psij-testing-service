@@ -365,13 +365,21 @@ class Server:
             value = cherrypy.serving.request._json_inner_handler(*args, **kwargs)
             return json_encoder.iterencode(value)
 
-        cherrypy.config.update({'server.socket_port': self.port})
+        cherrypy.config.update({
+            'server.socket_port': self.port,
+            'server.socket_host': '0.0.0.0'
+        })
         cherrypy.quickstart(TestingAggregatorApp(), '/', {
             '/': {
                 'tools.staticdir.root': str(Path(__file__).parent.parent.absolute() / 'web'),
                 'tools.staticdir.on': True,
                 'tools.staticdir.dir': '',
                 'tools.json_out.handler': json_handler
+            },
+            '/instance': {
+                'tools.staticdir.root': '/var/www/html',
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': '',
             }
         })
 

@@ -1,23 +1,60 @@
 #!/bin/bash
 
+try() {
+    N=$1
+    shift
+    
+    for ((I=1; I<=$N; I++)) do
+        set +e
+        "$@"
+        EC=$?
+        set -e
+        if [ "$EC" == "0" ]; then
+            return 0
+        fi
+        echo -n $I...
+    done
+    return 1
+}
+
 set -e
 
 URL_BASE=https://github.com/ExaWorks/psi-j-testing-service/archive/refs/tags/v
 FORCE=0
+DONTASK=0
 
-if [ "$1" == "--force" ]; then
-    FORCE=1
-    shift
-fi
-
-TARGET_VERSION="$1"
+while [ "$1" != "" ]; do
+    case "$1" in
+        --force)
+            FORCE=1
+            shift
+            ;;
+        -y)
+            DONTASK=1
+            shift
+            ;;
+        -*)
+            echo "Unrecognized option $1"
+            exit 1
+            ;;
+        *)
+            TARGET_VERSION="$1"
+            shift
+            ;;
+    esac
+done
 
 if [ "$TARGET_VERSION" == "" ]; then
     echo "Usage: update-psi-j-testing-service [--force] <target_version>"
     exit 1
 fi
 
-if ! wget -q --method=HEAD "$URL_BASE$TARGET_VERSION.tar.gz"; then
+PACKAGE="$URL_BASE$TARGET_VERSION.tar.gz"
+if [ "${TARGET_VERSION::1}" == "/" ]; then
+    # install from source
+    echo "Installing from source in $TARGET_VERSION"
+    PACKAGE="$TARGET_VERSION"
+elif ! wget -q --method=HEAD "$URL_BASE$TARGET_VERSION.tar.gz"; then
     echo "Error: no such version. Please check that the repo has a 'v$TARGET_VERSION' tag"
     exit 2
 fi
@@ -35,13 +72,17 @@ if [ "$FORCE" == "0" ]; then
     fi
 fi
 
-echo "Upgrade from $CURRENT_VERSION to $TARGET_VERSION (y/n)?"
+if [ "$DONTASK" == "0" ]; then
+    echo "Upgrade from $CURRENT_VERSION to $TARGET_VERSION (y/n)?"
 
-read ANSWER
+    read ANSWER
+else
+    ANSWER="y"
+fi
 
 if [ "$ANSWER" == "y" ]; then
-    pip install "$URL_BASE$TARGET_VERSION.tar.gz"
-    service psi-j-testing-service restart
+    pip install "$PACKAGE"
+    try 3 timeout 10s service psi-j-testing-service restart
 else
     echo "OK. Bailing out..."
 fi
