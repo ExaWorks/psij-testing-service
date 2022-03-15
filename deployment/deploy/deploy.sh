@@ -70,6 +70,7 @@ deployContainer() {
         fi
         mkdir -p $DATA_DIR/$TYPE/mongodb
         mkdir -p $DATA_DIR/$TYPE/web
+        cp $ROOT/web/$TYPE/* $DATA_DIR/$TYPE/web
         run docker run \
             -d -p $PORT:9909 --name "service-$TYPE" \
             --restart=on-failure:3 \
