@@ -135,14 +135,14 @@ var globalMethods = {
     },
     branchSort: function(lst) {
         if (setting("showBranchBubbles") != "true") {
-            return lst.filter(branch => branch.name == "main");
+            return lst.filter(branch => (branch.name == "main") || (branch.name == "master"));
         }
         var sorted = lst.slice().sort((a, b) => {
-            if (a.name == "main") {
+            if (a.name == "main" || a.name == "master") {
                 // main goes first
                 return -1;
             }
-            if (b.name == "main") {
+            if (b.name == "main" || b.name == "master") {
                 return 1;
             }
             return a.name.localeCompare(b.name);
@@ -302,7 +302,7 @@ var globalMethods = {
     },
     calendarBubbleClass: function(site, day, branch) {
         var size = function(branch) {
-            return branch.name == "main" ? "bubble-large" : "bubble-small";
+            return branch.name == "main" || branch.name == "master" ? "bubble-large" : "bubble-small";
         }
         var d = getBranchData(branch, getDayData(site, day));
         if (d == null || (d.completed_count == 0 && d.failed_count == 0)) {
