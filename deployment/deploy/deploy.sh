@@ -68,11 +68,13 @@ deployContainer() {
         else
             EXTRA_VOL=""
         fi
+        mkdir -p $DATA_DIR/$TYPE/mongodb
+        mkdir -p $DATA_DIR/$TYPE/web
         run docker run \
             -d -p $PORT:9909 --name "service-$TYPE" \
             --restart=on-failure:3 \
-            --volume=$ROOT/data/$TYPE:/var/lib/mongodb \
-            --volume=$ROOT/webroot/$TYPE:/var/www/html \
+            --volume=$DATA_DIR/$TYPE/mongodb:/var/lib/mongodb \
+            --volume=$DATA_DIR/$TYPE/web:/var/www/html \
             $EXTRA_VOL \
             $IMAGE:latest
         UPDATE_CONTAINER=1

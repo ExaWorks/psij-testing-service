@@ -13,3 +13,10 @@ IMAGE=hategan/psi-j-testing-service
 # If DEV is not 0, the deployment script will install the service from
 # the parent directory
 DEV=0
+
+# The location of the mongodb databases and customization directories
+DATA_DIR=/var/lib/psi-j-testing-service
+
+if [ "$DEV" == "1" ]; then
+    DATA_DIR="$PWD/../data"
+fi
