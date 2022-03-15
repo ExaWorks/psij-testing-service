@@ -65,10 +65,12 @@ LOWER_VERSION=`echo -e "$CURRENT_VERSION\n$TARGET_VERSION"| sort -V | head -n 1`
 
 if [ "$FORCE" == "0" ]; then
     if [ "$TARGET_VERSION" == "$LOWER_VERSION" ]; then
-        echo "Error: target version ($TARGET_VERSION) is lower than the currently"
-        echo "installed version ($CURRENT_VERSION). If you are sure you want to "
-        echo "downgrade, use the --force flag."
-        exit 3
+        if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+            echo "Error: target version ($TARGET_VERSION) is lower than the currently"
+            echo "installed version ($CURRENT_VERSION). If you are sure you want to "
+            echo "downgrade, use the --force flag."
+            exit 3
+        fi
     fi
 fi
 
