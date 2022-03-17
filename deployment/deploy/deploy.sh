@@ -105,7 +105,7 @@ else
 fi
 
 if [ "$UPDATE_NGINX" != "0" ]; then
-    run cp -u nginx.conf /etc/nginx
+    run cp -u *.conf /etc/nginx
     run service nginx restart
 fi
 
