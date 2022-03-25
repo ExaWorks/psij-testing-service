@@ -170,6 +170,7 @@ class TestingAggregatorApp(object):
                 now = datetime.datetime.utcnow()
                 diff = now - entry.last_seen
                 if diff >= datetime.timedelta(days=7):
+                    entry.key = key  # update with the new key
                     return self._update(entry)
                 else:
                     return None
