@@ -15,14 +15,24 @@ from mongoengine import Document, StringField, DateTimeField, connect, DictField
 logger = logging.getLogger(__name__)
 
 
-CODE_DB_VERSION = 1
+CODE_DB_VERSION = 2
 
 
 def upgrade_0_to_1() -> None:
     pass
 
+
+def upgrade_1_to_2() -> None:
+    RunEnv.objects().update(skipped_count=0)
+    Site.create_index(['last_seen'])
+    RunEnv.create_index(['site_id', 'run_id'])
+    RunEnv.create_index(['site_id', 'run_id', 'branch'])
+    Test.create_index(['site_id', 'run_id', 'branch'])
+
+
 DB_UPGRADES = {
-    0: upgrade_0_to_1
+    0: upgrade_0_to_1,
+    1: upgrade_1_to_2
 }
 
 class Version(Document):
@@ -64,6 +74,7 @@ class RunEnv(Document):
     run_end_time = DateTimeField()
     failed_count = IntField(default=0)
     completed_count = IntField(default=0)
+    skipped_count = IntField(default=0)
 
 
 def strtime(d):
@@ -129,11 +140,16 @@ class TestingAggregatorApp(object):
 
         results = data['results']
         failed = False
+        skipped = False
         for k, v in results.items():
-            if not v['passed']:
+            if v['failed']:
                 failed = True
+            if k == 'call' and v['status'] == 'skipped':
+                skipped = True
         if failed:
             RunEnv.objects(site_id=site_id, run_id=run_id, branch=branch).update(inc__failed_count=1)
+        elif skipped:
+            RunEnv.objects(site_id=site_id, run_id=run_id, branch=branch).update(inc__skipped_count=1)
         else:
             RunEnv.objects(site_id=site_id, run_id=run_id, branch=branch).update(inc__completed_count=1)
 
