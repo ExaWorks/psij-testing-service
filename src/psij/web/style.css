@@ -435,7 +435,7 @@ td.run-id {
 }
 
 #container .branch-tests .theme--light.v-expansion-panels .v-expansion-panel.test-status-skipped .test-status {
-    color: rgba(220, 220, 220, 0.7);
+    color: rgba(180, 180, 180, 0.7);
 }
 
 
