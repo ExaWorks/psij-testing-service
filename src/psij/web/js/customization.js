@@ -1,0 +1,3 @@
+CUSTOMIZATION = {
+    projectName: "PSI/J"
+}
