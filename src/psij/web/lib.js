@@ -167,12 +167,19 @@ var globalMethods = {
             return 0;
         }
         var passed = true;
+        var skipped = false;
         for (var k in results) {
             passed &= results[k].passed;
+            if (k == "call") {
+                skipped = (results[k].status == "skipped");
+            }
         }
 
         if (passed) {
             return 1;
+        }
+        else if (skipped) {
+            return 3;
         }
         else {
             return 2;
@@ -186,6 +193,8 @@ var globalMethods = {
                 return "Passed";
             case 2:
                 return "Failed";
+            case 3:
+                return "Skipped";
         }
     },
     testStatusIcon: function(test) {
@@ -196,6 +205,8 @@ var globalMethods = {
                 return "check_circle";
             case 2:
                 return "cancel";
+            case 3:
+                return "indeterminate_check_box";
         }
     },
     testStatusClass: function(test) {
@@ -206,6 +217,8 @@ var globalMethods = {
                 return "test-status-passed";
             case 2:
                 return "test-status-failed";
+            case 3:
+                return "test-status-skipped";
         }
     },
     formatEnvValue: function(key, value) {

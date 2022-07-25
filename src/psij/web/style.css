@@ -434,6 +434,11 @@ td.run-id {
     color: rgba(255, 0, 0, 0.7);
 }
 
+#container .branch-tests .theme--light.v-expansion-panels .v-expansion-panel.test-status-skipped .test-status {
+    color: rgba(180, 180, 180, 0.7);
+}
+
+
 .test-failure {
     padding-bottom: 12pt;
     padding-left: 8pt;
