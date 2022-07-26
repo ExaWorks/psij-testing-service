@@ -1,5 +1,5 @@
 body {
-    background-color: #f0f0f0;
+    background-color: #ffffff;
     font-family: "open sans", Helvetica, sans;
 }
 
@@ -8,7 +8,6 @@ body {
 }
 
 #container {
-    margin: 8pt;
     max-width: 700pt;
     margin-left: auto;
     margin-right: auto;
@@ -68,10 +67,6 @@ body {
     right: 1pt;
     top: 1pt;
     height: 16pt;
-}
-
-.highlightable:hover {
-    box-shadow: 1pt 1pt 5pt #80a0ff !important;
 }
 
 .clickable {
@@ -146,6 +141,10 @@ body {
     width: 100%;
     text-align: right;
     margin-bottom: 32pt;
+    background-color: #2d3436;
+    background-image: linear-gradient(180deg, #4d5456 0%, #000000 74%);
+    padding: 8px 0 0 0;
+    height: 45px;
 }
 
 #toolbar .spacer {
@@ -178,14 +177,21 @@ body {
 
 #toolbar .button {
     display: inline-block;
-    box-shadow: 1pt 1pt 3pt #606060;
     cursor: pointer;
-    background-color: #ffffff;
-    padding: 3pt;
+    background-color: #b2b2b2;
+    padding: 5px 9px 6px 9px;
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    margin: 0 5px 0 0;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
 }
 
-.button.selected {
-    background-color: #d0e0ff !important;
+#toolbar .button.selected {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid white;
 }
 
 .branch-heading {

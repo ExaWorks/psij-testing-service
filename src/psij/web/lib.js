@@ -1,6 +1,23 @@
 //  lib.js
 var lib_test = 5;
 
+//  DEBUG:
+setInterval( function() {
+    if( !window.mouseHasMoved ) {
+     //   location.reload();
+    }
+}, 3000);
+
+window.addEventListener('mousemove', function() {
+    console.log('move');
+    window.mouseHasMoved = 1;
+});
+
+$(window).focus(function(e) {
+    // Do Focus Actions Here
+    //location.reload();
+});
+
 var badness = function(obj) {
     if (obj['failed_count'] > 0) {
         if (obj['completed_count'] < obj['failed_count']) {
