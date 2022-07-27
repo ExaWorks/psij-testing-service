@@ -153,25 +153,35 @@ body {
 }
 
 #breadcrumbs {
-    float: left;
+    position: absolute;
+    top: 16px;
+    background-color: #444444;
+    border: 1px solid #666666;
+}
+
+#breadcrumbs .v-breadcrumbs__divider {
+    color: white;
 }
 
 #breadcrumbs .v-breadcrumbs {
     margin: 0pt;
-    padding-bottom: 4pt;
-    padding-top: 4pt;
+    padding-bottom: 0;
+    padding-top: 0;
 }
 
 #breadcrumbs li:not(.v-breadcrumbs__divider) {
     display: inline-block;
-    box-shadow: 1pt 1pt 3pt #606060;
     cursor: pointer;
-    background-color: #ffffff;
     padding: 4pt;
+    color: white;
+}
+
+#breadcrumbs a:visited {
+    color: white;
 }
 
 #breadcrumbs li:hover:not(.v-breadcrumbs__divider) {
-    box-shadow: 1pt 1pt 5pt #80a0ff !important;
+    color: white;
 }
 
 
