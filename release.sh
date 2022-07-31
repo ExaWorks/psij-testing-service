@@ -21,8 +21,6 @@ git push origin "v$VERSION"
 
 pushd deployment/docker
 
-read -p "Build? " BUILDING
-
 ./build.sh
 
 popd
