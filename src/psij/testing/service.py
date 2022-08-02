@@ -142,7 +142,7 @@ class TestingAggregatorApp(object):
         failed = False
         skipped = False
         for k, v in results.items():
-            if v['failed']:
+            if v['status'] == 'failed':
                 failed = True
             if k == 'call' and v['status'] == 'skipped':
                 skipped = True
