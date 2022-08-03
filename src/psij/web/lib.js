@@ -1,5 +1,5 @@
 //  lib.js
-var lib_test = 5;
+var lib_test = 6;
 
 //  DEBUG:
 setInterval( function() {
