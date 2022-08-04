@@ -138,6 +138,7 @@ body {
 }
 
 #toolbar {
+    position: relative;
     width: 100%;
     text-align: right;
     margin-bottom: 32pt;
@@ -157,6 +158,7 @@ body {
     top: 33px;
     background-color: #444444;
     border: 1px solid #666666;
+    z-index: 2;
 }
 
 #breadcrumbs .v-breadcrumbs__divider {
@@ -589,4 +591,14 @@ tr:nth-child(even) th {
 
 .calendar-cell {
     text-align: center;
+}
+
+.IntroBlurb {
+    background-color: #f1f0f0;
+    border: 1px solid #e2e2e2;
+    border-radius: 5px;
+    padding: 9px;
+    margin: 10px 0 10px 0;
+    font-size: 13px;
+    color: #000000;
 }

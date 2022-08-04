@@ -8,7 +8,10 @@
                 crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.3/ansi_up.js"></script>
+
+        <script src="js/blurb.js"></script>
         <script src="lib.js"></script>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <link rel="stylesheet" href="css/style.css">
@@ -80,7 +83,11 @@
     </span>
 
 </div>
-<div id="status">
+
+            <intro-blurb>{{ introBlurb }}</intro-blurb>
+            <intro-blurb>{{ bottomBlurb }}</intro-blurb>
+
+            <div id="status">
     <div id="status-calendar" v-if="mode == 'calendar'">
         <table>
             <tr>
@@ -203,13 +210,18 @@
 
         var siteStatus = new Vue({
             el: "#container",
+            components: {
+                'intro-blurb':VC.IntroBlurb
+            },
             vuetify: new Vuetify(),
             data: {
                 sites: sites,
                 mode: '',
                 now: moment().utc().startOf("day"),
                 settingsDialog: false,
-                dashboardTitle: CONF.STR.dashboardTitle
+                dashboardTitle: CONF.STR.dashboardTitle,
+                introBlurb: CONF.STR.introBlurb,
+                bottomBlurb: CONF.STR.outroBlurb
             },
             methods: globalMethods,
             computed: {
