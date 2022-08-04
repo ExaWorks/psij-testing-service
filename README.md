@@ -35,12 +35,14 @@ server_url = http://0.0.0.0:9909
 ~/psi-j-python: make tests -- --upload-results
 
 
-At LLNL, you will get this error: requests.exceptions.SSLError: HTTPSConnectionPool(host='testing.exaworks.org', port=443): Max retries exceeded with url: /result (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate in certificate chain (_ssl.c:1056)')))
-make: *** [tests] Error 1
+Restoring a mongodump DB:
+You'll want to get a full dump, that way you can play with the data:
 
-the firewall basically does a MITM certificate switch
-I don't remember the exact incantation, but you have to convince python to trust the root that signed the LLNL cert
+First untar these:
+mongodump-psij.tar
+mongodump-sdk.tar.gz
 
+mongorestore dump/
 
 
 
