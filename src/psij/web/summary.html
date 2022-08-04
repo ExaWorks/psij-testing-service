@@ -11,7 +11,7 @@
         <script src="lib.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="css/style.css">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
@@ -36,6 +36,9 @@
         <span class="material-icons">table_view</span>
     </div>
     <div class="spacer">&nbsp;</div>
+
+    <div class="dashboard-title">{{ dashboardTitle }}</div>
+
     <span data-app="true">
         <v-dialog v-model="settingsDialog" width="500">
             <template v-slot:activator="{on, attrs}">
@@ -205,7 +208,8 @@
                 sites: sites,
                 mode: '',
                 now: moment().utc().startOf("day"),
-                settingsDialog: false
+                settingsDialog: false,
+                dashboardTitle: CONF.STR.dashboardTitle
             },
             methods: globalMethods,
             computed: {

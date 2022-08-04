@@ -143,8 +143,8 @@ body {
     margin-bottom: 32pt;
     background-color: #2d3436;
     background-image: linear-gradient(180deg, #4d5456 0%, #000000 74%);
-    padding: 8px 0 0 0;
-    height: 45px;
+    padding: 15px 0 0 0;
+    height: 52px;
 }
 
 #toolbar .spacer {
@@ -154,7 +154,7 @@ body {
 
 #breadcrumbs {
     position: absolute;
-    top: 16px;
+    top: 33px;
     background-color: #444444;
     border: 1px solid #666666;
 }
@@ -172,8 +172,12 @@ body {
 #breadcrumbs li:not(.v-breadcrumbs__divider) {
     display: inline-block;
     cursor: pointer;
-    padding: 4pt;
+    padding: 1pt;
     color: white;
+}
+
+#breadcrumbs li {
+    font-size: 12px;
 }
 
 #breadcrumbs a:visited {
@@ -184,6 +188,14 @@ body {
     color: white;
 }
 
+.dashboard-title {
+    position: absolute;
+    left: 15px;
+    top: 6px;
+    color: #d0d0d0;
+    font-size: 14px;
+    font-weight: bold;
+}
 
 #toolbar .button {
     display: inline-block;
