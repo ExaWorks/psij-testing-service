@@ -601,4 +601,14 @@ tr:nth-child(even) th {
     margin: 10px 0 10px 0;
     font-size: 13px;
     color: #000000;
+    position: relative;
+}
+
+.IntroBlurb .close_me {
+    position: absolute;
+    top: 7px;
+    right: 10px;
+    color: #999999;
+    font-size: 17px;
+    cursor: pointer;
 }

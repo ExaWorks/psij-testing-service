@@ -9,6 +9,7 @@
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.3/ansi_up.js"></script>
 
+        <script src="js/localStorage.js"></script>
         <script src="js/blurb.js"></script>
         <script src="lib.js"></script>
 
@@ -40,7 +41,7 @@
     </div>
     <div class="spacer">&nbsp;</div>
 
-    <div class="dashboard-title">{{ dashboardTitle }}</div>
+    <div class="dashboard-title">{{ STR.dashboardTitle }}</div>
 
     <span data-app="true">
         <v-dialog v-model="settingsDialog" width="500">
@@ -84,8 +85,8 @@
 
 </div>
 
-            <intro-blurb>{{ introBlurb }}</intro-blurb>
-            <intro-blurb>{{ bottomBlurb }}</intro-blurb>
+            <intro-blurb>{{ STR.introBlurb }}</intro-blurb>
+            <intro-blurb>{{ STR.bottomBlurb }}</intro-blurb>
 
             <div id="status">
     <div id="status-calendar" v-if="mode == 'calendar'">
@@ -219,9 +220,7 @@
                 mode: '',
                 now: moment().utc().startOf("day"),
                 settingsDialog: false,
-                dashboardTitle: CONF.STR.dashboardTitle,
-                introBlurb: CONF.STR.introBlurb,
-                bottomBlurb: CONF.STR.outroBlurb
+                STR: CONF.STR
             },
             methods: globalMethods,
             computed: {

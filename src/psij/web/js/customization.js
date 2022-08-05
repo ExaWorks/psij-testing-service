@@ -6,7 +6,7 @@ var CONF = {
     STR: {
         "dashboardTitle": "Exascale dashboard testing service",
         "introBlurb": "The dashboard testing service shows you the status of various sites by date or by lab.",
-        "outroBlurb": "Dashboard outro.  The outro will also be roughly one paragraph long."
+        "bottomBlurb": "Dashboard outro.  The outro will also be roughly one paragraph long."
     },
     "curated_sites": {
         xaxis: [
