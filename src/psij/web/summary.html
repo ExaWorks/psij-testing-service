@@ -130,7 +130,7 @@
                         </div>
                         <div class="counts">
                             <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
-                            <img class="check-mark" src="checkmark.png" v-if="branch.failed_count == 0"/>
+                            <img class="check-mark" src="imgs/checkmark.png" v-if="branch.failed_count == 0"/>
                         </div>
                     </div>
                     <div class="branch-ellipsis" v-if="site.branches.length > 6">
@@ -153,7 +153,7 @@
                         {{ branch.name }}
                         <div class="counts">
                             <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
-                            <img class="check-mark" src="checkmark.png" v-if="branch.failed_count == 0"/>
+                            <img class="check-mark" src="imgs/checkmark.png" v-if="branch.failed_count == 0"/>
                         </div>
                     </div>
                 </th>
@@ -165,7 +165,7 @@
                         {{ site.site_id }}
                         <div class="counts">
                             <span class="failed-count" v-if="site.failed_count > 0">{{ site.failed_count }}</span>
-                            <img class="check-mark" src="checkmark.png" v-if="site.failed_count == 0"/>
+                            <img class="check-mark" src="imgs/checkmark.png" v-if="site.failed_count == 0"/>
                         </div>
                     </div>
                 </th>
@@ -175,7 +175,7 @@
                         &nbsp;
                         <div class="counts">
                             <span class="failed-count" v-if="branch.sites[site.site_id].failed_count > 0">{{ branch.sites[site.site_id].failed_count }}</span>
-                            <img class="check-mark" src="checkmark.png" v-if="branch.sites[site.site_id].failed_count == 0"/>
+                            <img class="check-mark" src="imgs/checkmark.png" v-if="branch.sites[site.site_id].failed_count == 0"/>
                         </div>
                     </div>
                     <div class="site-branch-cell absent" v-if="!(site.site_id in branch.sites)">
