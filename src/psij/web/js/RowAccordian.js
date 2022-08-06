@@ -1,11 +1,16 @@
 var VC = VC || {};
 
 VC.RowAccordian = Vue.component("row-accordian", {
-    props: ['rows'],
+    props: [
+        'logo_name',
+        'machines',
+        'logo_results',
+        'machine_row_results'
+    ],
     data: function () {
 
         return {
-            show: 0
+            open: 1
             }
     },
     template: '<table>' +
@@ -15,6 +20,7 @@ VC.RowAccordian = Vue.component("row-accordian", {
     methods: {
         toggle: function( event ) {
 
+            this.open = this.open ? 0 : 1;
         }
     }
 });
