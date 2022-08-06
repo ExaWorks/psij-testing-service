@@ -18,26 +18,38 @@ var CONF = {
         yaxis: [
             {
                 logo_src: "",
-                logo_name: "",
+                logo_name: "Lawrence Livermore National Lab",
                 machines: [
-                    "oregon1",
-                    "oregon2"
+                    "Livermore North",
+                    "Livermore South",
+                    "Livermore 4th st."
                 ]
             },
             {
                 logo_src: "",
-                logo_name: "",
+                logo_name: "Argonne",
                 machines: [
-                    "machine82834"
+                    "Arg 1",
+                    "Arg 2"
                 ]
             },
             {
                 logo_src: "",
-                logo_name: ""
+                logo_name: "Brookhaven National Lab",
+                machines: [
+                    "Brook River",
+                    "Brook Sim"
+                ]
             },
             {
                 logo_src: "",
-                logo_name: ""
+                logo_name: "Oakride National Lab",
+                machines: [
+                    "Oak 1",
+                    "Oak 2",
+                    "Oak 3",
+                    "Oak 4"
+                ]
             }
         ]
     }
