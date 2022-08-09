@@ -1,5 +1,5 @@
 body {
-    background-color: #ffffff;
+    background-color: #f0f0f0;
     font-family: "open sans", Helvetica, sans;
 }
 
@@ -8,6 +8,7 @@ body {
 }
 
 #container {
+    margin: 8pt;
     max-width: 700pt;
     margin-left: auto;
     margin-right: auto;
@@ -67,6 +68,10 @@ body {
     right: 1pt;
     top: 1pt;
     height: 16pt;
+}
+
+.highlightable:hover {
+    box-shadow: 1pt 1pt 5pt #80a0ff !important;
 }
 
 .clickable {
@@ -138,14 +143,9 @@ body {
 }
 
 #toolbar {
-    position: relative;
     width: 100%;
     text-align: right;
     margin-bottom: 32pt;
-    background-color: #2d3436;
-    background-image: linear-gradient(180deg, #4d5456 0%, #000000 74%);
-    padding: 15px 0 0 0;
-    height: 52px;
 }
 
 #toolbar .spacer {
@@ -154,68 +154,38 @@ body {
 }
 
 #breadcrumbs {
-    position: absolute;
-    top: 33px;
-    background-color: #444444;
-    border: 1px solid #666666;
-    z-index: 2;
-}
-
-#breadcrumbs .v-breadcrumbs__divider {
-    color: white;
+    float: left;
 }
 
 #breadcrumbs .v-breadcrumbs {
     margin: 0pt;
-    padding-bottom: 0;
-    padding-top: 0;
+    padding-bottom: 4pt;
+    padding-top: 4pt;
 }
 
 #breadcrumbs li:not(.v-breadcrumbs__divider) {
     display: inline-block;
+    box-shadow: 1pt 1pt 3pt #606060;
     cursor: pointer;
-    padding: 1pt;
-    color: white;
-}
-
-#breadcrumbs li {
-    font-size: 12px;
-}
-
-#breadcrumbs a:visited {
-    color: white;
+    background-color: #ffffff;
+    padding: 4pt;
 }
 
 #breadcrumbs li:hover:not(.v-breadcrumbs__divider) {
-    color: white;
+    box-shadow: 1pt 1pt 5pt #80a0ff !important;
 }
 
-.dashboard-title {
-    position: absolute;
-    left: 15px;
-    top: 6px;
-    color: #d0d0d0;
-    font-size: 14px;
-    font-weight: bold;
-}
 
 #toolbar .button {
     display: inline-block;
+    box-shadow: 1pt 1pt 3pt #606060;
     cursor: pointer;
-    background-color: #b2b2b2;
-    padding: 5px 9px 6px 9px;
-    border-top: 1px solid black;
-    border-left: 1px solid black;
-    border-right: 1px solid black;
-    border-bottom: 1px solid black;
-    margin: 0 5px 0 0;
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
+    background-color: #ffffff;
+    padding: 3pt;
 }
 
-#toolbar .button.selected {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid white;
+.button.selected {
+    background-color: #d0e0ff !important;
 }
 
 .branch-heading {
@@ -319,6 +289,7 @@ body {
 
 #run-table th, #run-table td {
     padding: 6pt;
+    padding-right
 }
 
 td.run-id {
@@ -492,8 +463,6 @@ td.run-id {
 
 #status-calendar table {
     position: relative;
-    width:100%;
-    border-spacing: 0;
 }
 
 #status-calendar table tr:first-child th {
@@ -501,27 +470,10 @@ td.run-id {
     top: 0pt;
 }
 
-#status-calendar tr:first-child th {
-    background-color: #666666;
-    color: white;
-    font-weight: bold;
-}
-
-#status-calendar tr td, tr th {
-    background-color: #e2e2e2;
-    border-bottom: 1px solid #cfcfcf;
-}
-
-#status-calendar tr:nth-child(even) td,
-tr:nth-child(even) th {
-    background-color: #f2f2f2;
-}
-
 .calendar-month {
     height: 14pt;
     font-weight: normal;
-    font-size: 9pt;
-    padding-top: 5px;
+    font-size: 11pt;
     width: 60pt;
 }
 
@@ -530,6 +482,8 @@ tr:nth-child(even) th {
     font-weight: normal;
     font-size: 11pt;
     padding-bottom: 4pt;
+    border-bottom: 2pt solid #e0e0e0;
+    margin-bottom: 2pt;
 }
 
 .calendar-site {
@@ -538,6 +492,7 @@ tr:nth-child(even) th {
     font-size: 11pt;
     height: 24pt;
     padding: 4pt;
+    border-radius: 4pt;
 }
 
 .calendar-tile {
@@ -604,11 +559,18 @@ tr:nth-child(even) th {
     position: relative;
 }
 
-.IntroBlurb .close_me {
+.IntroBlurb .CloseMe {
     position: absolute;
     top: 7px;
     right: 10px;
     color: #999999;
     font-size: 17px;
     cursor: pointer;
+}
+
+.dashboard-title {
+    position: absolute;
+    left: 110px;
+    top: 20px;
+    font-weight: bold;
 }

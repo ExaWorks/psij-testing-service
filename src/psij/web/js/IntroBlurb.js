@@ -9,7 +9,7 @@ VC.IntroBlurb = Vue.component("intro-blurb", {
     },
     template: '<div v-if="this.show == 1" ref="myRef" class="IntroBlurb" v-on:click="close( $event )">' +
         '<div class="main_slot"><slot></slot></div>' +
-        '<div class="close_me">X</div>' +
+        '<div class="CloseMe">X</div>' +
         '</div>',
     mounted: function( event ) {
         console.log('mounted');
