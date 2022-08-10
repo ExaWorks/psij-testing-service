@@ -16,7 +16,9 @@ VC.IntroBlurb = Vue.component("intro-blurb", {
         var content = this.$slots.default[0].text;
         console.dir( content );
 
-        if( sqs.IntroBlurb && sqs.IntroBlurb[ content ] ) {
+        var hideBlurb = Cookies.get( content );
+
+        if( hideBlurb === "1" ) {
             //  hide
             this.show = 0;
         } else {
@@ -29,10 +31,7 @@ VC.IntroBlurb = Vue.component("intro-blurb", {
             var ihtml = this.$el.firstChild.innerHTML;
             console.log(ihtml);
 
-            sqs.IntroBlurb = sqs.IntroBlurb || {};
-            sqs.IntroBlurb[ ihtml ] = 1;
-            sq.save();
-
+            Cookies.set( ihtml, "1" )
             this.show = 0;
         }
     }

@@ -146,6 +146,7 @@ body {
     width: 100%;
     text-align: right;
     margin-bottom: 32pt;
+    position: relative;
 }
 
 #toolbar .spacer {
@@ -549,7 +550,7 @@ td.run-id {
 }
 
 .IntroBlurb {
-    background-color: #f1f0f0;
+    background-color: #ffffff;
     border: 1px solid #e2e2e2;
     border-radius: 5px;
     padding: 9px;
@@ -571,6 +572,6 @@ td.run-id {
 .dashboard-title {
     position: absolute;
     left: 110px;
-    top: 20px;
+    top: 10px;
     font-weight: bold;
 }
