@@ -97,6 +97,13 @@ class CustomJSONEncoder(json.JSONEncoder):
             yield chunk.encode("utf-8")
 
 
+def add_cors_headers():
+    headers = cherrypy.response.headers
+    headers['Access-Control-Allow-Origin'] = '*'
+    headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept'
+
+
 class TestingAggregatorApp(object):
     def __init__(self):
         self.seq = 0
@@ -306,7 +313,7 @@ class TestingAggregatorApp(object):
 
                 date_start = date_start + datetime.timedelta(days=-1)
 
-
+        add_cors_headers()
         return resp
 
     @cherrypy.expose
@@ -338,6 +345,7 @@ class TestingAggregatorApp(object):
                 'completed_count': run.completed_count
             })
 
+        add_cors_headers()
         return resp
 
     @cherrypy.expose
@@ -367,6 +375,7 @@ class TestingAggregatorApp(object):
                 del test_dict['_id']
                 test_list.append(test_dict)
 
+        add_cors_headers()
         return resp
 
 class Server:
