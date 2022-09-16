@@ -128,18 +128,22 @@ class TestingAggregatorApp(object):
         if not site:
             raise cherrypy.HTTPError(403, 'This ID is associated with another key')
 
-        self.seq += 1
-        self._save_test(site_id, data)
+        try:
+            self.seq += 1
+            self._save_test(site_id, data)
 
-        module = data['module']
-        function = data['function']
-        if module == '_conftest':
-            if function == '_discover_environment':
-                self._save_environment(site, data)
-            if function == '_end':
-                self._end_tests(site_id, data)
+            module = data['module']
+            function = data['function']
+            if module == '_conftest':
+                if function == '_discover_environment':
+                    self._save_environment(site, data)
+                if function == '_end':
+                    self._end_tests(site_id, data)
 
-        self._update_totals(site_id, data)
+            self._update_totals(site_id, data)
+        except:
+            logger.info('Request json: %s' % json)
+            raise
 
     def _update_totals(self, site_id, data: Dict[str, object]) -> None:
         run_id = data['run_id']
