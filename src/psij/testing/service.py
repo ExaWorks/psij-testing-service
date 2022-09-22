@@ -382,6 +382,75 @@ class TestingAggregatorApp(object):
         add_cors_headers()
         return resp
 
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def getLatestResultForTestOnAllSites(self, sitesToGet) -> object:
+
+        import json
+        sitesToGet = json.loads(sitesToGet)
+
+        # Example sitesToGet = ["mothra.hidden.uoregon.edu", "reptar.hidden.uoregon.edu", "saturn.hidden.uoregon.edu"]
+        resp = {}
+
+        for site_id in sitesToGet:
+            resp[site_id] = self.getSite(site_id)
+
+        return resp
+
+
+    def getSite(self, site_id):
+        #  Example site_id="mothra.hidden.uoregon.edu"
+        run_id=""
+
+        runs = RunEnv.objects(site_id=site_id).order_by('+test_start_time')
+
+        for run in runs:
+            run_id=run.run_id
+
+        resp = {}
+        resp['site_id'] = site_id
+        resp['run_id'] = run_id
+        branches = []
+        resp['branches'] = branches
+
+        runs = RunEnv.objects(site_id=site_id, run_id=run_id).order_by('+test_start_time')
+
+        from pprint import pprint
+
+        for run in runs:
+            test_list = []
+            branch = run.to_mongo().to_dict()
+            branch['tests'] = test_list
+            branch['name'] = run.branch
+            branches.append(branch)
+
+            tests = Test.objects(site_id=site_id, run_id=run_id,
+                                 branch=run.branch).order_by('-test_start_time')
+
+            for test in tests:
+                test_dict = test.to_mongo().to_dict()
+                del test_dict['_id']
+                test_list.append(test_dict)
+
+        if len(resp['branches']) == 0:
+            return []
+
+        resBySiteIdAndTestName = {}
+        brs = resp['branches']
+
+
+        for testContainer in brs:
+
+            for oneTest in testContainer['tests']:
+
+                testName = oneTest['test_name']
+                resBySiteIdAndTestName[testName] = oneTest['results']
+                resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
+                resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
+
+        return resBySiteIdAndTestName
+
+
 class Server:
     def __init__(self, port: int = 9909) -> None:
         self.port = port
