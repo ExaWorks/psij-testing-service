@@ -1,3 +1,4 @@
+//  lib.js
 var badness = function(obj) {
     if (obj['failed_count'] > 0) {
         if (obj['completed_count'] < obj['failed_count']) {

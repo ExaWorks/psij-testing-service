@@ -146,6 +146,7 @@ body {
     width: 100%;
     text-align: right;
     margin-bottom: 32pt;
+    position: relative;
 }
 
 #toolbar .spacer {
@@ -546,4 +547,31 @@ td.run-id {
 
 .calendar-cell {
     text-align: center;
+}
+
+.IntroBlurb {
+    background-color: #ffffff;
+    border: 1px solid #e2e2e2;
+    border-radius: 5px;
+    padding: 9px;
+    margin: 10px 0 10px 0;
+    font-size: 13px;
+    color: #000000;
+    position: relative;
+}
+
+.IntroBlurb .CloseMe {
+    position: absolute;
+    top: 7px;
+    right: 10px;
+    color: #999999;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+.dashboard-title {
+    position: absolute;
+    left: 110px;
+    top: 10px;
+    font-weight: bold;
 }
