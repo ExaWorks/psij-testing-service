@@ -405,7 +405,7 @@ class TestingAggregatorApp(object):
         runs = RunEnv.objects(site_id=site_id).order_by('+test_start_time')
 
         for run in runs:
-            run_id=run.run_id
+            run_id = run.run_id
 
         resp = {}
         resp['site_id'] = site_id
