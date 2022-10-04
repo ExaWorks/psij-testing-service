@@ -414,3 +414,14 @@ $(document).ready(function() {
         });
     }, 500);
 });
+
+//  For now, Used for Testing
+var getLatestResultForTestOnAllSites = function() {
+
+    var machinesToGet = ["axis1.hidden.uoregon.edu","illyad.hidden.uoregon.edu","jupiter.hidden.uoregon.edu","reptar.hidden.uoregon.edu","saturn.hidden.uoregon.edu","orthus.hidden.uoregon.edu","doesnotexistTEST.edu","doc.llnl.gov","cori08.nersc.gov","perlmutter.nersc","doesNOTexistTEST.edu2"];
+
+    var context = "getLatestResultForTestOnAllSites";
+    var params = "sitesToGet=" + JSON.stringify( machinesToGet );
+
+    $.get(context, params);
+};
