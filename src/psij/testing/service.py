@@ -400,7 +400,7 @@ class TestingAggregatorApp(object):
 
     def getSite(self, site_id):
         #  Example site_id="mothra.hidden.uoregon.edu"
-        run_id=""
+        run_id = ""
 
         runs = RunEnv.objects(site_id=site_id).order_by('+test_start_time')
 
