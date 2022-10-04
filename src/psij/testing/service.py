@@ -415,8 +415,6 @@ class TestingAggregatorApp(object):
 
         runs = RunEnv.objects(site_id=site_id, run_id=run_id).order_by('+test_start_time')
 
-        from pprint import pprint
-
         for run in runs:
             test_list = []
             branch = run.to_mongo().to_dict()
