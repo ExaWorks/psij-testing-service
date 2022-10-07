@@ -384,7 +384,7 @@ class TestingAggregatorApp(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def getLatestResultForTestOnAllSites(self, sitesToGet) -> object:
+    def tests(self, sitesToGet) -> object:
 
         import json
         sitesToGet = json.loads(sitesToGet)
