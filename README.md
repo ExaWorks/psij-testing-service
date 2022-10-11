@@ -1,1 +1,1 @@
-# psi-j-testing-service
+# psij-testing-service

@@ -19,7 +19,7 @@ try() {
 
 set -e
 
-URL_BASE=https://github.com/ExaWorks/psi-j-testing-service/archive/refs/tags/v
+URL_BASE=https://github.com/ExaWorks/psij-testing-service/archive/refs/tags/v
 FORCE=0
 DONTASK=0
 
