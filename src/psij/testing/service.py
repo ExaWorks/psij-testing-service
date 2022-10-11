@@ -402,10 +402,19 @@ class TestingAggregatorApp(object):
         #  Example site_id="mothra.hidden.uoregon.edu"
         run_id = ""
 
-        runs = RunEnv.objects(site_id=site_id).order_by('+test_start_time')
+        runs = RunEnv.objects(site_id=site_id).order_by('-test_start_time')[0:1]
+
+        from pprint import pprint
 
         for run in runs:
             run_id = run.run_id
+
+        pprint('first:')
+        pprint(runs)
+        pprint(run_id)
+        #run = runs[0:1]
+        #pprint(run[0])
+        #run_id = run.run_id
 
         resp = {}
         resp['site_id'] = site_id
@@ -442,7 +451,7 @@ class TestingAggregatorApp(object):
             for oneTest in testContainer['tests']:
 
                 testName = oneTest['test_name']
-                
+
                 if oneTest['branch'] == 'main':
                     resBySiteIdAndTestName[testName] = oneTest['results']
                     resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
