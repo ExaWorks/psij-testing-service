@@ -404,17 +404,9 @@ class TestingAggregatorApp(object):
 
         runs = RunEnv.objects(site_id=site_id).order_by('-test_start_time')[0:1]
 
-        from pprint import pprint
-
         for run in runs:
             run_id = run.run_id
 
-        pprint('first:')
-        pprint(runs)
-        pprint(run_id)
-        #run = runs[0:1]
-        #pprint(run[0])
-        #run_id = run.run_id
 
         resp = {}
         resp['site_id'] = site_id
