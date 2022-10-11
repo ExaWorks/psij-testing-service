@@ -442,9 +442,11 @@ class TestingAggregatorApp(object):
             for oneTest in testContainer['tests']:
 
                 testName = oneTest['test_name']
-                resBySiteIdAndTestName[testName] = oneTest['results']
-                resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
-                resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
+                
+                if oneTest['branch'] == 'main':
+                    resBySiteIdAndTestName[testName] = oneTest['results']
+                    resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
+                    resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
 
         return resBySiteIdAndTestName
 
