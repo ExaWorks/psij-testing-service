@@ -384,21 +384,22 @@ class TestingAggregatorApp(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def tests(self, sitesToGet) -> object:
+    def tests(self, sitesToGet, testsToMatch) -> object:
 
         import json
         sitesToGet = json.loads(sitesToGet)
+        testsToMatch = json.loads( testsToMatch)
 
         # Example sitesToGet = ["mothra.hidden.uoregon.edu", "reptar.hidden.uoregon.edu", "saturn.hidden.uoregon.edu"]
         resp = {}
 
         for site_id in sitesToGet:
-            resp[site_id] = self.getSite(site_id)
+            resp[site_id] = self.getSite(site_id, testsToMatch)
 
         return resp
 
 
-    def getSite(self, site_id):
+    def getSite(self, site_id, testsToMatch):
         #  Example site_id="mothra.hidden.uoregon.edu"
         run_id = ""
 
@@ -431,9 +432,6 @@ class TestingAggregatorApp(object):
                 del test_dict['_id']
                 test_list.append(test_dict)
 
-        if len(resp['branches']) == 0:
-            return []
-
         resBySiteIdAndTestName = {}
         brs = resp['branches']
 
@@ -444,7 +442,13 @@ class TestingAggregatorApp(object):
 
                 testName = oneTest['test_name']
 
-                if oneTest['branch'] == 'main':
+                foundMatch = 0
+
+                for test in testsToMatch:
+                    if testName == test:
+                        foundMatch = 1
+
+                if oneTest['branch'] == 'main' and foundMatch == 1:
                     resBySiteIdAndTestName[testName] = oneTest['results']
                     resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
                     resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
