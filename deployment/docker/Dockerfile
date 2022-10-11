@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 ARG SERVICE_VERSION
-ARG GIT_BASE=https://github.com/ExaWorks/psi-j-testing-service/archive/refs/tags
+ARG GIT_BASE=https://github.com/ExaWorks/psij-testing-service/archive/refs/tags
 
 RUN useradd -ms /bin/bash testsrv
 

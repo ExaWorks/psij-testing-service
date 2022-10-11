@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GIT_BASE=https://github.com/ExaWorks/psi-j-testing-service/archive/refs/tags
+GIT_BASE=https://github.com/ExaWorks/psij-testing-service/archive/refs/tags
 VERSION=`cat ../../RELEASE`
 
 # The service version to build the docker container with or use for
@@ -8,7 +8,7 @@ VERSION=`cat ../../RELEASE`
 SERVICE_VERSION=$VERSION
 
 # Docker image to use
-IMAGE=hategan/psi-j-testing-service
+IMAGE=hategan/psij-testing-service
 
 # If DEV is not 0, the deployment script will install the service from
 # the parent directory
