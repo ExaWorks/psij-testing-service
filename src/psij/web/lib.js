@@ -425,8 +425,8 @@ var getLatestResultForTestOnAllSites = function() {
     var testsToMatch = ['test_parallel_jobs[batch-test:mpirun]','test_cancel[local:single]', 'test_failing_job[batch-test:mpirun]'];
     //  getLatestResultForTestOnAllSites
     var context = "tests";
-    var params = "sitesToGet=" + JSON.stringify( machinesToGet ) + '&' +
-                    "testsToMatch=" + JSON.stringify(testsToMatch)
+    var params = "sites_to_get=" + JSON.stringify( machinesToGet ) + '&' +
+                    "tests_to_match=" + JSON.stringify(testsToMatch)
 
     $.get(context, params, function(data) {
         console.dir(data);

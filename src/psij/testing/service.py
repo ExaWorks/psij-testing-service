@@ -384,22 +384,22 @@ class TestingAggregatorApp(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def tests(self, sitesToGet, testsToMatch) -> object:
+    def tests(self, sites_to_get, tests_to_match) -> object:
 
         import json
-        sitesToGet = json.loads(sitesToGet)
-        testsToMatch = json.loads( testsToMatch)
+        sites_to_get = json.loads(sites_to_get)
+        tests_to_match = json.loads( tests_to_match)
 
-        # Example sitesToGet = ["mothra.hidden.uoregon.edu", "reptar.hidden.uoregon.edu", "saturn.hidden.uoregon.edu"]
+        # Example sites_to_get = ["mothra.hidden.uoregon.edu", "reptar.hidden.uoregon.edu", "saturn.hidden.uoregon.edu"]
         resp = {}
 
-        for site_id in sitesToGet:
-            resp[site_id] = self.getSite(site_id, testsToMatch)
+        for site_id in sites_to_get:
+            resp[site_id] = self.getSite(site_id, tests_to_match)
 
         return resp
 
 
-    def getSite(self, site_id, testsToMatch):
+    def getSite(self, site_id, tests_to_match):
         #  Example site_id="mothra.hidden.uoregon.edu"
         run_id = ""
 
@@ -444,7 +444,7 @@ class TestingAggregatorApp(object):
 
                 foundMatch = 0
 
-                for test in testsToMatch:
+                for test in tests_to_match:
                     if testName == test:
                         foundMatch = 1
 
