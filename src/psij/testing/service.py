@@ -403,10 +403,10 @@ class TestingAggregatorApp(object):
         #  Example site_id="mothra.hidden.uoregon.edu"
         run_id = ""
 
-        runs = RunEnv.objects(site_id=site_id).order_by('-test_start_time')[0:1]
-
-        for run in runs:
-            run_id = run.run_id
+        try:
+            run_id = RunEnv.objects(site_id=site_id).order_by('-test_start_time')[0].run_id
+        except:
+            run_id = ""
 
 
         resp = {}
