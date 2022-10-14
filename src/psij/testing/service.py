@@ -425,7 +425,8 @@ class TestingAggregatorApp(object):
             branches.append(branch)
 
             tests = Test.objects(site_id=site_id, run_id=run_id,
-                                 branch=run.branch).order_by('-test_start_time')
+                                 branch=run.branch,
+                                 test_name__in=tests_to_match).order_by('-test_start_time')
 
             for test in tests:
                 test_dict = test.to_mongo().to_dict()
