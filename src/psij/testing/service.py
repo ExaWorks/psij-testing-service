@@ -384,28 +384,30 @@ class TestingAggregatorApp(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def getLatestResultForTestOnAllSites(self, sitesToGet) -> object:
+    def tests(self, sites_to_get, tests_to_match) -> object:
 
         import json
-        sitesToGet = json.loads(sitesToGet)
+        sites_to_get = json.loads(sites_to_get)
+        tests_to_match = json.loads( tests_to_match)
 
-        # Example sitesToGet = ["mothra.hidden.uoregon.edu", "reptar.hidden.uoregon.edu", "saturn.hidden.uoregon.edu"]
+        # Example sites_to_get = ["mothra.hidden.uoregon.edu", "reptar.hidden.uoregon.edu", "saturn.hidden.uoregon.edu"]
         resp = {}
 
-        for site_id in sitesToGet:
-            resp[site_id] = self.getSite(site_id)
+        for site_id in sites_to_get:
+            resp[site_id] = self.getSite(site_id, tests_to_match)
 
         return resp
 
 
-    def getSite(self, site_id):
+    def getSite(self, site_id, tests_to_match):
         #  Example site_id="mothra.hidden.uoregon.edu"
         run_id = ""
 
-        runs = RunEnv.objects(site_id=site_id).order_by('+test_start_time')
+        try:
+            run_id = RunEnv.objects(site_id=site_id).order_by('-test_start_time')[0].run_id
+        except:
+            run_id = ""
 
-        for run in runs:
-            run_id = run.run_id
 
         resp = {}
         resp['site_id'] = site_id
@@ -423,15 +425,13 @@ class TestingAggregatorApp(object):
             branches.append(branch)
 
             tests = Test.objects(site_id=site_id, run_id=run_id,
-                                 branch=run.branch).order_by('-test_start_time')
+                                 branch=run.branch,
+                                 test_name__in=tests_to_match).order_by('-test_start_time')
 
             for test in tests:
                 test_dict = test.to_mongo().to_dict()
                 del test_dict['_id']
                 test_list.append(test_dict)
-
-        if len(resp['branches']) == 0:
-            return []
 
         resBySiteIdAndTestName = {}
         brs = resp['branches']
@@ -442,9 +442,17 @@ class TestingAggregatorApp(object):
             for oneTest in testContainer['tests']:
 
                 testName = oneTest['test_name']
-                resBySiteIdAndTestName[testName] = oneTest['results']
-                resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
-                resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
+
+                foundMatch = 0
+
+                for test in tests_to_match:
+                    if testName == test:
+                        foundMatch = 1
+
+                if oneTest['branch'] == 'main' and foundMatch == 1:
+                    resBySiteIdAndTestName[testName] = oneTest['results']
+                    resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
+                    resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
 
         return resBySiteIdAndTestName
 
