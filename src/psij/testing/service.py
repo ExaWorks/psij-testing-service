@@ -396,6 +396,7 @@ class TestingAggregatorApp(object):
         for site_id in sites_to_get:
             resp[site_id] = self.getSite(site_id, tests_to_match)
 
+        add_cors_headers()
         return resp
 
 
