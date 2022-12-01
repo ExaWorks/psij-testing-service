@@ -64,6 +64,11 @@ var makeSetting = function(name, callback, type) {
         },
 
         set: function(val) {
+            if (typeof type === "function") {
+                if (type(val) !== true) {
+                    return;
+                }
+            }
             Cookies.set(name, val);
             callback();
         }
@@ -82,6 +87,17 @@ var settings = function(...names) {
 
 var setting = function(name) {
     return Cookies.get(name);
+}
+
+var validatePositiveInt = function(val) {
+    num = Number(val);
+    if (val === String(num) && Number.isInteger(num) && num >= 0) {
+        // the first check is because Number("") is 0}
+        return true;
+    }
+    else {
+        return "Must be a positive integer";
+    }
 }
 
 var ansi_up = new AnsiUp();
@@ -398,7 +414,8 @@ var globalMethods = {
         }
         return b;
     },
-    setting: setting
+    setting: setting,
+    validatePositiveInt: validatePositiveInt
 }
 
 $(document).ready(function() {
