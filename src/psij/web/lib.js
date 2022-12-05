@@ -1,4 +1,10 @@
+
 var badness = function(obj) {
+
+    if (obj['completed_count'] <= 2) {
+        return 2;
+    }
+
     if (obj['failed_count'] > 0) {
         if (obj['completed_count'] < obj['failed_count']) {
             return 2;
