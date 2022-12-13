@@ -217,6 +217,7 @@ class TestingAggregatorApp(object):
         # get latest batch of tests on each site and return totals for passed/failed
 
         now = datetime.datetime.now(datetime.timezone.utc)
+
         try:
             iInactiveTimeout = int(inactiveTimeout)
             date_limit = now - datetime.timedelta(days=iInactiveTimeout)
@@ -405,7 +406,7 @@ class TestingAggregatorApp(object):
         run_id = ""
 
         try:
-            run_id = RunEnv.objects(site_id=site_id).order_by('-test_start_time')[0].run_id
+            run_id = RunEnv.objects(site_id=site_id,branch='master').order_by('-run_start_time')[0].run_id
         except:
             run_id = ""
 
@@ -416,27 +417,29 @@ class TestingAggregatorApp(object):
         branches = []
         resp['branches'] = branches
 
-        runs = RunEnv.objects(site_id=site_id, run_id=run_id).order_by('+test_start_time')
+        runs = RunEnv.objects(site_id=site_id,run_id=run_id).order_by('+run_start_time')
 
         for run in runs:
+
             test_list = []
             branch = run.to_mongo().to_dict()
+
             branch['tests'] = test_list
             branch['name'] = run.branch
             branches.append(branch)
 
             tests = Test.objects(site_id=site_id, run_id=run_id,
                                  branch=run.branch,
-                                 test_name__in=tests_to_match).order_by('-test_start_time')
+                                 test_name__in=tests_to_match).order_by('+test_start_time')
 
             for test in tests:
                 test_dict = test.to_mongo().to_dict()
                 del test_dict['_id']
                 test_list.append(test_dict)
 
+
         resBySiteIdAndTestName = {}
         brs = resp['branches']
-
 
         for testContainer in brs:
 
@@ -450,7 +453,9 @@ class TestingAggregatorApp(object):
                     if testName == test:
                         foundMatch = 1
 
-                if oneTest['branch'] == 'main' and foundMatch == 1:
+                branchMatch = oneTest['branch'] == 'master'
+
+                if branchMatch and foundMatch == 1:
                     resBySiteIdAndTestName[testName] = oneTest['results']
                     resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
                     resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
