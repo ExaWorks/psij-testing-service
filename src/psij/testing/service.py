@@ -406,7 +406,8 @@ class TestingAggregatorApp(object):
         run_id = ""
 
         try:
-            run_id = RunEnv.objects(site_id=site_id,branch='master').order_by('-run_start_time')[0].run_id
+            run_id = RunEnv.objects(site_id=site_id,
+                                    branch__in=['main','master']).order_by('-run_start_time')[0].run_id
         except:
             run_id = ""
 
