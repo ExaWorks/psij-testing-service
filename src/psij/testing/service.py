@@ -455,7 +455,7 @@ class TestingAggregatorApp(object):
 
                 branchMatch = oneTest['branch'] == 'master'
 
-                if branchMatch and foundMatch == 1:
+                if foundMatch == 1:
                     resBySiteIdAndTestName[testName] = oneTest['results']
                     resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
                     resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
