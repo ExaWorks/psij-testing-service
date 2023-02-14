@@ -89,36 +89,32 @@
         </v-dialog>
     </span>
 
-        <div id="curated-sites-home" v-if="mode == 'curated-sites'" class="main-section">
+        <div id="status">
+            <div id="curated-sites-home" v-if="mode == 'curated-sites'" class="main-section status-table">
 
-            <div>
-                <table class="AccordionHeader">
+                <table class="status-table-header">
                     <tr>
-                        <td></td>
-                        <td>Scheduler</td>
+                        <td class="site-name-header"></td>
+                        <th class="scheduler-header-cell">Scheduler</th>
 
-                        <td v-for="xaxe in curated_sites.xaxis">
+                        <th class="status-header-cell" v-for="xaxe in curated_sites.xaxis">
                             {{ xaxe }}
-                        </td>
+                        </th>
                     </tr>
                 </table>
 
                 <div v-for="yaxe in curated_sites.yaxis">
                     <row-accordion :yaxe_prop="yaxe" show_scheduler="1"></row-accordion>
                 </div>
+
             </div>
 
-        </div>
+            <div id="status-calendar" v-if="mode == 'calendar'" class="main-section status-table">
 
-        <div id="status">
-            <div id="status-calendar" v-if="mode == 'calendar'" class="main-section">
-
-                <table>
+                <table class="status-table-header">
                     <tr>
-                        <th class="topHeader"></th>
-                        <th class="bg">&nbsp;</th>
-                        <th class="bg"></th>
-                        <th class="bg" v-for="day in daysRange(now, 8)">
+                        <th class="site-name-header"></th>
+                        <th class="status-header-cell" v-for="day in daysRange(now, 8)">
                             <div class="calendar-month">{{ day.month }}</div>
                             <div class="calendar-day">{{ day.day }}</div>
                         </th>
