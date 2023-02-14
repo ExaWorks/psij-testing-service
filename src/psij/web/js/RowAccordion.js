@@ -22,20 +22,20 @@ VC.RowAccordion = Vue.component("row-accordion", {
     },
     template: '<table class="RowAccordion">' +
             '<tr>' +
-        '<td v-on:click="toggle( $event )" class="logo_name" colspan="10">' +
+        '<td v-on:click="toggle( $event )" class="logo_name">' +
         '<div v-if="this.open == 1" class="ArrowRight"></div>' +
         '<div v-if="this.open == 0" class="ArrowDown"></div>' +
         '{{ this.yaxe_prop.logo_name }}</td>' +
-        '<td v-if="show_scheduler"></td>' +
-        '<td v-for="summaryState in yaxe_prop.horizontalSummary">' +
+        '<td class="scheduler-cell" v-if="show_scheduler"></td>' +
+        '<td class="status-cell" v-for="summaryState in yaxe_prop.horizontalSummary">' +
         '<div :class=\'"calendar-bubble " + summaryState + " bubble-large"\'></div>' +
         '</td>'+
             '</tr> \
             <tr :class=\'open == 0 ? "rowIsOpen" : "rowIsClosed"\' v-for="machineObj in yaxe_prop.machinesFromModel">\
-            <td class="machineLink" :onclick=\'"event.stopPropagation(); VC.goHere();" \'>{{ machineObj.machine }}</td>' +
+            <td class="machineLink highlightable" :onclick=\'"event.stopPropagation(); VC.goHere();" \'>{{ machineObj.machine }}</td>' +
             '<td v-if="show_scheduler" class="schedulerCol">{{ machineObj.schedulerShow }}</td>' +
-        '<td v-for="state in machineObj.states">' +
-            '<div :class=\'"calendar-bubble " + state.mainState + " bubble-large testing822"\'></div>' +
+        '<td class="status-cell" v-for="state in machineObj.states">' +
+            '<div :class=\'"calendar-bubble " + state.mainState + " bubble-large"\'></div>' +
             '<div class="container-for-mini-branches">' +
             '<div class="calendar-bubble" v-for="branch in state.branches" ' +
             '        :class="branch.calendarBubbleClass">' +
