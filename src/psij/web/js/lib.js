@@ -1,10 +1,29 @@
+//  lib.js
+var PS = PS || {};
+PS.STATES = {
+    "GOOD": "state-good",
+    "SOMEWHAT_BAD": "state-somewhat-bad",
+    "REALLY_BAD": "state-really-bad",
+    "EMPTY": "empty"
+};
+
 var badness = function(obj) {
-    if (obj['failed_count'] > 0) {
-        if (obj['completed_count'] < obj['failed_count']) {
-            return 2;
+
+    if( obj['completed_count'] === 0 ) {
+        //  empty.
+        return 3;
+    }
+
+    if( obj['completed_count'] <= 2 ) {
+        return 2;  // red.
+    }
+
+    if (obj['failed_count'] > 0 ) {
+        if (obj['completed_count'] < obj['failed_count'] ) {
+            return 2;  //  red
         }
         else {
-            return 1;
+            return 1; //  orange
         }
     }
     else {
@@ -24,7 +43,7 @@ var getDayData = function(site, day) {
             return month[day.day];
         }
     }
-    return null;
+    return {branches:[]};
 }
 
 var getBranchData = function(branch, dayData) {
@@ -33,6 +52,7 @@ var getBranchData = function(branch, dayData) {
     }
     var name = branch.name;
     if (dayData != null) {
+
         for (var i = 0; i < dayData.branches.length; i++) {
             if (dayData.branches[i].name == name) {
                 return dayData.branches[i];
@@ -54,19 +74,40 @@ var settingsDefaults = function(dict) {
 var makeSetting = function(name, callback, type) {
     return {
         get: function() {
-            var val = Cookies.get(name);
-            if (type == "bool") {
-                return val == "true";
+
+            var sbb = localStorage.getItem(name);
+
+            if( name === 'showBranchBubbles' ) {
+                sbb = localStorage.getItem('showBranchBubbles') === 'true' ? 'true' : false;
+            } else  if( name === 'inactiveTimeout' ) {
+                sbb = localStorage.getItem('inactiveTimeout') || 10;
             }
-            else {
-                return val;
-            }
+
+            return sbb;
         },
 
         set: function(val) {
-            Cookies.set(name, val);
+
+            localStorage.setItem( name, val );
             callback();
-        }
+
+            if( name === "showBranchBubbles" ) {
+                console.log('showBranchbubbles:');
+                console.dir(val);
+            }
+         }
+    }
+};
+
+
+PS.showOrHideBranchBubbles = function() {
+
+    var show = localStorage.getItem('showBranchBubbles') === 'true';
+
+    if( show ) {
+        $('.container-for-mini-branches').show();
+    } else {
+        $('.container-for-mini-branches').hide();
     }
 };
 
@@ -90,7 +131,6 @@ ansi_up.use_classes = true;
 
 var globalMethods = {
     sort: function(key, lst) {
-        console.log(lst);
         if (!lst) {
             return lst;
         }
@@ -105,9 +145,9 @@ var globalMethods = {
         for (var i = 0; i < copy.length; i++) {
             var site = copy[i];
             site.key = site.site_id.split('.').reverse().join('.');
-            console.log(site.key)
         }
         strComp = function(a, b) {if (a > b) return 1; else if (a == b) return 0; else return -1;};
+
         return copy.sort((a, b) => strComp(a.key, b.key));
     },
     limit: function(array, n) {
@@ -121,11 +161,13 @@ var globalMethods = {
     badnessClass: function(obj) {
         switch(badness(obj)) {
             case 0:
-                return "state-good";
+                return PS.STATES.GOOD;
             case 1:
-                return "state-somewhat-bad";
+                return PS.STATES.SOMEWHAT_BAD;
             case 2:
-                return "state-really-bad";
+                return PS.STATES.REALLY_BAD;
+            case 3:
+                return PS.STATES.EMPTY;
         }
     },
     badnessSort: function(lst) {
@@ -134,7 +176,8 @@ var globalMethods = {
         });
     },
     branchSort: function(lst) {
-        if (setting("showBranchBubbles") != "true") {
+
+        if (localStorage.getItem("showBranchBubbles") != "true") {
             return lst.filter(branch => (branch.name == "main") || (branch.name == "master"));
         }
         var sorted = lst.slice().sort((a, b) => {
@@ -149,8 +192,55 @@ var globalMethods = {
         });
         return sorted;
     },
+    //  could be more optimized
+    isSingleUrl: function( url ) {
+
+        var count = 0;
+        var test_domain = this.getDomain( url );
+
+        for( var x in this.sites ) {
+
+            var site = this.sites[x];
+            var loop_domain = this.getDomain( site.site_id );
+
+            if( test_domain === loop_domain ) {
+                count++;
+            }
+        }
+
+        console.dir( this.sitesSort(this.sites) );
+        console.log( test_domain + count );
+        return count < 2;
+    },
+    getPosition: function( url ) {
+
+        if( this.isSingleUrl(url) ) {
+            return 'oneRowOnly';
+        }
+
+        var domain = globalMethods.getDomain( url );
+        PS.urls = PS.urls || {};
+
+        PS.urls[domain] = PS.urls[domain] || 0;
+        PS.urls[domain]++;
+
+        if( PS.urls[domain] <= 2 ) {
+            return "firstPos";
+        }
+
+        return "otherPos";
+    },
+    getDomain: function( url ) {
+
+        var uparts = url.split('.');
+        var len = uparts.length;
+        var first = uparts[len - 2];
+        var first_dot = first ? (first + '.') : "";
+
+        return first_dot + uparts[len - 1];
+    },
     navigate: function(loc) {
-        console.log(loc);
+        //console.log(loc);
         return "event.stopPropagation(); window.location=\"" + loc + "\"";
     },
     shortenId: function(id) {
@@ -319,14 +409,18 @@ var globalMethods = {
         }
         var d = getBranchData(branch, getDayData(site, day));
         if (d == null || (d.completed_count == 0 && d.failed_count == 0)) {
-            return "state-unknown, " + size(branch);
+            return "state-unknown " + size(branch);
         }
         else {
-            return this.badnessClass(d) + ", " + size(branch);
+            return this.badnessClass(d); // + ", " + size(branch);
         }
     },
     calendarBubbleStyle: function(site, day, branch) {
+
         var d = getBranchData(branch, getDayData(site, day));
+        return globalMethods.calendarBubbleStyleObj(d);
+    },
+    calendarBubbleStyleObj: function( d ) {
         var color;
         if (d != null) {
             var completed = d.completed_count;
@@ -379,7 +473,10 @@ var globalMethods = {
     },
     getDayData: getDayData,
     breadcrumbs: function() {
-        var b = [{text: CUSTOMIZATION.projectName + " Tests", href: "summary.html"}];
+
+        var projName = CUSTOMIZATION.projectName;
+
+        var b = [{text: projName + " Tests", href: "summary.html"}];
         var level = 0;
         if (window.location.pathname.startsWith("/site.html")) {
             level = 1;
@@ -398,11 +495,16 @@ var globalMethods = {
         }
         return b;
     },
+    updateRender: function() {
+        this.$forceUpdate();
+    },
     setting: setting
 }
 
 $(document).ready(function() {
+
     setTimeout(function() {
+
         $('.clickable').each(function() {
             if ($(this).attr('onclick') !== undefined) {
                 var v = $(this).attr('onclick');

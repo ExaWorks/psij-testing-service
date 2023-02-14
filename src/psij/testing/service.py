@@ -97,6 +97,13 @@ class CustomJSONEncoder(json.JSONEncoder):
             yield chunk.encode("utf-8")
 
 
+def add_cors_headers():
+    headers = cherrypy.response.headers
+    headers['Access-Control-Allow-Origin'] = '*'
+    headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept'
+
+
 class TestingAggregatorApp(object):
     def __init__(self):
         self.seq = 0
@@ -121,18 +128,22 @@ class TestingAggregatorApp(object):
         if not site:
             raise cherrypy.HTTPError(403, 'This ID is associated with another key')
 
-        self.seq += 1
-        self._save_test(site_id, data)
+        try:
+            self.seq += 1
+            self._save_test(site_id, data)
 
-        module = data['module']
-        function = data['function']
-        if module == '_conftest':
-            if function == '_discover_environment':
-                self._save_environment(site, data)
-            if function == '_end':
-                self._end_tests(site_id, data)
+            module = data['module']
+            function = data['function']
+            if module == '_conftest':
+                if function == '_discover_environment':
+                    self._save_environment(site, data)
+                if function == '_end':
+                    self._end_tests(site_id, data)
 
-        self._update_totals(site_id, data)
+            self._update_totals(site_id, data)
+        except:
+            logger.info('Request json: %s' % json)
+            raise
 
     def _update_totals(self, site_id, data: Dict[str, object]) -> None:
         run_id = data['run_id']
@@ -206,6 +217,7 @@ class TestingAggregatorApp(object):
         # get latest batch of tests on each site and return totals for passed/failed
 
         now = datetime.datetime.now(datetime.timezone.utc)
+
         try:
             iInactiveTimeout = int(inactiveTimeout)
             date_limit = now - datetime.timedelta(days=iInactiveTimeout)
@@ -306,7 +318,7 @@ class TestingAggregatorApp(object):
 
                 date_start = date_start + datetime.timedelta(days=-1)
 
-
+        add_cors_headers()
         return resp
 
     @cherrypy.expose
@@ -338,6 +350,7 @@ class TestingAggregatorApp(object):
                 'completed_count': run.completed_count
             })
 
+        add_cors_headers()
         return resp
 
     @cherrypy.expose
@@ -367,7 +380,89 @@ class TestingAggregatorApp(object):
                 del test_dict['_id']
                 test_list.append(test_dict)
 
+        add_cors_headers()
         return resp
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def tests(self, sites_to_get, tests_to_match) -> object:
+
+        import json
+        sites_to_get = json.loads(sites_to_get)
+        tests_to_match = json.loads( tests_to_match)
+
+        # Example sites_to_get = ["mothra.hidden.uoregon.edu", "reptar.hidden.uoregon.edu", "saturn.hidden.uoregon.edu"]
+        resp = {}
+
+        for site_id in sites_to_get:
+            resp[site_id] = self.getSite(site_id, tests_to_match)
+
+        add_cors_headers()
+        return resp
+
+
+    def getSite(self, site_id, tests_to_match):
+        #  Example site_id="mothra.hidden.uoregon.edu"
+        run_id = ""
+
+        try:
+            run_id = RunEnv.objects(site_id=site_id,
+                                    branch__in=['main','master']).order_by('-run_start_time')[0].run_id
+        except:
+            run_id = ""
+
+
+        resp = {}
+        resp['site_id'] = site_id
+        resp['run_id'] = run_id
+        branches = []
+        resp['branches'] = branches
+
+        runs = RunEnv.objects(site_id=site_id,run_id=run_id).order_by('+run_start_time')
+
+        for run in runs:
+
+            test_list = []
+            branch = run.to_mongo().to_dict()
+
+            branch['tests'] = test_list
+            branch['name'] = run.branch
+            branches.append(branch)
+
+            tests = Test.objects(site_id=site_id, run_id=run_id,
+                                 branch=run.branch,
+                                 test_name__in=tests_to_match).order_by('+test_start_time')
+
+            for test in tests:
+                test_dict = test.to_mongo().to_dict()
+                del test_dict['_id']
+                test_list.append(test_dict)
+
+
+        resBySiteIdAndTestName = {}
+        brs = resp['branches']
+
+        for testContainer in brs:
+
+            for oneTest in testContainer['tests']:
+
+                testName = oneTest['test_name']
+
+                foundMatch = 0
+
+                for test in tests_to_match:
+                    if testName == test:
+                        foundMatch = 1
+
+                branchMatch = oneTest['branch'] == 'master'
+
+                if foundMatch == 1:
+                    resBySiteIdAndTestName[testName] = oneTest['results']
+                    resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
+                    resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
+
+        return resBySiteIdAndTestName
+
 
 class Server:
     def __init__(self, port: int = 9909) -> None:
@@ -392,11 +487,6 @@ class Server:
                 'tools.staticdir.on': True,
                 'tools.staticdir.dir': '',
                 'tools.json_out.handler': json_handler
-            },
-            '/instance': {
-                'tools.staticdir.root': '/var/www/html',
-                'tools.staticdir.on': True,
-                'tools.staticdir.dir': '',
             }
         })
 
