@@ -28,19 +28,19 @@ var CONF = {
                         scheduler: "SLURM"
                     },
                     "illyad.hidden.uoregon.edu": {
-                        scheduler: "SLURM"
+                        scheduler: ""
                     },
                     "jupiter.hidden.uoregon.edu": {
-                        scheduler: "SLURM"
+                        scheduler: ""
                     },
                     "reptar.hidden.uoregon.edu": {
-                        scheduler: "SLURM"
+                        scheduler: ""
                     },
                     "saturn.hidden.uoregon.edu": {
-                        scheduler: "SLURM"
+                        scheduler: ""
                     },
                     "orthus.hidden.uoregon.edu": {
-                        scheduler: "SLURM"
+                        scheduler: ""
                     }
                 }
             },
