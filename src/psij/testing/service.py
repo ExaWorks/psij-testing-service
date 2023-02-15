@@ -418,7 +418,8 @@ class TestingAggregatorApp(object):
         branches = []
         resp['branches'] = branches
 
-        runs = RunEnv.objects(site_id=site_id,run_id=run_id).order_by('+run_start_time')
+        runs = RunEnv.objects(site_id=site_id,run_id=run_id,
+                              branch__in=['main','master']).order_by('+run_start_time')
 
         for run in runs:
 
