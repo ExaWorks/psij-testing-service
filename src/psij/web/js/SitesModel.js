@@ -98,45 +98,19 @@ PS.SitesModel = function() {
                 }
 
                 var state = globalMethods.badnessClass(sobj);
+                var states = [state];
 
-                var s1 = getMachineStateByTestingColumn_(siteId, 0);
-                var s2 = getMachineStateByTestingColumn_(siteId, 1);
-                var s3 = getMachineStateByTestingColumn_(siteId, 2);
-                var s4 = getMachineStateByTestingColumn_(siteId, 3);
-                var s5 = getMachineStateByTestingColumn_(siteId, 4);
+                for( var cIndex = 0; cIndex < 6; cIndex++ ) {
 
-                if (state !== PS.STATES.GOOD && state !== "") {
-                    curSite.yaxis[yIndex].horizontalSummary[0] = PS.STATES.REALLY_BAD;
-                }
+                    var s = getMachineStateByTestingColumn_(siteId, cIndex );
 
-                if (s1 !== PS.STATES.GOOD && s1 !== "") {
-                    curSite.yaxis[yIndex].horizontalSummary[1] = PS.STATES.REALLY_BAD;
-                }
+                    if( s !== PS.STATES.GOOD && s !== "" && curSite.xaxis.length > (cIndex+1) ) {
+                        curSite.yaxis[yIndex].horizontalSummary[cIndex+1] = PS.STATES.REALLY_BAD;
+                    }
 
-                if (s2 !== PS.STATES.GOOD && s2 !== "") {
-                    curSite.yaxis[yIndex].horizontalSummary[2] = PS.STATES.REALLY_BAD;
-                }
-
-                if (s3 !== PS.STATES.GOOD && s3 !== "") {
-                    curSite.yaxis[yIndex].horizontalSummary[3] = PS.STATES.REALLY_BAD;
-                }
-
-                if (s4 !== PS.STATES.GOOD && s4 !== "" && curSite.xaxis.length > 4 ) {
-                    curSite.yaxis[yIndex].horizontalSummary[4] = PS.STATES.REALLY_BAD;
-                }
-
-                if (s5 !== PS.STATES.GOOD && s5 !== "" && curSite.xaxis.length > 5 ) {
-                    curSite.yaxis[yIndex].horizontalSummary[5] = PS.STATES.REALLY_BAD;
-                }
-
-                var states = [state,s1,s2,s3];
-
-                if( curSite.xaxis.length > 4 ) {
-                    states.push(s4);
-                }
-
-                if( curSite.xaxis.length > 5 ) {
-                    states.push(s5);
+                    if (curSite.xaxis.length > (cIndex+1)) {
+                        states.push(s);
+                    }
                 }
 
                 var objStates = [];

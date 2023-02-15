@@ -10,14 +10,12 @@ var CONF = {
     "curated_sites": {
         xaxis: [
             "Tests Suite",
-            "Tests",
-            "Quickstart example",
-            "Simple Ensemble"
+            "Basic test",
+            "Parallel jobs"
         ],
         xaxisTests: [
-            "test_parallel_jobs[local:mpirun]",
-            "test_simple_job[slurm:single]",
-            "test_simple_job[slurm:multiple]"
+            "test_simple_job[local:single]",
+            "test_parallel_jobs[local:single]"
         ],
         yaxis: [
             {
