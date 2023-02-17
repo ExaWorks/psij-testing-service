@@ -142,7 +142,7 @@ PS.SitesModel = function() {
         var xTests = CONF.curated_sites.xaxisTests;
         var testName = xTests[columnIndex];
 
-        var resultSetupAndCall = resultsBySiteIdAndCol_[ siteId ][ testName ];
+        var resultSetupAndCall = resultsBySiteIdAndCol_[ siteId ] ? resultsBySiteIdAndCol_[ siteId ][ testName ] : {};
 
         var bl = getStatus_(resultSetupAndCall, testName);
         return bl;
