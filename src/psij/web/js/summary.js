@@ -92,6 +92,8 @@ PS.bindRowOpenClose = function() {
 
         $('[site_id="' + siteIdClicked + '"][position="otherPosOnc"]').parent().toggle();
     });
+
+    PS.showOrHideBranchBubbles();
 };
 
 
