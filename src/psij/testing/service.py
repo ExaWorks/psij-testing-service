@@ -406,9 +406,11 @@ class TestingAggregatorApp(object):
                 resp[test.site_id] = {}
             # only store the more recent test
             if test.test_name not in resp[test.site_id]:
-                resp[test.site_id][test.test_name] = test.to_mongo().to_dict()
+                test_dict = test.to_mongo().to_dict()
+                resp[test.site_id][test.test_name] = test_dict
                 for key in ['_id', "stdout", "stderr", "log"]:
-                    del resp[test.site_id][test.test_name][key]
+                    if key in test_dict:
+                        del test_dict[key]
 
         add_cors_headers()
         return resp
