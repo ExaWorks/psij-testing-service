@@ -211,7 +211,13 @@ PS.SitesModel = function() {
     };
 
 
-    var getStatus_ = function( result, testName ) {
+    var getStatus_ = function( resultContainer, testName ) {
+
+        if( !resultContainer || !resultContainer.results ) {
+            return PS.STATES.EMPTY;
+        }
+
+        var result = resultContainer.results;
 
         //  SDK page send back results in a slightly different format.
         if( result && result[testName] ) {
@@ -220,9 +226,6 @@ PS.SitesModel = function() {
         }
 
         //  PSIJ
-        if( result === undefined ) {
-            return PS.STATES.EMPTY;
-        }
 
         if( result && result.call && result.call.passed &&
             result.setup && result.setup.passed ) {
