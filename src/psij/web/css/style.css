@@ -23,7 +23,7 @@ body {
     background-color: #e0e0e0;
     border: 1pt solid #a0a0a0;
     border-radius: 4pt;
-    width: 190pt;
+    width: 220pt;
     height: 80pt;
     z-index: 20;
 }
@@ -45,7 +45,7 @@ body {
 .branch-tile {
     position: relative;
     display: inline-block;
-    width: 95pt;
+    width: 110pt;
     height: 16pt;
     font-size: 8.5pt;
     padding: 2pt;
@@ -461,9 +461,7 @@ td.run-id {
     color: rgb(180, 0, 0);
 }
 
-#status-calendar table {
-    position: relative;
-}
+
 
 #status-calendar table tr:first-child th {
     position: sticky;
@@ -482,7 +480,6 @@ td.run-id {
     font-weight: normal;
     font-size: 11pt;
     padding-bottom: 4pt;
-    border-bottom: 2pt solid #e0e0e0;
     margin-bottom: 2pt;
 }
 
@@ -540,10 +537,173 @@ td.run-id {
     background-color: #e0e0e0;
 }
 
+.calendar-bubble.state-good {
+	background-color: rgb(106, 255, 77);
+}
+
+.calendar-bubble.state-somewhat-bad {
+	background-color: rgb(242, 219, 73);
+}
+
+.calendar-bubble.state-really-bad {
+	background-color: #ffb0a0;
+}
+
+
 .bg {
     background-color: #f0f0f0;
 }
 
 .calendar-cell {
     text-align: center;
+}
+
+.RowAccordion {
+	border-top: 1px solid #e0e0e1;
+}
+
+.RowAccordion td {
+	padding: 5px;
+	position:relative;
+}
+
+.RowAccordion .status-cell {
+    text-align: center;
+}
+
+.RowAccordion td:first-child {
+	cursor: pointer;
+	color: #333333;
+}
+
+.RowAccordion .logo_name {
+	font-weight: bold;
+}
+
+.RowAccordion .ArrowDown {
+	width: 0;
+	height: 0;
+	display: inline-block;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 8px solid #333333;
+	margin-right: 11px;
+	margin-left: 3px;
+}
+
+.RowAccordion .ArrowRight {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-top: 8px solid transparent;
+	border-bottom: 8px solid transparent;
+	border-left: 8px solid #333334;
+	padding: 0 6px 0 0;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+
+.RowAccordion .machineLink {
+	padding: 5px 5px 5px 35px;
+}
+
+.RowAccordion .rowIsClosed {
+	display: none;
+}
+
+.status-table .status-header-cell {
+    width: 60pt;
+}
+
+#status-calendar .RowAccordion td {
+	height: 32px;
+}
+
+#status-calendar td.logo_name {
+	width: 100%;
+}
+
+#status-calendar .schedulerCol {
+	width: 0;
+}
+
+.status-table th.status-header-cell {
+	text-align: center;
+}
+
+.status-table .status-cell {
+    padding: 0;
+    width: 60pt;
+    min-width: 60pt;
+}
+
+.status-table th, .status-table td {
+    font-size: 11pt;
+}
+
+.status-table th {
+    font-weight: normal;
+}
+
+#status-calendar.status-table .status-table-header, #status-calendar .RowAccordion {
+    width: 700pt;
+    max-width: 700pt;
+}
+
+#curated-sites-home.status-table .status-table-header, #curated-sites-home .RowAccordion {
+    width: 600pt;
+    max-width: 600pt;
+}
+
+.status-table .status-table-header {
+    border-bottom: 2pt solid #e0e0e0;
+}
+
+#status-calendar > div:first-of-type > table.RowAccordion {
+    border-top: none;
+}
+
+#status {
+    margin-top: 16pt;
+}
+
+.status-table .scheduler-header-cell, .status-table .scheduler-cell {
+    width: 100pt;
+}
+
+.status-table .scheduler-header-cell {
+    text-align: left;
+}
+
+.open_close_arrow {
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 8px solid #444444;
+	margin-left: 8px;
+	cursor: pointer;
+}
+
+.open_close_arrow[position="otherPos"] {
+   display: none;
+}
+
+.open_close_arrow[position="oneRowOnly"] {
+   display: none;
+}
+
+.open_close_arrow.open {
+   position: relative;
+   left: 5px;
+   border-top: 8px solid transparent;
+   border-bottom: 8px solid transparent;
+   border-left: 8px solid #444444;
+}
+
+.container-for-mini-branches {
+    display: inline-flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    vertical-align: middle;
+    margin-right: auto;
+    height: 10pt;
 }

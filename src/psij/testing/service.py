@@ -439,11 +439,6 @@ class Server:
                 'tools.staticdir.on': True,
                 'tools.staticdir.dir': '',
                 'tools.json_out.handler': json_handler
-            },
-            '/instance': {
-                'tools.staticdir.root': '/var/www/html',
-                'tools.staticdir.on': True,
-                'tools.staticdir.dir': '',
             }
         })
 
