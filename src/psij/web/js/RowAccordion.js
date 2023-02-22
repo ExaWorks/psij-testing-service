@@ -32,7 +32,7 @@ VC.RowAccordion = Vue.component("row-accordion", {
         '</td>'+
             '</tr> \
             <tr :class=\'open == 0 ? "rowIsOpen" : "rowIsClosed"\' v-for="machineObj in yaxe_prop.machinesFromModel">\
-            <td class="machineLink highlightable" :onclick=\'"event.stopPropagation(); VC.goHere();" \'>{{ machineObj.machine }}</td>' +
+            <td class="machineLink highlightable" :onclick=\'"event.stopPropagation(); VC.goHere();" \'>{{ machineObj.site_id }}</td>' +
             '<td v-if="show_scheduler" class="schedulerCol">{{ machineObj.schedulerShow }}</td>' +
         '<td class="status-cell" v-for="state in machineObj.states">' +
             '<div :class=\'"calendar-bubble " + state.mainState + " bubble-large"\'></div>' +

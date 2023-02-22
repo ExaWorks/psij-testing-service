@@ -123,7 +123,7 @@ PS.SitesModel = function() {
                 }
 
                 machinesInAccordion.push({
-                    machine: siteId,
+                    site_id: siteId,
                     schedulerShow: machinesObj.scheduler,
                     states: objStates
                 });
