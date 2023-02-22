@@ -53,10 +53,10 @@ PS.BuildAccordionModelFromSites = function() {
         for( var x=0; x < PS.sites.length; x++ ) {
 
             var site = PS.sites[x];
-            var domain = globalMethods.getDomain(site.site_id);
+            var siteId = globalMethods.getDomain(site.site_id);
 
-            machObjs[domain] = machObjs[domain] || [];
-            machObjs[domain].push({
+            machObjs[siteId] = machObjs[siteId] || [];
+            machObjs[siteId].push({
                 machine: site.site_id,
                 states: get_states_(site.months ) //["state-good","state-good","state-really-bad","state-good","state-good","state-bad", "state-good", "state-good"]
             });
