@@ -63,11 +63,11 @@ PS.BuildAccordionModelFromSites = function() {
         }
 
 
-        for( var domain in machObjs ) {
+        for( var siteId in machObjs ) {
 
             am.push({
-                logo_name: domain,
-                machinesFromModel: machObjs[domain]
+                logo_name: siteId,
+                machinesFromModel: machObjs[siteId]
             });
         }
 
