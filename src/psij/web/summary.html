@@ -42,9 +42,6 @@
         <div class="highlightable button view-mode-group" id="view-mode-tiles" title="Tiles View" onclick="setViewMode('tiles')">
             <span class="material-icons">grid_view</span>
         </div>
-        <div class="highlightable button view-mode-group" id="view-mode-table" title="Table View" onclick="setViewMode('table')">
-            <span class="material-icons">table_view</span>
-        </div>
 
 
         <div class="spacer">&nbsp;</div>
@@ -153,51 +150,6 @@
                 </div>
             </div>
 
-            <div id="status-table" v-if="mode == 'table'"  class="main-section">
-                <table>
-                    <tr>
-                        <th class="split-cell">
-                            <span class="split-cell-top-right">Branch</span>
-                            <span class="split-cell-bottom-left">Site</span>
-                        </th>
-                        <th v-for="branch in allBranches">
-                            <div class="branch-heading highlightable clickable" :class="badnessClass(branch)"
-                                 :onclick="navigate('branch.html?branch=' + branch.name)">
-                                {{ branch.name }}
-                                <div class="counts">
-                                    <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
-                                    <img class="check-mark" src="imgs/checkmark.png" v-if="branch.failed_count == 0"/>
-                                </div>
-                            </div>
-                        </th>
-                    </tr>
-                    <tr v-for="site in sites">
-                        <th>
-                            <div class="site-heading highlightable clickable" :class="badnessClass(site)"
-                                 :onclick="navigate('site.html?site_id=' + site.site_id)">
-                                {{ site.site_id }}
-                                <div class="counts">
-                                    <span class="failed-count" v-if="site.failed_count > 0">{{ site.failed_count }}</span>
-                                    <img class="check-mark" src="imgs/checkmark.png" v-if="site.failed_count == 0"/>
-                                </div>
-                            </div>
-                        </th>
-                        <td class="branch-status" v-for="branch in allBranches">
-                            <div class="site-branch-cell highlightable clickable" :class="badnessClass(branch.sites[site.site_id])" v-if="site.site_id in branch.sites"
-                                 :onclick="navigate('branch.html?site_id=' + site.site_id + '&branch=' + branch.name)">
-                                &nbsp;
-                                <div class="counts">
-                                    <span class="failed-count" v-if="branch.sites[site.site_id].failed_count > 0">{{ branch.sites[site.site_id].failed_count }}</span>
-                                    <img class="check-mark" src="imgs/checkmark.png" v-if="branch.sites[site.site_id].failed_count == 0"/>
-                                </div>
-                            </div>
-                            <div class="site-branch-cell absent" v-if="!(site.site_id in branch.sites)">
-                                &nbsp;
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
         </div>
     </div>
 </div>
