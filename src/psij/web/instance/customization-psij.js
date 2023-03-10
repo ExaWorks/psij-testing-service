@@ -47,7 +47,16 @@ var CONF = {
                 logo_name: "Lawrence Livermore National Lab",
                 machines: {
                     "doc.llnl.gov": {
-                        scheduler: "SLURM"
+                        scheduler: ""
+                    },
+                    "quartz.llnl.gov": {
+                        scheduler: ""
+                    },
+                    "lassen.llnl.gov": {
+                        scheduler: ""
+                    },
+                    "ruby.llnl.gov": {
+                        scheduler: ""
                     }
                 }
             },
