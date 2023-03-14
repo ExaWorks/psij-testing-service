@@ -23,7 +23,7 @@ update() {
     TYPE=$1
     ID=`docker ps -f "name=service-$TYPE" --format "{{.ID}}"`
     if [ "$ID" != "" ]; then
-        docker exec -it $ID update-psi-j-testing-service $TARGET_VERSION
+        docker exec -it $ID update-psi-j-testing-service $TYPE $TARGET_VERSION
     else
         echo "Service $TYPE not running."
     fi
