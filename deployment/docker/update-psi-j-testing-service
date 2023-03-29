@@ -19,7 +19,8 @@ try() {
 
 set -e
 
-URL_BASE=https://github.com/ExaWorks/psij-testing-service/archive/refs/tags/v
+PACKAGE_NAME="psij-testing-service"
+URL_BASE=https://github.com/ExaWorks/$PACKAGE_NAME/archive/refs/tags/v
 FORCE=0
 DONTASK=0
 
@@ -38,14 +39,16 @@ while [ "$1" != "" ]; do
             exit 1
             ;;
         *)
-            TARGET_VERSION="$1"
+            TYPE="$1"
+            TARGET_VERSION="$2"
+            shift
             shift
             ;;
     esac
 done
 
-if [ "$TARGET_VERSION" == "" ]; then
-    echo "Usage: update-psi-j-testing-service [--force] <target_version>"
+if [ "$TARGET_VERSION" == "" ] || [ "$TYPE" == "" ]; then
+    echo "Usage: update-psi-j-testing-service [--force] <type> <target_version>"
     exit 1
 fi
 
@@ -59,7 +62,7 @@ elif ! wget -q --method=HEAD "$URL_BASE$TARGET_VERSION.tar.gz"; then
     exit 2
 fi
 
-CURRENT_VERSION=`pip show psi-j-testing-service|grep Version|awk '{print $2}'`
+CURRENT_VERSION=`pip show $PACKAGE_NAME|grep Version|awk '{print $2}'`
 
 LOWER_VERSION=`echo -e "$CURRENT_VERSION\n$TARGET_VERSION"| sort -V | head -n 1`
 
@@ -84,6 +87,11 @@ fi
 
 if [ "$ANSWER" == "y" ]; then
     pip install "$PACKAGE"
+    PACKAGE_LOC=`pip show $PACKAGE_NAME | grep "Location: " | sed 's/Location: //'`
+    LINK_NAME="$PACKAGE_LOC/psij/web/instance/customization.js"
+    if [ ! -e "$LINK_NAME" ]; then
+        ln -s "customization-$TYPE.js" "$LINK_NAME"
+    fi
     try 3 timeout 10s service psi-j-testing-service restart
 else
     echo "OK. Bailing out..."
