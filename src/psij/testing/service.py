@@ -12,9 +12,6 @@ from mongoengine import Document, StringField, DateTimeField, connect, DictField
     IntField
 
 
-logger = logging.getLogger(__name__)
-
-
 CODE_DB_VERSION = 2
 
 
@@ -142,7 +139,7 @@ class TestingAggregatorApp(object):
 
             self._update_totals(site_id, data)
         except:
-            logger.info('Request json: %s' % json)
+            cherrypy.log('Request json: %s' % json)
             raise
 
     def _update_totals(self, site_id, data: Dict[str, object]) -> None:
@@ -207,7 +204,6 @@ class TestingAggregatorApp(object):
 
     def _update(self, entry: Site) -> Site:
         entry.last_seen = datetime.datetime.utcnow()
-        print(entry.site_id)
         entry.save()
         return entry
 
@@ -445,7 +441,7 @@ class Server:
 
 def upgrade_db(v: Version) -> Version:
     if v.version in DB_UPGRADES:
-        logger.info('Upgrading DB from %s to %s' % (v.version, v.version + 1))
+        cherrypy.log('Upgrading DB from %s to %s' % (v.version, v.version + 1))
         DB_UPGRADES[v.version]()
         v.update(inc__version=1)
         v.reload()
