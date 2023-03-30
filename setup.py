@@ -2,10 +2,19 @@ import distutils
 import io
 import os
 import pathlib
+from typing import List
 
 from setuptools import setup, find_packages
 from distutils.cmd import Command
 from distutils.command.build import build
+
+
+def get_files(root: str) -> List[str]:
+    files = []
+    for (path, dirs, fns) in os.walk(root):
+        for fn in fns:
+            files.append(os.path.join(path[len('src/psij/'):], fn))
+    return files
 
 
 if __name__ == '__main__':
@@ -31,7 +40,7 @@ if __name__ == '__main__':
         
         package_data={
             '': ['README.md', 'LICENSE', 'RELEASE'],
-            'psij': [x.path[9:] for x in os.scandir('src/psij/web') if x.is_file()]
+            'psij': get_files('src/psij/web')
         },
 
         scripts=[],
