@@ -105,7 +105,12 @@ else
 fi
 
 if [ "$UPDATE_NGINX" != "0" ]; then
-    run cp -u *.conf /etc/nginx
+    DOMAIN_NAME=`cat DOMAIN_NAME | tr -d '\n'`
+    for CONF in `ls *.conf`; do
+        if [ ! -f "/etc/nginx/$CONF" ]; then
+            run sed -e "s/\${DOMAIN_NAME}/${DOMAIN_NAME}/" $CONF >/etc/nginx/$CONF
+        fi
+    done
     run service nginx restart
 fi
 
