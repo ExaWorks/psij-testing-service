@@ -84,9 +84,9 @@ deployContainer() {
         getId $TYPE
         ID=$OUT
         if [ "$DEV" == "1" ]; then
-            run docker exec -it $ID update-psi-j-testing-service -y /psi-j-testing-service-dev
+            run docker exec -it $ID update-psi-j-testing-service -y $TYPE /psi-j-testing-service-dev
         else
-            run docker exec -it $ID update-psi-j-testing-service -y $SERVICE_VERSION
+            run docker exec -it $ID update-psi-j-testing-service -y $TYPE $SERVICE_VERSION
         fi
     fi
 }
