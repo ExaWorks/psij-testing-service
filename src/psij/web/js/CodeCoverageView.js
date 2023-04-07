@@ -35,9 +35,13 @@ PS.CodeCoverageView = function() {
     var init_ = function() {
 
         var coverage = STUB_FROM_BE.coverage;
+        var ht = "";
 
         for( var x=0; x < coverage; x++ ) {
-            
+
+            var covObj = coverage[x];
+            var linesHTML = covObj.join("<br>");
+            ht += linesHTML;
         }
 
     };
