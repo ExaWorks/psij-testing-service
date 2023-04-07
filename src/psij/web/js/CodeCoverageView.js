@@ -33,8 +33,7 @@ PS.CodeCoverageView = function() {
     };
 
 
-
-    var init_ = function() {
+    var make_right_side_ = function() {
 
         var coverage = STUB_FROM_BE.coverage;
         var ht = "";
@@ -47,6 +46,26 @@ PS.CodeCoverageView = function() {
         }
 
         $('.right-side').append( ht );
+    };
+
+    var make_left_side_ = function() {
+
+        var ht = "";
+        var files = STUB_FROM_BE.files;
+
+        for( var x=0; x < files.length; x++ ) {
+
+            var fileObj = files[x];
+            ht += "<div class='file_line'>" + fileObj.name + '</div>';
+        }
+
+        $('.select-page').append( ht );
+    };
+
+    var init_ = function() {
+
+        make_left_side_();
+        make_right_side_();
     };
 
     $(document).ready( init_ );
