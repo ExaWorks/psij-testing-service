@@ -1,3 +1,5 @@
+var PS = PS || {};
+
 PS.CodeCoverageView = function() {
 
     var STUB_FROM_BE = {
@@ -37,13 +39,14 @@ PS.CodeCoverageView = function() {
         var coverage = STUB_FROM_BE.coverage;
         var ht = "";
 
-        for( var x=0; x < coverage; x++ ) {
+        for( var x=0; x < coverage.length; x++ ) {
 
             var covObj = coverage[x];
-            var linesHTML = covObj.join("<br>");
-            ht += linesHTML;
+            var linesHTML = covObj.lines.join("<br>");
+            ht += '<div class="' + covObj.status + '">' + linesHTML + '</div>';
         }
 
+        $('.right-side').append( ht );
     };
 
     $(document).ready( init_ );

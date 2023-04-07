@@ -1,0 +1,33 @@
+.select-page {
+	width: 200px;
+	border: 1px solid #333333;
+	height: 700px;
+}
+
+.right-side {
+	font-family: monospace;
+	font-size: 14px;
+	line-height: 26px;
+	border: 1px solid #333333;
+	padding: 5px;
+	width: 700px;
+	height: 700px;
+	vertical-align: top;
+}
+.right-side .green,
+.right-side .red,
+.right-side .white {
+	padding: 0 5px 0 12px;
+}
+
+.right-side .white {
+	background-color: white;
+}
+
+.right-side .green {
+	background-color: #d8f6d2;
+}
+
+.right-side .red {
+	background-color: #f8dfdf;
+}
