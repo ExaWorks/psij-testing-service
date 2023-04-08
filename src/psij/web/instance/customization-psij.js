@@ -5,7 +5,7 @@ CUSTOMIZATION = {
 var CONF = {
     backendURL: "https://psij.testing.exaworks.org/",
     STR: {
-        "dashboardTitle": "Exascale dashboard testing service"
+        "dashboardTitle": "PSI/J Testing Dashboard"
     },
     "curated_sites": {
         xaxis: [
