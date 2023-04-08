@@ -126,8 +126,8 @@ deploySite() {
     INTERNAL_PORT="$3"
 
     echo "Deploying site $NAME"
-    filterConf nginx/site-template "/etc/nginx/sites-available/$NAME" $SERVER_NAME $PROXY_REDIRECT $INTERNAL_PORT
-    ln -f -s /etc/nginx/sites-available/$NAME /etc/nginx/sites-enabled/$NAME
+    filterConf nginx/site-template "/etc/nginx/sites-available/$NAME" "$SERVER_NAME" "$PROXY_REDIRECT" "$INTERNAL_PORT"
+    ln -f -s "/etc/nginx/sites-available/$NAME" "/etc/nginx/sites-enabled/$NAME"
 }
 
 if [ "$UPDATE_NGINX" != "0" ]; then
@@ -140,9 +140,9 @@ if [ "$UPDATE_NGINX" != "0" ]; then
     run ln -f -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
     # psij is default
-    deploySite $DOMAIN_NAME psij.$DOMAIN_NAME 9901
-    deploySite psij.$DOMAIN_NAME psij.$DOMAIN_NAME 9901
-    deploySite sdk.$DOMAIN_NAME sdk.$DOMAIN_NAME 9902
+    deploySite "$DOMAIN_NAME" "psij.$DOMAIN_NAME" 9901
+    deploySite "psij.$DOMAIN_NAME" "psij.$DOMAIN_NAME" 9901
+    deploySite "sdk.$DOMAIN_NAME" "sdk.$DOMAIN_NAME" 9902
 
     run service nginx restart
 fi
