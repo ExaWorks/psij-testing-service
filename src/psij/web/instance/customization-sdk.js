@@ -3,7 +3,7 @@ CUSTOMIZATION = {
 };
 
 var CONF = {
-    backendURL: "https://sdk.testing.exaworks.org/",
+    backendURL: "",
     STR: {
         "dashboardTitle": "Exascale dashboard testing service"
     },
