@@ -112,10 +112,10 @@ filterConf() {
     INTERNAL_PORT="$5"
 
     if [ ! -f "$DST" ]; then
-        sed -e "s/\${DOMAIN_NAME}/${DOMAIN_NAME}/" "$SRC" | \
-        sed -e "s/\${SERVER_NAME}/${SERVER_NAME}/" | \
-        sed -e "s/\${PROXY_REDIRECT}/${PROXY_REDIRECT}/" | \
-        sed -e "s/\${INTERNAL_PORT}/${INTERNAL_PORT}/" >"$DST"
+        sed -e "s/\${DOMAIN_NAME}/${DOMAIN_NAME}/g" "$SRC" | \
+        sed -e "s/\${SERVER_NAME}/${SERVER_NAME}/g" | \
+        sed -e "s/\${PROXY_REDIRECT}/${PROXY_REDIRECT}/g" | \
+        sed -e "s/\${INTERNAL_PORT}/${INTERNAL_PORT}/g" >"$DST"
     fi
 }
 
