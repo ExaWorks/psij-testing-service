@@ -5,7 +5,7 @@ CUSTOMIZATION = {
 var CONF = {
     backendURL: "https://sdk.testing.exaworks.org/",
     STR: {
-        "dashboardTitle": "Exascale dashboard testing service"
+        "dashboardTitle": "ExaWorks SDK Testing Dashboard"
     },
     "curated_sites": {
         xaxis: [
