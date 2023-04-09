@@ -1,0 +1,22 @@
+server {
+        listen 443 ssl;
+
+        server_name ${SERVER_NAME};
+
+        include /etc/nginx/ssl.conf;
+
+        root /var/www/html;
+
+        location /.well-known {
+                try_files $uri $uri/ =404;
+        }
+
+        location / {
+                include /etc/nginx/snippets/headers.conf;
+
+                proxy_pass http://localhost:${INTERNAL_PORT};
+                proxy_read_timeout 90;
+
+                proxy_redirect http://localhost:${INTERNAL_PORT} https://${PROXY_REDIRECT};
+        }
+}
