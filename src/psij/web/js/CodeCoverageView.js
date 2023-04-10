@@ -2,25 +2,25 @@ var PS = PS || {};
 
 PS.CodeCoverageView = function() {
 
+    var file_idx_ = 0;
+
     var STUB_FROM_BE = {
         files: [
             {
                 name: "__init__.py",
                 coverage: [{
                     lines: [
-                        "# this is a sample code file",
-                        "# using comments that appear white",
-                        ""
+                        "for( var x=0; x < 5; x++) {",
+                        "   w=5;",
+                        "}"
                     ],
-                    status: "white"
+                    status: "green"
                 },
                     {
                         lines: [
-                            "var cx=0;",
-                            "cx = 80;",
-                            "if( cx == 80 ) { return true; }"
+                            "# comments should be here."
                         ],
-                        status: "green"
+                        status: "white"
                     },
                     {
                         lines: [
@@ -62,14 +62,20 @@ PS.CodeCoverageView = function() {
                     }
                 ]},
             {name: "job.py",
-                coverage: []}
+                coverage: [{
+                    lines: [
+                        "if( code_note == 3 ) {",
+                        "}"
+                    ],
+                    status: "red"
+                }]}
         ]
     };
 
 
     var make_right_side_ = function() {
 
-        var coverage = STUB_FROM_BE.files[0].coverage;
+        var coverage = STUB_FROM_BE.files[ file_idx_ ].coverage;
         var ht = "";
 
         for( var x=0; x < coverage.length; x++ ) {
@@ -79,7 +85,7 @@ PS.CodeCoverageView = function() {
             ht += '<div class="' + covObj.status + '">' + linesHTML + '</div>';
         }
 
-        $('.right-side').append( ht );
+        $('.right-side').html( ht );
     };
 
     var make_left_side_ = function() {
@@ -90,12 +96,21 @@ PS.CodeCoverageView = function() {
         for( var x=0; x < files.length; x++ ) {
 
             var fileObj = files[x];
-            ht += "<div class='file_line'>" + fileObj.name + '</div>';
+            ht += "<div class='file_line' file_index='" + x + "'>" + fileObj.name + '</div>';
         }
 
-        $('.select-page').append( ht );
+        $('.select-page').html( ht );
+
+        $('.select-page .file_line').unbind('click').bind('click', file_selected_ );
     };
 
+
+    var file_selected_ = function() {
+
+        file_idx_ = $(this).attr('file_index');
+        console.log(file_idx_);
+        init_();
+    };
 
     var init_ = function() {
 
