@@ -100,7 +100,7 @@ PS.CodeCoverageView = function() {
 
     var make_left_side_ = function() {
 
-        var ht = "";
+        var ht = "<div class='files_header'>Files</div>";
         var files = STUB_FROM_BE.files;
 
         for( var x=0; x < files.length; x++ ) {

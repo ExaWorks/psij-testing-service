@@ -8,6 +8,14 @@
 	padding: 5px 5px 0 5px;
 }
 
+.select-page .files_header {
+	font-weight: bold;
+	color: white;
+	background-color: #333333;
+	padding: 3px 0 3px 10px;
+	font-size: 14px;
+}
+
 .select-page .file_line {
 	background-color: white;
 	border-bottom: 1px solid #dfdfdf;
