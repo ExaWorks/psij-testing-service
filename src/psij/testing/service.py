@@ -207,6 +207,13 @@ class TestingAggregatorApp(object):
         entry.save()
         return entry
 
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def coverage(self) -> object:
+        return ["text", "hello world"]
+
+
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def summary(self, inactiveTimeout: str = "10") -> object:
