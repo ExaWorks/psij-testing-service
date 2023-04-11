@@ -108,7 +108,6 @@ PS.CodeCoverageView = function() {
     var file_selected_ = function() {
 
         file_idx_ = $(this).attr('file_index');
-        console.log(file_idx_);
         init_();
     };
 
