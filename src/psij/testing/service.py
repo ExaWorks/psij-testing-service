@@ -211,6 +211,8 @@ class TestingAggregatorApp(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def coverage(self) -> object:
+
+        add_cors_headers()
         return ["text", "hello world"]
 
 

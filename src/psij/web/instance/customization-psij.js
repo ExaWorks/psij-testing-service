@@ -3,7 +3,7 @@ CUSTOMIZATION = {
 };
 
 var CONF = {
-    backendURL: "",
+    backendURL: "https://testing.exaworks.org/",
     STR: {
         "dashboardTitle": "PSI/J Testing Dashboard"
     },

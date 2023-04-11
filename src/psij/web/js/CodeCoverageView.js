@@ -121,14 +121,31 @@ PS.CodeCoverageView = function() {
         init_();
     };
 
+    var get_coverage_ = function() {
+
+        var context = 'http://localhost:9909/coverage';
+        //PS.getURL('coverage');
+
+        $.get(context, {}, function(data) {
+
+            console.dir( data );
+        });
+    };
+
+
     var init_ = function() {
 
         line_count_ = 0;
+
         make_left_side_();
         make_right_side_();
+
+        get_coverage_();
     };
 
     $(document).ready( init_ );
 
-    return {};
+    return {
+        get_coverage: get_coverage_
+    };
 }();
