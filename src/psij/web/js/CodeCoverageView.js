@@ -3,6 +3,7 @@ var PS = PS || {};
 PS.CodeCoverageView = function() {
 
     var file_idx_ = 0;
+    var line_count_ = 1;
 
     var STUB_FROM_BE = {
         files: [
@@ -81,12 +82,21 @@ PS.CodeCoverageView = function() {
         for( var x=0; x < coverage.length; x++ ) {
 
             var covObj = coverage[x];
-            var linesHTML = covObj.lines.join("<br>");
+            var linesHTML = "";
+            //covObj.lines.join("<br>");
+
+            for( var j=0; j < covObj.lines.length; j++ ) {
+                linesHTML += "<div class='line_count'>" + line_count_ + "</div>" +
+                    "<div class='line'>" + covObj.lines[j] + "</div><br>";
+                line_count_++;
+            }
+
             ht += '<div class="' + covObj.status + '">' + linesHTML + '</div>';
         }
 
         $('.right-side').html( ht );
     };
+
 
     var make_left_side_ = function() {
 
@@ -113,6 +123,7 @@ PS.CodeCoverageView = function() {
 
     var init_ = function() {
 
+        line_count_ = 0;
         make_left_side_();
         make_right_side_();
     };

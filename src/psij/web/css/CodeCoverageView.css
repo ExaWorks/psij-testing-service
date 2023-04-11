@@ -30,6 +30,15 @@
 	padding: 0 5px 0 12px;
 }
 
+.right-side .line_count {
+	display: inline-block;
+	width: 50px;
+}
+
+.right-side .line {
+	display: inline-block;
+}
+
 .right-side .white {
 	background-color: white;
 }
