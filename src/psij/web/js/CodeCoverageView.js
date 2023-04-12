@@ -8,6 +8,79 @@ PS.CodeCoverageView = function() {
     var STUB_FROM_BE = {
         files: [
             {
+                name: "service.py",
+                coverage: [{
+                    lines: [
+                        "import argparse",
+                        "import datetime",
+                        "import json",
+                        "import logging",
+                        "import sys",
+                        "from pathlib import Path",
+                        "from typing import Optional, Dict, cast"
+                    ],
+                    status: "green"
+                },
+                    {
+                        lines: [
+                        "from mongoengine import Document, StringField, DateTimeField, connect, DictField, BooleanField, \\",
+                        "    IntField",
+                        "",
+                        "",
+                        "CODE_DB_VERSION = 2",
+                        "",
+                        "",
+                        "def upgrade_0_to_1() -> None:",
+                        "    pass",
+                        "",
+                        ""
+                    ],
+                    status: "white"
+                },
+                    {
+                    lines: [
+                                                "def upgrade_1_to_2() -> None:",
+                        "    RunEnv.objects().update(skipped_count=0)",
+                        "    Site.create_index(['last_seen'])",
+                        "    RunEnv.create_index(['site_id', 'run_id'])",
+                        "    RunEnv.create_index(['site_id', 'run_id', 'branch'])",
+                        "    Test.create_index(['site_id', 'run_id', 'branch'])",
+                        "",
+                        "",
+                        "DB_UPGRADES = {",
+                        "    0: upgrade_0_to_1,",
+                        "    1: upgrade_1_to_2",
+                        "}",
+                        "",
+                        "class Version(Document):",
+                        "    version = IntField(required=True)",
+                        "",
+                        "",
+                        "class Site(Document):",
+                        "    site_id = StringField(required=True, unique=True)",
+                        "    key = StringField(required=True)",
+                        "    last_seen = DateTimeField(required=True)",
+                        "    crt_maintainer_email = StringField()",
+                        "    ip = StringField()",
+                        "",
+                        "",
+                        "class Test(Document):",
+                        "    site_id = StringField(required=True)",
+                        "    test_start_time = DateTimeField(required=True)",
+                        "    test_end_time = DateTimeField(required=True)",
+                        "    stdout = StringField()",
+                        "    stderr = StringField()",
+                        "    log = StringField()",
+                        "    module = StringField()",
+                        "    cls = StringField()",
+                        "    function = StringField()",
+                        "    test_name = StringField()",
+                        "    results = DictField()"
+                    ],
+                    status: "red"
+                }]
+            },
+            {
                 name: "__init__.py",
                 coverage: [{
                     lines: [
@@ -106,7 +179,7 @@ PS.CodeCoverageView = function() {
         for( var x=0; x < files.length; x++ ) {
 
             var fileObj = files[x];
-            ht += "<div class='file_line' file_index='" + x + "'>" + fileObj.name + '</div>';
+            ht += "<div class='file_line' file_index='"+  x + "'>" + fileObj.name + '</div>';
         }
 
         $('.select-page').html( ht );
