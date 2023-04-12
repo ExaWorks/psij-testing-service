@@ -212,8 +212,13 @@ class TestingAggregatorApp(object):
     @cherrypy.tools.json_out()
     def coverage(self) -> object:
 
+        from ParseCoverage import ParseCoverage
+
+        cov = ParseCoverage()
+        ret = cov.parse("src/psij/testing/cov.xml")
+
         add_cors_headers()
-        return ["text", "hello world"]
+        return ret
 
 
     @cherrypy.expose
