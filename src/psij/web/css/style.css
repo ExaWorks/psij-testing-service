@@ -617,6 +617,79 @@ td.run-id {
 }
 
 .calendar-cell {
+    text-align: center;
+}
+
+.RowAccordion {
+	border-top: 1px solid #e0e0e1;
+}
+
+.RowAccordion td {
+	padding: 0;
+	position:relative;
+}
+
+.RowAccordion .status-cell {
+    text-align: center;
+}
+
+.RowAccordion td:first-child {
+	cursor: pointer;
+	color: #333333;
+}
+
+.RowAccordion .logo_name {
+	font-weight: bold;
+}
+
+.RowAccordion .ArrowDown {
+	width: 0;
+	height: 0;
+	display: inline-block;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 8px solid #333333;
+	margin-right: 11px;
+	margin-left: 3px;
+}
+
+.RowAccordion .ArrowRight {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-top: 8px solid transparent;
+	border-bottom: 8px solid transparent;
+	border-left: 8px solid #333334;
+	padding: 0 6px 0 0;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+
+.RowAccordion .machineLink {
+	padding: 0 5px 0 35px;
+}
+
+.RowAccordion .rowIsClosed {
+	display: none;
+}
+
+.status-table .status-header-cell {
+    width: 60pt;
+}
+
+#status-calendar .RowAccordion td {
+	height: 32px;
+}
+
+#status-calendar td.logo_name {
+	width: 100%;
+}
+
+#status-calendar .schedulerCol {
+	width: 0;
+}
+
+.status-table th.status-header-cell {
 	text-align: center;
 }
 
@@ -690,7 +763,7 @@ td.run-id {
 }
 .RowAccordion 	td {
 	width: 90px;
-	padding: 5px;
+	padding: 0 1px 0 1px;
 	position:relative;
 }
 
@@ -783,3 +856,52 @@ td.run-id {
 #curated-sites-home .RowAccordion td {
 	display: inline-block;
 }
+
+.container-for-mini-branches {
+    display: inline-flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    vertical-align: middle;
+    margin-right: auto;
+    height: 0;
+}
+
+.status-box {
+    background-color: #018701;
+    font-size: 12px;
+    padding: 10px;
+    color: white;
+    font-weight: bold;
+	text-align: center;
+}
+
+.status-box.state-really-bad {
+    background-color: #ed0024;
+}
+
+.status-box.state-bad {
+    background-color: #fd8d00;
+}
+
+/*
+.status-box {
+    background-color: #cbfdcb;
+    border: 1px solid #7ebe7e;
+    font-size: 10px;
+    padding: 8px;
+}
+
+.status-box.state-really-bad {
+    background-color: #efbed4;
+    border: 1px solid #e15b70;
+    font-size: 10px;
+    padding: 8px;
+}
+
+.status-box.state-bad {
+    background-color: #eab878;
+    border: 1px solid #fb8c00;
+    font-size: 10px;
+    padding: 8px;
+}
+ */

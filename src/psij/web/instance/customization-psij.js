@@ -3,7 +3,7 @@ CUSTOMIZATION = {
 };
 
 var CONF = {
-    backendURL: "https://psij.testing.exaworks.org/",
+    backendURL: "https://testing.exaworks.org/",
     STR: {
         "dashboardTitle": "Exascale dashboard testing service"
     },
@@ -24,6 +24,12 @@ var CONF = {
                 logo_src: "",
                 logo_name: "University of Oregon",
                 machines: {
+                    "echo.test": {
+                        scheduler: ""
+                    },
+                    "echo": {
+                        scheduler: ""
+                    },
                     "axis1.hidden.uoregon.edu": {
                         scheduler: "SLURM"
                     },
@@ -49,7 +55,19 @@ var CONF = {
                 logo_name: "Lawrence Livermore National Lab",
                 machines: {
                     "doc.llnl.gov": {
-                        scheduler: "SLURM"
+                        scheduler: ""
+                    },
+                    "quartz.llnl.gov": {
+                        scheduler: ""
+                    },
+                    "lassen.llnl.gov": {
+                        scheduler: ""
+                    },
+                    "ruby.llnl.gov": {
+                        scheduler: ""
+                    },
+                    "bebop.lcrc.anl.gov": {
+                        scheduler: ""
                     }
                 }
             },
