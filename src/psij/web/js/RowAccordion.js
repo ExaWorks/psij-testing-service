@@ -28,14 +28,16 @@ VC.RowAccordion = Vue.component("row-accordion", {
         '{{ this.yaxe_prop.logo_name }}</td>' +
         '<td class="scheduler-cell" v-if="show_scheduler"></td>' +
         '<td class="status-cell" v-for="summaryState in yaxe_prop.horizontalSummary">' +
-        '<div :class=\'"calendar-bubble " + summaryState + " bubble-large"\'></div>' +
+//        '<div :class=\'"calendar-bubble " + summaryState + " bubble-large"\'></div>' +
+            '<div class="status-box">PASS</div>' +
         '</td>'+
             '</tr> \
             <tr :class=\'open == 0 ? "rowIsOpen" : "rowIsClosed"\' v-for="machineObj in yaxe_prop.machinesFromModel">\
             <td class="machineLink highlightable" :onclick=\'"event.stopPropagation(); VC.goHere();" \'>{{ machineObj.site_id }}</td>' +
             '<td v-if="show_scheduler" class="schedulerCol">{{ machineObj.schedulerShow }}</td>' +
         '<td class="status-cell" v-for="state in machineObj.states">' +
-            '<div :class=\'"calendar-bubble " + state.mainState + " bubble-large"\'></div>' +
+            //'<div :class=\'"calendar-bubble " + state.mainState + " bubble-large"\'></div>' +
+            '<div :class=\'"status-box " + state.mainState + " "\'>{{ state.mainText }}</div>' +
             '<div class="container-for-mini-branches">' +
             '<div class="calendar-bubble" v-for="branch in state.branches" ' +
             '        :class="branch.calendarBubbleClass">' +

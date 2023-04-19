@@ -116,8 +116,12 @@ PS.SitesModel = function() {
                 var objStates = [];
 
                 for( var y=0; y < states.length; y++ ) {
+                    
+                    var block = hackState_();
+                    
                     objStates.push({
-                       mainState: states[y],
+                       mainState: block.state, //states[y],
+                        mainText: block.text,
                        branches: []
                     });
                 }
@@ -131,6 +135,35 @@ PS.SitesModel = function() {
         }
     };
 
+    function randomIntFromInterval(min, max) { // min and max included
+      return Math.floor(Math.random() * (max - min + 1) + min)
+    }
+
+    var hackState_ = function() {
+
+        var ran = randomIntFromInterval(1,3);
+
+        var ret = {
+            state: "state-really-bad",
+            text: "FAIL"
+        };
+
+        if( ran === 2 ) {
+            ret = {
+                state: "state-bad",
+                text: "OK"
+            };
+        }
+
+        if( ran === 3 ) {
+            ret = {
+            state: "state-good",
+            text: "PASS"
+            };
+        }
+
+        return ret;
+    };
 
     /*
      *  curated sites:

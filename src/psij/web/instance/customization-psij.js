@@ -3,7 +3,8 @@ CUSTOMIZATION = {
 };
 
 var CONF = {
-    backendURL: "",
+    //"https://testing.psij.io/", //
+    backendURL: "https://testing.exaworks.org/",
     STR: {
         "dashboardTitle": "PSI/J Testing Dashboard"
     },
@@ -22,6 +23,12 @@ var CONF = {
                 logo_src: "",
                 logo_name: "University of Oregon",
                 machines: {
+                    "echo.test": {
+                        scheduler: ""
+                    },
+                    "echo": {
+                        scheduler: ""
+                    },
                     "axis1.hidden.uoregon.edu": {
                         scheduler: "SLURM"
                     },
@@ -56,6 +63,9 @@ var CONF = {
                         scheduler: ""
                     },
                     "ruby.llnl.gov": {
+                        scheduler: ""
+                    },
+                    "bebop.lcrc.anl.gov": {
                         scheduler: ""
                     }
                 }
