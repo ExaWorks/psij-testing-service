@@ -142,8 +142,8 @@ PS.SitesModel = function() {
                 var objStates = [];
 
                 for( var y=0; y < states.length; y++ ) {
-                    
-                    var block = hackState_();
+
+                    var block = blockState_( states[y] );
                     
                     objStates.push({
                        mainState: block.state, //states[y],
@@ -164,6 +164,38 @@ PS.SitesModel = function() {
     function randomIntFromInterval(min, max) { // min and max included
       return Math.floor(Math.random() * (max - min + 1) + min)
     }
+
+    
+    var blockState_ = function( state ) {
+
+        var ret = {
+            state: "state-really-bad",
+            text: "FAIL"
+        };
+        
+        if( state === "empty" ) {
+            ret = {
+                state: "empty",
+                text: ""
+            }
+        }
+
+        if( state === "state-bad" ) {
+            ret = {
+                state: "state-bad",
+                text: "OK"
+            };
+        }
+
+        if( state === "state-good" ) {
+            ret = {
+            state: "state-good",
+            text: "PASS"
+            };
+        }
+
+        return ret;
+    };
 
     var hackState_ = function() {
 
@@ -201,6 +233,11 @@ PS.SitesModel = function() {
         var xTests = CONF.curated_sites.xaxisTests;
         var testName = xTests[columnIndex];
 
+        //  siteId not found:
+        if( !resultsBySiteIdAndCol_[ siteId ] ) {
+            return "siteId not found";
+        }
+        
         var resultSetupAndCall = resultsBySiteIdAndCol_[ siteId ][ testName ];
 
         var bl = getStatus_(resultSetupAndCall, testName);

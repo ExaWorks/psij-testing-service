@@ -25,10 +25,11 @@ VC.RowAccordion = Vue.component("row-accordion", {
         '<td v-on:click="toggle( $event )" class="logo_name" colspan="10">' +
         '<div v-if="this.open == 1" class="ArrowRight"></div>' +
         '<div v-if="this.open == 0" class="ArrowDown"></div>' +
-        '{{ this.yaxe_prop.logo_name }}</td>' +
+        '<div class="logo_name_text">{{ this.yaxe_prop.logo_name }}</div>' +
+        '</td>' +
         '<td v-if="show_scheduler"></td>' +
         '<td v-for="summaryState in yaxe_prop.horizontalSummary">' +
-            '<div v-if="show_scheduler" class="status-box">PASS</div>' +
+            '<div v-if="show_scheduler" class=\'"status-box " + summaryState + " "\'>PASS</div>' +
         '<div v-else :class=\'"calendar-bubble " + summaryState + " bubble-large"\'></div>' +
         '</td>'+
             '</tr> \
