@@ -29,7 +29,7 @@ VC.RowAccordion = Vue.component("row-accordion", {
         '</td>' +
         '<td v-if="show_scheduler"></td>' +
         '<td v-for="summaryState in yaxe_prop.horizontalSummary">' +
-            '<div v-if="show_scheduler" class=\'"status-box " + summaryState + " "\'>PASS</div>' +
+            '<div v-if="show_scheduler" :class=\'"status-box " + summaryState + " "\'>FAIL</div>' +
         '<div v-else :class=\'"calendar-bubble " + summaryState + " bubble-large"\'></div>' +
         '</td>'+
             '</tr> \
