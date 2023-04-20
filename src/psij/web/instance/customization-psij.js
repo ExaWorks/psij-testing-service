@@ -3,7 +3,7 @@ CUSTOMIZATION = {
 };
 
 var CONF = {
-    backendURL: "",
+    backendURL: "https://testing.psij.io/",
     STR: {
         "dashboardTitle": "PSI/J Testing Dashboard"
     },
@@ -22,6 +22,9 @@ var CONF = {
                 logo_src: "",
                 logo_name: "University of Oregon",
                 machines: {
+                    "echo.test": {
+                        scheduler: ""
+                    },
                     "axis1.hidden.uoregon.edu": {
                         scheduler: "SLURM"
                     },
@@ -74,8 +77,10 @@ var CONF = {
             },
             {
                 logo_src: "",
-                logo_name: "Oakridge National Lab",
+                logo_name: "ALF",
                 machines: {
+                    "polaris.alcf.anl.gov":{scheduler: ""},
+                    "theta.alcf.anl.gov":{scheduler: ""}
                 }
             }
         ]
