@@ -80,7 +80,10 @@ var CONF = {
                 logo_name: "ALF",
                 machines: {
                     "polaris.alcf.anl.gov":{scheduler: ""},
-                    "theta.alcf.anl.gov":{scheduler: ""}
+                    "theta.alcf.anl.gov":{scheduler: ""},
+                    "bebop.lcrc.anl.gov": {
+                        scheduler: ""
+                    }
                 }
             }
         ]
