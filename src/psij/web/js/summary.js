@@ -2,13 +2,13 @@
 var setViewMode = function (viewMode) {
 
     if (viewMode === undefined) {
-        viewMode = Cookies.get('viewMode');
+        viewMode = localStorage.getItem('viewMode');
     }
     if (viewMode === undefined) {
         viewMode = 'calendar';
     }
 
-    Cookies.set('viewMode', viewMode);
+    localStorage.setItem('viewMode', viewMode);
 
     $('.view-mode-group').removeClass('selected');
     $('#view-mode-' + viewMode).addClass('selected');
