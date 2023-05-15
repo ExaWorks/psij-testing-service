@@ -64,50 +64,37 @@ var getBranchData = function(branch, dayData) {
 
 var settingsDefaults = function(dict) {
     for (var k in dict) {
-        var val = Cookies.get(k);
+        var val = localStorage.getItem(k);
         if (val == undefined) {
-            Cookies.set(k, dict[k]);
+            localStorage.setItem(k, dict[k]);
         }
     }
 };
 
+var setting = function(name, type) {
+    var val = localStorage.getItem(name);
+
+    if (type == "bool") {
+        return val == "true";
+    }
+    else {
+        return val;
+    }
+}
+
+
 var makeSetting = function(name, callback, type) {
     return {
         get: function() {
-
-            var sbb = localStorage.getItem(name);
-
-            if( name === 'showBranchBubbles' ) {
-                sbb = localStorage.getItem('showBranchBubbles') === 'true' ? 'true' : false;
-            } else  if( name === 'inactiveTimeout' ) {
-                sbb = localStorage.getItem('inactiveTimeout') || 10;
-            }
-
-            return sbb;
+            return setting(name, type);
         },
 
         set: function(val) {
-
-            localStorage.setItem( name, val );
-            callback();
-
-            if( name === "showBranchBubbles" ) {
-                console.log('showBranchbubbles:');
-                console.dir(val);
+            localStorage.setItem(name, val);
+            if (callback) {
+                callback(name, val);
             }
-         }
-    }
-};
-
-
-PS.showOrHideBranchBubbles = function() {
-
-    var show = localStorage.getItem('showBranchBubbles') === 'true';
-
-    if( show ) {
-        $('.container-for-mini-branches').show();
-    } else {
-        $('.container-for-mini-branches').hide();
+        }
     }
 };
 
@@ -115,15 +102,17 @@ var settings = function(...names) {
     var obj = {};
     for (var i = 0; i < names.length; i++) {
         var name = names[i];
-        obj[name] = Cookies.get(name);
+        var type = null;
+        if (name.includes(":")) {
+            var s = name.split(/:/);
+            name = s[0];
+            type = s[1];
+        }
+        obj[name] = setting(name, type);
     }
 
     return obj;
 };
-
-var setting = function(name) {
-    return Cookies.get(name);
-}
 
 var ansi_up = new AnsiUp();
 ansi_up.use_classes = true;
