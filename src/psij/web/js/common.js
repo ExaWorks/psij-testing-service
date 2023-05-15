@@ -1,10 +1,12 @@
 var PS = PS || {};
 
-PS.sites = [
-];
-
-settingsDefaults({"viewMode": "calendar", "inactiveTimeout": 10, "showBranchBubbles": false});
+settingsDefaults({
+    "viewMode": "calendar",
+    "inactiveTimeout": 10,
+    "showBranchBubbles": false,
+    "showAllRows": false
+});
 
 PS.getURL = function( path ) {
-    return CONF.backendURL + path;
+    return CUSTOMIZATION.backendURL + path;
 };
