@@ -41,7 +41,7 @@
             <td class="run-id" :title="run.run_id">{{ shortenId(run.run_id) }}</td>
             <td class="run-branches">
                 <div class="run-branch" v-for="branch in run.branches">
-                    <div class="site-branch-cell highlightable" :class="badnessClass(branch)"
+                    <div class="site-branch-cell highlightable" :class="siteStateCSSClass(branch)"
                         :onclick="navigate('run.html?site_id=' + site.site_id + '&run_id=' + run.run_id + '#branch-' + branch.name)">
                         <div class="site-branch-cell-name">
                             {{ branch.name }}

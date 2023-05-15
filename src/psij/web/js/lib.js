@@ -1,34 +1,57 @@
 //  lib.js
 var PS = PS || {};
-PS.STATES = {
-    "GOOD": "state-good",
-    "SOMEWHAT_BAD": "state-somewhat-bad",
-    "REALLY_BAD": "state-really-bad",
-    "EMPTY": "empty"
+const SiteState = {
+    // All tests passed
+    AllPassed: 1,
+    // Some but not more than half of tests failed
+    SomeFailed: 2,
+    // More than half of tests failed
+    MostFailed: 3,
+    // There are two or fewer tests (setup an teardown), meaning no actual tests ran
+    RunFailed: 4,
+    // No data at all
+    NoResults: 5
+};
+
+const GroupState = {
+    // All sites passed all tests
+    AllPassed: 1,
+    // Some sites have some failures
+    SomeFailed: 2,
+    // Some sites are missing, but the rest are all passin
+    MissingAndPassed: 3,
+    // Some sites are missing and some of the rest are failing
+    MissingAndFailed: 4,
+    // All missing
+    NoResults: 5
+};
+
+const TestResult = {
+    Unknown: 0,
+    Passed: 1,
+    Failed: 2,
+    Skipped: 3
 };
 
 var badness = function(obj) {
-
     if( obj['completed_count'] === 0 ) {
-        //  empty.
-        return 3;
+        return SiteState.NoResults;
     }
 
     if( obj['completed_count'] <= 2 ) {
-        return 2;  // red.
+        return SiteState.RunFailed;
     }
 
     if (obj['failed_count'] > 0 ) {
         if (obj['completed_count'] < obj['failed_count'] ) {
-            return 2;  //  red
+            return SiteState.MostFailed;
         }
         else {
-            return 1; //  orange
+            return SiteState.SomeFailed;
         }
     }
-    else {
-        return 0;
-    }
+
+    return SiteState.AllPassed;
 };
 
 var urlParam = function(paramName) {
@@ -147,17 +170,42 @@ var globalMethods = {
             return array;
         }
     },
-    badnessClass: function(obj) {
-        switch(badness(obj)) {
-            case 0:
-                return PS.STATES.GOOD;
-            case 1:
-                return PS.STATES.SOMEWHAT_BAD;
-            case 2:
-                return PS.STATES.REALLY_BAD;
-            case 3:
-                return PS.STATES.EMPTY;
+    /**
+     * Returns a CSS class that represents the state of the tests on siteState, which can
+     * be either an instance of the SiteState enum or a site object.
+     */
+    siteStateCSSClass: function(siteState) {
+        if (!Number.isInteger(siteState)) {
+            siteState = badness(siteState);
         }
+        switch(siteState) {
+            case SiteState.AllPassed:
+                return "state-good";
+            case SiteState.SomeFailed:
+                return "state-somewhat-bad";
+            case SiteState.MostFailed:
+            case SiteState.RunFailed:
+                return "state-really-bad";
+            case SiteState.NoResults:
+                return "state-empty";
+        }
+    },
+    groupStateCSSClass: function(groupState) {
+        switch(groupState) {
+            case GroupState.AllPassed:
+                return "state-good";
+            case GroupState.SomeFailed:
+                return "state-really-bad";
+            case GroupState.MissingAndPassed:
+                return "state-missing-and-good";
+            case GroupState.MissingAndFailed:
+                return "state-missing-and-bad";
+            case GroupState.NoResults:
+                return "state-empty"
+        }
+    },
+    branchCSSClass: function(branchName) {
+        return branchName == "main" || branchName == "master" ? "bubble-large" : "bubble-small";
     },
     badnessSort: function(lst) {
         return lst.slice().sort((a, b) => {
@@ -243,7 +291,7 @@ var globalMethods = {
     testStatus: function(test) {
         var results = test.results;
         if (results === undefined) {
-            return 0;
+            return TestResult.Unknown;
         }
         var passed = true;
         var skipped = false;
@@ -255,13 +303,13 @@ var globalMethods = {
         }
 
         if (passed) {
-            return 1;
+            return TestResult.Passed;
         }
         else if (skipped) {
-            return 3;
+            return TestResult.Skipped;
         }
         else {
-            return 2;
+            return TestResult.Failed;
         }
     },
     testStatusText: function(test) {
