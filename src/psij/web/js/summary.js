@@ -53,7 +53,6 @@ var Summary = function() {
             calendarItems: [],
             mode: '',
             now: today,
-            STR: CONF.STR,
             settingsDialog: false,
             settings: settings("showBranchBubbles:bool", "showAllRows:bool")
         },
