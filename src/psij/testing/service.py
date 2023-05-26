@@ -1,18 +1,28 @@
 import argparse
+import os
+import smtplib
+import tempfile
+import traceback
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import bcrypt
 import datetime
 import json
-import logging
+import secrets
 import sys
 from pathlib import Path
-from typing import Optional, Dict, cast
+from typing import Optional, Dict, cast, Tuple
 
 import cherrypy
+import requests
 from bson import ObjectId
-from mongoengine import Document, StringField, DateTimeField, connect, DictField, BooleanField, \
-    IntField
+from mongoengine import Document, StringField, DateTimeField, connect, DictField, \
+    IntField, NotUniqueError
 
-
-CODE_DB_VERSION = 2
+CODE_DB_VERSION = 4
+EMAIL_BLOCKLIST_URL = 'https://raw.githubusercontent.com/disposable-email-domains/' \
+                      'disposable-email-domains/master/disposable_email_blocklist.conf'
 
 
 def upgrade_0_to_1() -> None:
@@ -27,9 +37,28 @@ def upgrade_1_to_2() -> None:
     Test.create_index(['site_id', 'run_id', 'branch'])
 
 
+def upgrade_2_to_3() -> None:
+    # Mongoengine automatically creates indexes on unique fields?
+    # Auth.create_index(['key_id'])
+    # AuthExceptionRequests.create_index(['req_id'])
+    # AuthDisabledDomains.create_index(['domain'])
+    AuthAllowedEmails.create_index(['email'])
+
+
+def _add_disabled_domain(domain: str) -> None:
+    AuthDisabledDomains(domain=domain).save()
+
+
+def upgrade_3_to_4() -> None:
+    for domain in ['gmail.com', 'yahoo.com']:
+        _add_disabled_domain(domain)
+
+
 DB_UPGRADES = {
     0: upgrade_0_to_1,
-    1: upgrade_1_to_2
+    1: upgrade_1_to_2,
+    2: upgrade_2_to_3,
+    3: upgrade_3_to_4
 }
 
 class Version(Document):
@@ -74,6 +103,40 @@ class RunEnv(Document):
     skipped_count = IntField(default=0)
 
 
+class Auth(Document):
+    key_id = StringField(required=True, unique=True)
+    hash = StringField(required=True)
+    email = StringField(required=True)
+    last_used = DateTimeField(required=True)
+    # the rounds for bcrypt; just default for now, but if that changes, we need to distinguish
+    # between entries that were encoded with one round vs something else
+    rounds = IntField(required=True, default=1)
+
+
+# email domains for which we do not allow registration
+class AuthDisabledDomains(Document):
+    domain = StringField(required=True, unique=True)
+
+
+# exceptions to AuthDisabledDomains
+class AuthAllowedEmails(Document):
+    email = StringField(required=True)
+    approved_by = StringField(required=True)
+    approved_on = DateTimeField(required=True)
+    approved_by_ip = StringField(required=True)
+
+
+# send admin requests to these emails
+class AuthAdminEmails(Document):
+    email = StringField(required=True, unique=True)
+
+
+class AuthExceptionRequests(Document):
+    req_id = StringField(required=True, unique=True)
+    email = StringField(required=True)
+    approver_email = StringField(required=True)
+
+
 def strtime(d):
     return d.strftime('%a, %b %d, %Y - %H:%M')
 
@@ -101,6 +164,37 @@ def add_cors_headers():
     headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept'
 
 
+class AuthError(Exception):
+    def __init__(self, error: str, email: str = '', banned_domain: bool = False, domain: str = '') -> None:
+        self.error = error
+        self.email = email
+        self.banned_domain = banned_domain
+        self.domain = domain
+
+    def to_object(self):
+        return {'success': False, 'error': self.error, 'email': self.email,
+                'bannedDomain': self.banned_domain, 'domain': self.domain}
+
+
+AUTH_EMAIL_DATA = {
+    'PSI/J': {
+        'from': 'noreply@testing.psij.io',
+        'callback-url': 'https://testing.psij.io',
+        'body': 'psij-auth',
+    },
+    'SDK': {
+        'from': 'noreply@testing.sdk.exaworks.org',
+        'callback-url': 'https://testing.sdk.exaworks.org',
+        'body': 'sdk-auth'
+    }
+}
+
+EXCEPTION_EMAIL_BODY = 'exception'
+EXCEPTION_APPROVED_BODY = 'exception-approved'
+EXCEPTION_REJECTED_BODY = 'exception-rejected'
+
+
+
 class TestingAggregatorApp(object):
     def __init__(self):
         self.seq = 0
@@ -116,14 +210,19 @@ class TestingAggregatorApp(object):
         if not 'id' in json:
             raise cherrypy.HTTPError(400, 'Missing id')
         if not 'key' in json:
-            raise cherrypy.HTTPError(400, 'Missing key')
+            raise cherrypy.HTTPError(400, 'Missing key. Please go to /auth.html to request a key.')
         site_id = json['id']
         key = json['key']
         data = json['data']
 
-        site = self._check_authorized(site_id, key)
-        if not site:
-            raise cherrypy.HTTPError(403, 'This ID is associated with another key')
+        if ':' in key:
+            site = self._check_authorized(site_id, key)
+            if not site:
+                raise cherrypy.HTTPError(403, 'Invalid key. Please go to /auth.html to request a new key.')
+        else:
+            site = self._check_authorized_legacy(site_id, key)
+            if not site:
+                raise cherrypy.HTTPError(403, 'This ID is associated with another key')
 
         try:
             self.seq += 1
@@ -183,7 +282,13 @@ class TestingAggregatorApp(object):
                          run_start_time=env['start_time'], branch=env['git_branch'])
         run_env.save()
 
-    def _check_authorized(self, id: str, key: str) -> Optional[Site]:
+    def _check_authorized(self, id:str, key: str) -> Optional[Site]:
+        id, token = self._split_key(key)
+        if not self._verify_key(id, token):
+            return None
+        return Site.objects(site_id=id).first()
+
+    def _check_authorized_legacy(self, id: str, key: str) -> Optional[Site]:
         entries = Site.objects(site_id=id)
         entry = entries.first()
         if entry:
@@ -191,16 +296,11 @@ class TestingAggregatorApp(object):
             if key == entry.key:
                 return self._update(entry)
             else:
-                now = datetime.datetime.utcnow()
-                diff = now - entry.last_seen
-                if diff >= datetime.timedelta(days=7):
-                    entry.key = key  # update with the new key
-                    return self._update(entry)
-                else:
-                    return None
+                # we do not allow ad-hoc keys any more
+                return None
         else:
             # nothing yet
-            return self._update(Site(site_id=id, key=key, ip=cherrypy.request.remote.ip))
+            return None
 
     def _update(self, entry: Site) -> Site:
         entry.last_seen = datetime.datetime.utcnow()
@@ -310,8 +410,6 @@ class TestingAggregatorApp(object):
                         'name': k
                     })
 
-
-
                 date_start = date_start + datetime.timedelta(days=-1)
 
         add_cors_headers()
@@ -411,6 +509,214 @@ class TestingAggregatorApp(object):
         add_cors_headers()
         return resp
 
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def authRequest(self, project: str, email: str, ctoken: str) -> object:
+        try:
+            self._verify_captcha_token(ctoken)
+            ix = email.find('@')
+            if ix == -1:
+                raise AuthError('The email you provided has an incorrect syntax.', email)
+            domain = email[ix + 1:]
+
+            if AuthDisabledDomains.objects(domain=domain).count() > 0:
+                if AuthAllowedEmails.objects(email=email).count() > 0:
+                    self._perform_auth_request(project, email)
+                else:
+                    raise AuthError('Invalid domain', email, banned_domain=True, domain=domain)
+            else:
+                self._perform_auth_request(project, email)
+        except AuthError as err:
+            return err.to_object()
+        except Exception:
+            traceback.print_exc()
+            return AuthError('Internal error', email=email).to_object()
+
+        return {'success': True}
+
+    def _verify_captcha_token(self, ctoken: str) -> None:
+        r = requests.post('https://www.google.com/recaptcha/api/siteverify',
+                          data = {'secret': os.getenv('RECAPTCHA_SECRET_KEY'), 'response': ctoken})
+        if r.status_code != 200:
+            print(r.json())
+            raise AuthError('reCAPTHCA verify error', email='')
+        rj = r.json()
+        if not rj['success']:
+            raise AuthError('reCAPTHCA verify error', email='')
+
+    def _perform_auth_request(self, project: str, email: str) -> None:
+        salt = bcrypt.gensalt()
+        token = secrets.token_hex(24)
+        encrypted_token = bcrypt.hashpw(token.encode('ascii'), salt)
+
+        for tries in range(3):
+            id = secrets.token_hex(8)
+            try:
+                Auth.save(Auth(key_id=id, email=email, hash=encrypted_token,
+                               last_used=datetime.datetime.utcnow()))
+                return self._send_key_email(project, email, id, token)
+            except NotUniqueError:
+                pass
+
+        raise AuthError('Failed to generate authentication key', email)
+
+    def _load_email_body(self, file_name: str) -> str:
+        dir = os.path.dirname(__file__)
+        with open(dir + '/mailtemplates/' + file_name) as f:
+            return f.read()
+
+    def _load_email_bodies(self, file_prefix: str, params: Dict[str, str]) -> MIMEMultipart:
+        body_plain = self._load_email_body(file_prefix + '.plain').format(**params)
+        body_html = self._load_email_body(file_prefix + '.html').format(**params)
+        msg = MIMEMultipart('alternative')
+        msg.attach(MIMEText(body_plain, 'plain'))
+        msg.attach(MIMEText(body_html, 'html'))
+        return msg
+
+
+    def _send_key_email(self, project: str, email: str, id: str, token: str) -> None:
+        if project not in AUTH_EMAIL_DATA:
+            raise AuthError('Unknown project: ' + project, email)
+
+        msg = self._load_email_bodies(AUTH_EMAIL_DATA[project]['body'], {'id': id, 'key': token})
+
+        source = AUTH_EMAIL_DATA[project]['from']
+
+        msg['Subject'] = 'Your ' + project + ' testing dashboard key'
+        msg['From'] = source
+        msg['To'] = email
+
+        self._send_email(source, email, msg)
+
+    def _send_email(self, source: str, email: str, msg: MIMEMultipart) -> None:
+        smtp = smtplib.SMTP('localhost')
+        smtp.sendmail(source, email, msg.as_string())
+        smtp.quit()
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def authRevoke(self, project: str, key: str, ctoken: str) -> object:
+        try:
+            self._verify_captcha_token(ctoken)
+
+            id, token = self._split_key(key)
+            if not self._verify_key(id, token):
+                raise AuthError('Invalid key')
+            Auth.objects(key_id=id).delete()
+        except AuthError as err:
+            return err.to_object()
+        except Exception:
+            traceback.print_exc()
+            return AuthError('Internal error').to_object()
+
+        return {'success': True}
+
+    def _verify_key(self, id: str, key: str) -> None:
+        auth = Auth.objects(key_id=id).first()
+
+        encrypted_key = bcrypt.hashpw(key.encode('ascii'), auth.hash.encode('ascii'))
+        if encrypted_key.decode('ascii') == auth.hash:
+            auth.update(last_used=datetime.datetime.utcnow())
+            return True
+        else:
+            return False
+
+    def _split_key(self, key: str) -> Tuple[str, str]:
+        ix = key.find(':')
+        if ix == -1:
+            raise AuthError('Invalid code')
+
+        return key[:ix], key[ix + 1:]
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def authExceptionRequest(self, project: str, email: str, reason: str) -> object:
+        try:
+            self._send_exception_emails(project, email, reason)
+        except AuthError as err:
+            return err.to_object()
+        except Exception:
+            traceback.print_exc()
+            return AuthError('Internal error').to_object()
+
+        return {'success': True}
+
+    def _send_exception_emails(self, project: str, email: str, reason: str) -> None:
+        for o in AuthAdminEmails.objects():
+            id = secrets.token_hex(16)
+            AuthExceptionRequests(req_id=id, email=email, approver_email=o.email).save()
+            self._send_exception_email(o.email, project, email, reason, id)
+
+    def _send_exception_email(self, to: str, project: str, email: str, reason: str,
+                              id: str) -> None:
+        if project not in AUTH_EMAIL_DATA:
+            raise AuthError('Unknown project: ' + project, email)
+
+        approveUrl = AUTH_EMAIL_DATA[project]['callback-url'] \
+                     + '/exception-control.html?action=approve&req_id=' + id
+        rejectUrl = AUTH_EMAIL_DATA[project]['callback-url'] \
+                    + '/exception-control.html?action=reject&req_id=' + id
+
+        msg = self._load_email_bodies(EXCEPTION_EMAIL_BODY, {'project': project, 'email': email,
+                                                             'reason': reason,
+                                                             'approveUrl': approveUrl,
+                                                             'rejectUrl': rejectUrl})
+
+        source = AUTH_EMAIL_DATA[project]['from']
+
+        msg['Subject'] = project + ' email exception request'
+        msg['From'] = source
+        msg['To'] = to
+
+        self._send_email(source, to, msg)
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def authExceptionAction(self, project: str, req_id: str, action: str) -> object:
+        try:
+            reqs = AuthExceptionRequests.objects(req_id=req_id)
+            if len(reqs) == 0:
+                raise AuthError('Exception request not found')
+            req = reqs.first()
+            if action == 'approve':
+                headers = cherrypy.request.headers
+                if 'X-Forwarded-For' in headers:
+                    ip = headers['X-Forwarded-For']
+                else:
+                    ip = cherrypy.request.remote.ip
+                AuthAllowedEmails(email=req.email, approved_by=req.approver_email,
+                                  approved_on=datetime.datetime.utcnow(),
+                                  approved_by_ip=ip).save()
+            self._send_exception_confirmation_email(project, req.email, action)
+            req.delete()
+        except AuthError as err:
+            return err.to_object()
+        except Exception:
+            traceback.print_exc()
+            return AuthError('Internal error').to_object()
+
+        return {'success': True}
+
+    def _send_exception_confirmation_email(self, project: str, to: str, action: str) -> None:
+        if project not in AUTH_EMAIL_DATA:
+            raise AuthError('Unknown project: ' + project)
+
+        authpage = AUTH_EMAIL_DATA[project]['callback-url'] + '/auth.html'
+        if action == 'approve':
+            msg = self._load_email_bodies(EXCEPTION_APPROVED_BODY, {'email': to,
+                                                                   'authpage': authpage})
+            msg['Subject'] = project + ' email exception approved'
+        else:
+            msg = self._load_email_bodies(EXCEPTION_REJECTED_BODY, {'email': to,
+                                                                  'authpage': authpage})
+            msg['Subject'] = project + ' email exception rejected'
+
+        source = AUTH_EMAIL_DATA[project]['from']
+
+        msg['From'] = source
+        msg['To'] = to
+
+        self._send_email(source, to, msg)
 
 class Server:
     def __init__(self, port: int = 9909) -> None:
@@ -461,8 +767,20 @@ def check_db() -> None:
         v = upgrade_db(v)
 
 
+def update_email_blocklist():
+    print('updating blocklist')
+    r = requests.get(EMAIL_BLOCKLIST_URL)
+    r.raise_for_status()
+    for line in r.content.splitlines():
+        try:
+            AuthDisabledDomains(domain=line).save()
+        except NotUniqueError:
+            pass
+
+
 def main() -> None:
     check_db()
+    update_email_blocklist()
     parser = argparse.ArgumentParser(description='Starts test aggregation server')
     parser.add_argument('-p', '--port', action='store', type=int, default=9909,
                         help='The port on which to start the server.')

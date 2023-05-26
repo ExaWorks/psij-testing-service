@@ -1,7 +1,9 @@
 CUSTOMIZATION = {
     projectName: "PSI/J",
     title: "PSI/J Testing Dashboard",
-    backendURL: "https://testing.psij.io/",
+    // If not specified, relative links are used, so it works on any domain
+    backendURL: "",
+    reCaptchaSiteKey: "",
     testsTable: {
         tests: [
             "test_simple_job[local:single]",

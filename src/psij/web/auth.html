@@ -1,0 +1,288 @@
+<html>
+    <head>
+        <title>Authentication key management</title>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.js"
+                integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+                crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.3/ansi_up.js"></script>
+        <script src="js/lib.js"></script>
+        <link rel="stylesheet" href="css/style.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+        <script src="instance/customization.js"></script>
+        <script src="js/auth-common.js"></script>
+        <script src="https://www.google.com/recaptcha/api.js?onload=rcloaded&render=explicit" async defer></script>
+    </head>
+    <body>
+        <div id="container">
+<div id="auth">
+    <v-app>
+        <v-tabs v-model="tab" @change="tabChanged">
+            <v-tab key="request">Request</v-tab>
+            <v-tab key="revoke">Revoke</v-tab>
+        </v-tabs>
+        <v-tabs-items v-model="tab">
+            <v-tab-item key="request" eager>
+                <v-form v-model="requestValid" @submit.prevent="submitRequest">
+                    <v-card id="requestCard">
+                        <v-card-title>Request authentication key</v-card-title>
+                        <v-card-text>
+                            <div class="help">Enter your email below to receive an authentication key that
+                            will allow you to upload test results to this dashboard. The email you enter here
+                            will only be used as part of the process of obtaining a key.</div>
+
+
+                            <v-container>
+                                <v-row>
+                                    <v-col cols="12" md="4">
+                                        <v-text-field v-model="email" :rules="emailRules" autocomplete="email"
+                                                      label="E-mail" required>
+                                        </v-text-field>
+                                    </v-col>
+                                </v-row>
+                                <v-row>
+                                    <v-col>
+                                        <div class="recaptcha" id="rc0" @mounted="tabChanged"></div>
+                                    </v-col>
+                                </v-row>
+                                <v-row>
+                                    <v-btn class="mr-4" type="submit" :disabled="!requestValid || !requestCaptchaValid || requestSubmitDialog">Request key</v-btn>
+                                </v-row>
+                            </v-container>
+                        </v-card-text>
+                        <v-dialog v-model="requestSubmitDialog" persistent width="300" attach="#requestCard">
+                            <v-card color="primary" dark>
+                                <v-card-text>
+                                    Requesting key...
+                                    <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                                </v-card-text>
+                            </v-card>
+                        </v-dialog>
+                    </v-card>
+                </v-form>
+            </v-tab-item>
+
+            <v-tab-item key="revoke" eager>
+                <v-form v-model="revokeValid" @submit.prevent="submitRevoke">
+                    <v-card>
+                        <v-card-title>Revoke authentication key</v-card-title>
+                        <v-card-text>
+                            <div class="help">Enter an authentication key to revoke. After revocation, test
+                                uploads using this authentication key will be rejected.</div>
+
+
+                            <v-container>
+                                <v-row>
+                                    <v-col cols="12" md="8">
+                                        <v-text-field v-model="key" :rules="keyRules"
+                                                      label="Authentication key" required>
+                                        </v-text-field>
+                                    </v-col>
+                                </v-row>
+                                <v-row>
+                                    <v-col>
+                                        <div class="recaptcha" id="rc1" @updated="tabChanged"></div>
+                                    </v-col>
+                                </v-row>
+                                <v-row>
+                                    <v-btn class="mr-4" type="submit" :disabled="!revokeValid || !requestCaptchaValid">Revoke key</v-btn>
+                                </v-row>
+                            </v-container>
+                        </v-card-text>
+                    </v-card>
+                </v-form>
+            </v-tab-item>
+        </v-tabs-items>
+
+        <template>
+            <v-dialog v-model="errorDialog" persistent width="300">
+                <v-card>
+                    <v-toolbar color="error" dense flat>Request failed</v-toolbar>
+                    <v-card-subtitle></v-card-subtitle>
+                    <v-card-text>
+                        {{errorDialogMessage}}
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="gray" @click="errorDialog = false">Close</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+        </template>
+
+        <template>
+            <v-dialog v-model="successDialog" persistent width="300">
+                <v-card>
+                    <v-toolbar color="success" dense flat>Request succeeded</v-toolbar>
+                    <v-card-subtitle></v-card-subtitle>
+                    <v-card-text>{{successMessage}}</v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="gray" @click="successDialog = false">Close</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+        </template>
+        <template>
+            <v-dialog v-model="bannedDomainDialog" persistent width="600">
+                <v-form v-model="exceptionRequestValid" @submit.prevent="submitExceptionRequest">
+                    <v-card>
+                        <v-toolbar color="yellow" dense flat>Invalid email domain</v-toolbar>
+                        <v-card-subtitle></v-card-subtitle>
+                        <v-card-text>
+                            <p>The email domain {{bannedDomainDialogDomain}} was rejected by the server.
+                            To prevent abuse we restrict access from non-institutional emails. If you
+                            believe that an exception should be made for {{bannedDomainDialogEmail}},
+                            please write a concise explanation as to why you believe such an exception
+                            should be made in the box below and click on the "Request exception" button.
+                            We will try our best to get back to you as quickly as possible with a
+                            decision. If your email is whitelisted, you will be able to use it to
+                            request access keys above.</p>
+
+                            <p>Please briefly explain why you cannot use an institutional email, what
+                            type of machine you are trying to run the tests on, and any other
+                            circumstances that might be relevant.</p>
+
+                             <v-textarea v-model="exceptionRequestReason" name="exceptionMessage"
+                                         label="Reason for exception" value=""
+                                         :rules="exceptionMessageRules"></v-textarea>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn class="mr-4" type="cancel" @click.prevent="bannedDomainDialog = false">Cancel</v-btn>
+                            <v-btn class="mr-4" type="submit" :disabled="!exceptionRequestValid">Request exception</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-form>
+            </v-dialog>
+        </template>
+    </v-app>
+</div>
+        </div>
+
+
+        <script src="js/common.js"></script>
+    <script>
+        function RequestSuccessMessage(email) {
+            return `An email with the authentication key has been sent to ${email}. It may take a
+                    few minutes for the email to be delivered. Please follow the instructions in
+                    the email to use the key.`;
+        }
+
+        function ExceptionSuccessMessage(email) {
+            return `A request for an exception for ${email} has been submitted and we will respond
+                    as soon as we can.`;
+        }
+
+        function RevokeSuccessMessage(key) {
+            return `The key ${key} has been revoked. Tests result uploads using this key will
+                    be rejected.`;
+        }
+
+        var rcs = {};
+        var crtReCaptcha = null;
+
+        var vue = new Vue({
+            el: "#container",
+            vuetify: new Vuetify(),
+            data: {
+                CUSTOMIZATION: CUSTOMIZATION,
+                tab: 0,
+                requestValid: false,
+                requestCaptchaValid: false,
+                requestCaptchaToken: "",
+                revokeValid: false,
+                requestSubmitDialog: false,
+                errorDialog: false,
+                errorDialogMessage: "An error has occurred",
+                successDialog: false,
+                successMessage: "",
+                bannedDomainDialog: false,
+                bannedDomainDialogDomain: "",
+                bannedDomainDialogEmail: "",
+                exceptionRequestValid: false,
+                exceptionRequestReason: "",
+                email: "",
+                key: "",
+                emailRules: [
+                    v => !!v || "E-mail is required",
+                    v => /.+@.+/.test(v) || "E-mail must be valid",
+                ],
+                keyRules: [
+                    v => !!v || "Authentication key is required",
+                ],
+                exceptionMessageRules: [
+                    v => !!v || "Reason is required",
+                ]
+            },
+            methods: {
+                tabChanged: function() {
+                    var rcid = "rc" + this.tab;
+                    var rc = rcs[rcid];
+                    crtReCaptcha = rc;
+                    grecaptcha.reset(rc);
+                },
+                submitRequest: function() {
+                    var vue = this;
+                    vue.genericSubmit(vue, "authRequest", {project: CUSTOMIZATION.projectName,
+                        email: vue.email, ctoken: vue.requestCaptchaToken},
+                        RequestSuccessMessage(vue.email), crtReCaptcha);
+                },
+                genericSubmit: genericSubmit,
+                showErrorDialog: function(message) {
+                    this.errorDialogMessage = message;
+                    this.errorDialog = true;
+                },
+                showBannedDomainDialog: function(domain, email) {
+                    this.bannedDomainDialogDomain = domain;
+                    this.bannedDomainDialogEmail = email;
+                    this.exceptionRequestReason = "";
+                    this.bannedDomainDialog = true;
+                },
+                showSuccessDialog: function(message) {
+                    this.successMessage = message;
+                    this.successDialog = true;
+                },
+                submitRevoke: function() {
+                    var vue = this;
+                    vue.genericSubmit(vue, "authRevoke", {project: CUSTOMIZATION.projectName,
+                        key: vue.key, ctoken: vue.requestCaptchaToken},
+                        RevokeSuccessMessage(vue.key), crtReCaptcha);
+                },
+                submitExceptionRequest: function() {
+                    var vue = this;
+                    vue.bannedDomainDialog = false;
+                    vue.genericSubmit(vue, "authExceptionRequest", {project: CUSTOMIZATION.projectName,
+                        email: vue.email, reason: vue.exceptionRequestReason},
+                        ExceptionSuccessMessage(vue.email), crtReCaptcha);
+                }
+            }
+        });
+
+        function reCaptchaCB(token) {
+            vue.requestCaptchaValid = true;
+            vue.requestCaptchaToken = token;
+        }
+
+        function reCaptchaExpiredCB() {
+            vue.requestCaptchaValid = false;
+            vue.requestCaptchaToken = "";
+        }
+
+        function rcloaded() {
+            $(".recaptcha").each(function(){
+                var id = $(this).attr("id");
+                var rc = grecaptcha.render(id, {
+                        "sitekey": CUSTOMIZATION.reCaptchaSiteKey,
+                        "callback": reCaptchaCB, "expired-callback": reCaptchaExpiredCB});
+                rcs[id] = rc;
+            });
+            vue.tabChanged();
+        }
+    </script>
+    </body>
+</html>
