@@ -1,54 +1,22 @@
 CUSTOMIZATION = {
-    projectName: "SDK"
-};
-
-var CONF = {
-    backendURL: "",
-    STR: {
-        "dashboardTitle": "ExaWorks SDK Testing Dashboard"
-    },
-    "curated_sites": {
-        xaxis: [
-            "Tests Suites",
-            "Flux",
-            "Parsl",
-            "Parsl-flux",
-            "RP",
-            "Swift-t"
-        ],
-        xaxisTests: [
+    projectName: "SDK",
+    title: "Exascale dashboard testing service",
+    backendURL: "https://sdk.testing.exaworks.org/",
+    testsTable: {
+        tests: [
             "flux",
             "parsl",
             "parsl-flux",
             "rp",
             "swift-t"
         ],
-        yaxis: [
-            {
-                logo_src: "",
-                logo_name: "Lawrence Livermore National Lab",
-                machines: {
-                    "llnl-lassen": {
-                        scheduler: "SLURM"
-                    },
-                    "llnl-quartz": {
-                        scheduler: "SLURM"
-                    },
-                    "llnl-ruby": {
-                        scheduler: "SLURM"
-                    }
-                }
-            },
-            {
-                logo_src: "",
-                logo_name: "GitHub Actions",
-                machines: {
-                    "Github Actions": {
-                        scheduler: "none"
-                    }
-                }
-            }
-        ]
+        testNames: [
+            "Flux",
+            "Parsl",
+            "Parsl-Flux",
+            "Radical",
+            "Swift/T"
+        ],
+        suiteName: "Test suite"
     }
 };
-

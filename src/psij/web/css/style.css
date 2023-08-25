@@ -176,12 +176,20 @@ body {
 }
 
 
-#toolbar .button {
+.button {
     display: inline-block;
     box-shadow: 1pt 1pt 3pt #606060;
     cursor: pointer;
     background-color: #ffffff;
     padding: 3pt;
+    font-size: 11pt;
+    padding-left: 8pt;
+    padding-right: 8pt;
+}
+
+.button.icon-button {
+    padding-left: 3pt;
+    padding-right: 3pt;
 }
 
 .button.selected {
@@ -484,147 +492,73 @@ td.run-id {
 }
 
 .calendar-site {
-    text-align: right;
-    font-weight: normal;
+    text-align: left;
+    font-weight: 300;
     font-size: 11pt;
     height: 24pt;
     padding: 4pt;
     border-radius: 4pt;
 }
 
-.calendar-tile {
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+.status-table-tile {
+    text-align: left;
     height: 10pt;
-    align-content: center;
+    align-content: left;
+    margin-left: calc(50% - 4pt);
 }
 
-.calendar-bubble {
+.status-bubble {
     border-radius: 100pt;
     border: 0.5px solid rgba(0, 0, 0, 0.2);
     display: inline-block;
 }
 
-.calendar-bubble.bubble-large {
+.status-bubble.bubble-large {
     width: 8pt;
     height: 8pt;
-    margin-right: 2pt;
+    margin-right: 0pt;
 }
 
-.calendar-bubble.bubble-small {
+.status-bubble.bubble-small {
     width: 3pt;
     height: 3pt;
     margin-right: 1pt;
     margin-bottom: 1pt;
+    left: 0;
 }
 
-.calendar-tile.state-somewhat-bad {
-    background-color: #f0f0d0;
-}
-
-.calendar-tile.state-really-bad {
-    background-color: #ff4d4d;
-}
-
-.calendar-tile.state-good {
-    background-color: #6aff4d;
-}
-
-.calendar-tile.state-unknown {
-    background-color: #e0e0e0;
-}
-
-.calendar-bubble.state-good {
+.status-bubble.state-good {
 	background-color: rgb(106, 255, 77);
 }
 
-.calendar-bubble.state-somewhat-bad {
+.status-bubble.state-somewhat-bad {
 	background-color: rgb(242, 219, 73);
 }
 
-.calendar-bubble.state-really-bad {
+.status-bubble.state-really-bad {
 	background-color: #ffb0a0;
 }
+
+.status-bubble.state-missing-and-good {
+    background: linear-gradient(90deg, rgb(106, 255, 77) 35%, rgba(0, 0, 0, 0.2) 35%, rgba(0, 0, 0, 0.2) 55%, #e0e0e0 55%);
+}
+
+.status-bubble.state-missing-and-bad {
+    background: linear-gradient(90deg, #ffb0a0 35%, rgba(0, 0, 0, 0.2) 35%, rgba(0, 0, 0, 0.2) 55%, #e0e0e0 55%);
+}
+
 
 
 .bg {
     background-color: #f0f0f0;
 }
 
-.calendar-cell {
+.status-table-cell {
     text-align: center;
-}
-
-.RowAccordion {
-	border-top: 1px solid #e0e0e1;
-}
-
-.RowAccordion td {
-	padding: 5px;
-	position:relative;
-}
-
-.RowAccordion .status-cell {
-    text-align: center;
-}
-
-.RowAccordion td:first-child {
-	cursor: pointer;
-	color: #333333;
-}
-
-.RowAccordion .logo_name {
-	font-weight: bold;
-}
-
-.RowAccordion .ArrowDown {
-	width: 0;
-	height: 0;
-	display: inline-block;
-	border-left: 8px solid transparent;
-	border-right: 8px solid transparent;
-	border-top: 8px solid #333333;
-	margin-right: 11px;
-	margin-left: 3px;
-}
-
-.RowAccordion .ArrowRight {
-	display: inline-block;
-	width: 0;
-	height: 0;
-	border-top: 8px solid transparent;
-	border-bottom: 8px solid transparent;
-	border-left: 8px solid #333334;
-	padding: 0 6px 0 0;
-	margin-left: 8px;
-	margin-right: 8px;
-}
-
-.RowAccordion .machineLink {
-	padding: 5px 5px 5px 35px;
-}
-
-.RowAccordion .rowIsClosed {
-	display: none;
 }
 
 .status-table .status-header-cell {
     width: 60pt;
-}
-
-#status-calendar .RowAccordion td {
-	height: 32px;
-}
-
-#status-calendar td.logo_name {
-	width: 100%;
-}
-
-#status-calendar .schedulerCol {
-	width: 0;
 }
 
 .status-table th.status-header-cell {
@@ -645,22 +579,8 @@ td.run-id {
     font-weight: normal;
 }
 
-#status-calendar.status-table .status-table-header, #status-calendar .RowAccordion {
-    width: 700pt;
-    max-width: 700pt;
-}
-
-#curated-sites-home.status-table .status-table-header, #curated-sites-home .RowAccordion {
-    width: 600pt;
-    max-width: 600pt;
-}
-
 .status-table .status-table-header {
     border-bottom: 2pt solid #e0e0e0;
-}
-
-#status-calendar > div:first-of-type > table.RowAccordion {
-    border-top: none;
 }
 
 #status {
@@ -675,35 +595,108 @@ td.run-id {
     text-align: left;
 }
 
-.open_close_arrow {
-	border-left: 8px solid transparent;
-	border-right: 8px solid transparent;
-	border-top: 8px solid #444444;
-	margin-left: 8px;
-	cursor: pointer;
+#status .status-table .v-data-table {
+    background-color: #f0f0f0;
 }
 
-.open_close_arrow[position="otherPos"] {
-   display: none;
+#status .status-table .v-data-table table, .status-table .v-data-table__wrapper {
+    width: 700pt;
+    border-collapse: collapse;
+    overflow-x: hidden;
 }
 
-.open_close_arrow[position="oneRowOnly"] {
-   display: none;
+#status .status-table .v-data-table td,
+#status .status-table .v-data-table th{
+    padding-left: 4pt;
+    padding-right: 4pt;
+    height: 20pt;
+    font-size: 11pt;
+    border-bottom: none;
 }
 
-.open_close_arrow.open {
-   position: relative;
-   left: 5px;
-   border-top: 8px solid transparent;
-   border-bottom: 8px solid transparent;
-   border-left: 8px solid #444444;
+#status .status-table .v-data-table td.hline {
+    height: 8pt;
 }
 
-.container-for-mini-branches {
-    display: inline-flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+#status .status-table .v-row-group__header th.group-open {
+}
+
+#status .status-table .v-row-group__summary {
+    height: 8pt;
+}
+
+#status .status-table .v-row-group__summary td {
+    height: 8pt;
+}
+
+#status .status-table .v-row-group__summary .group-footer {
+    margin-left: 10pt;
+    width: 100%;
+    height: 8pt;
+    border-top: thin solid #e0e0e0;
+}
+
+#status .status-table .top-row {
+    border-bottom: 2pt solid #e0e0e0;
+}
+
+#status .status-table .v-data-table th.calendar-site {
+    padding-left: 12pt;
+    white-space: nowrap;
+}
+
+#status .status-table .v-data-table th.calendar-site .site-label {
+    display: inline-block;
+    font-size: 11pt;
+    font-weight: normal;
+    height: 100%;
     vertical-align: middle;
-    margin-right: auto;
-    height: 10pt;
 }
+
+#status .status-table .v-data-table th.table-group-header {
+    text-align: left;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#status .status-table .v-data-table .expander {
+    display: inline-block;
+    width: 6pt;
+    margin: 2pt;
+}
+
+#status .status-table .v-data-table .group-name {
+    padding-left: 0pt;
+}
+
+#status .status-table .calendar-site:hover {
+    background-color: #80a0ff10;
+}
+
+#status .status-table .footer {
+    font-size: 11pt;
+    margin-top: 8pt;
+    margin-left: 24pt;
+}
+
+#status .status-table .group-indicator {
+    width: 8pt;
+    height: 100%;
+    display: inline-block;
+}
+
+.indicator-in-group {
+    border-left: thin solid #e0e0e0;
+}
+
+.branches-container {
+    display: inline-flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-content: flex-start;
+    width: 40%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+

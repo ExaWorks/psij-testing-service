@@ -29,7 +29,7 @@
     <div class="branch-list-summary">
         Branches:
         <div class="run-branch" v-for="branch in run.branches">
-            <div class="site-branch-cell highlightable" :class="badnessClass(branch)"
+            <div class="site-branch-cell highlightable" :class="siteStateCSSClass(branch)"
                 :onclick="navigate('#branch-' + branch.name)">
                 {{ branch.name }}
                 <div class="counts">
