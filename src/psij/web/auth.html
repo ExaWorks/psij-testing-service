@@ -228,7 +228,7 @@
                 },
                 submitRequest: function() {
                     var vue = this;
-                    vue.genericSubmit(vue, "authRequest", {project: CUSTOMIZATION.projectName,
+                    vue.genericSubmit(vue, "authRequest", {
                         email: vue.email, ctoken: vue.requestCaptchaToken},
                         RequestSuccessMessage(vue.email), crtReCaptcha);
                 },
@@ -249,14 +249,14 @@
                 },
                 submitRevoke: function() {
                     var vue = this;
-                    vue.genericSubmit(vue, "authRevoke", {project: CUSTOMIZATION.projectName,
+                    vue.genericSubmit(vue, "authRevoke", {
                         key: vue.key, ctoken: vue.requestCaptchaToken},
                         RevokeSuccessMessage(vue.key), crtReCaptcha);
                 },
                 submitExceptionRequest: function() {
                     var vue = this;
                     vue.bannedDomainDialog = false;
-                    vue.genericSubmit(vue, "authExceptionRequest", {project: CUSTOMIZATION.projectName,
+                    vue.genericSubmit(vue, "authExceptionRequest", {
                         email: vue.email, reason: vue.exceptionRequestReason},
                         ExceptionSuccessMessage(vue.email), crtReCaptcha);
                 }

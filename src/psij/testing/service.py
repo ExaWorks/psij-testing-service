@@ -176,25 +176,6 @@ class AuthError(Exception):
                 'bannedDomain': self.banned_domain, 'domain': self.domain}
 
 
-AUTH_EMAIL_DATA = {
-    'PSI/J': {
-        'from': 'noreply@testing.psij.io',
-        'callback-url': 'https://testing.psij.io',
-        'body': 'psij-auth',
-    },
-    'SDK': {
-        'from': 'noreply@testing.sdk.exaworks.org',
-        'callback-url': 'https://testing.sdk.exaworks.org',
-        'body': 'sdk-auth'
-    }
-}
-
-EXCEPTION_EMAIL_BODY = 'exception'
-EXCEPTION_APPROVED_BODY = 'exception-approved'
-EXCEPTION_REJECTED_BODY = 'exception-rejected'
-
-
-
 class TestingAggregatorApp(object):
     def __init__(self):
         self.seq = 0
@@ -511,7 +492,7 @@ class TestingAggregatorApp(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def authRequest(self, project: str, email: str, ctoken: str) -> object:
+    def authRequest(self, email: str, ctoken: str) -> object:
         try:
             self._verify_captcha_token(ctoken)
             ix = email.find('@')
@@ -521,11 +502,11 @@ class TestingAggregatorApp(object):
 
             if AuthDisabledDomains.objects(domain=domain).count() > 0:
                 if AuthAllowedEmails.objects(email=email).count() > 0:
-                    self._perform_auth_request(project, email)
+                    self._perform_auth_request(email)
                 else:
                     raise AuthError('Invalid domain', email, banned_domain=True, domain=domain)
             else:
-                self._perform_auth_request(project, email)
+                self._perform_auth_request(email)
         except AuthError as err:
             return err.to_object()
         except Exception:
@@ -536,7 +517,8 @@ class TestingAggregatorApp(object):
 
     def _verify_captcha_token(self, ctoken: str) -> None:
         r = requests.post('https://www.google.com/recaptcha/api/siteverify',
-                          data = {'secret': os.getenv('RECAPTCHA_SECRET_KEY'), 'response': ctoken})
+                          data = {'secret': self.secrets['reCAPTHCA-secret-key'],
+                                  'response': ctoken})
         if r.status_code != 200:
             print(r.json())
             raise AuthError('reCAPTHCA verify error', email='')
@@ -544,7 +526,7 @@ class TestingAggregatorApp(object):
         if not rj['success']:
             raise AuthError('reCAPTHCA verify error', email='')
 
-    def _perform_auth_request(self, project: str, email: str) -> None:
+    def _perform_auth_request(self, email: str) -> None:
         salt = bcrypt.gensalt()
         token = secrets.token_hex(24)
         encrypted_token = bcrypt.hashpw(token.encode('ascii'), salt)
@@ -554,7 +536,7 @@ class TestingAggregatorApp(object):
             try:
                 Auth.save(Auth(key_id=id, email=email, hash=encrypted_token,
                                last_used=datetime.datetime.utcnow()))
-                return self._send_key_email(project, email, id, token)
+                return self._send_key_email(email, id, token)
             except NotUniqueError:
                 pass
 
@@ -562,7 +544,7 @@ class TestingAggregatorApp(object):
 
     def _load_email_body(self, file_name: str) -> str:
         dir = os.path.dirname(__file__)
-        with open(dir + '/mailtemplates/' + file_name) as f:
+        with open(dir + '/' + file_name) as f:
             return f.read()
 
     def _load_email_bodies(self, file_prefix: str, params: Dict[str, str]) -> MIMEMultipart:
@@ -574,15 +556,13 @@ class TestingAggregatorApp(object):
         return msg
 
 
-    def _send_key_email(self, project: str, email: str, id: str, token: str) -> None:
-        if project not in AUTH_EMAIL_DATA:
-            raise AuthError('Unknown project: ' + project, email)
+    def _send_key_email(self, email: str, id: str, token: str) -> None:
 
-        msg = self._load_email_bodies(AUTH_EMAIL_DATA[project]['body'], {'id': id, 'key': token})
+        msg = self._load_email_bodies(self.config['auth-email']['body'], {'id': id, 'key': token})
 
-        source = AUTH_EMAIL_DATA[project]['from']
+        source = self.config['auth-email']['from']
 
-        msg['Subject'] = 'Your ' + project + ' testing dashboard key'
+        msg['Subject'] = 'Your ' + self.config['project-name'] + ' testing dashboard key'
         msg['From'] = source
         msg['To'] = email
 
@@ -630,9 +610,9 @@ class TestingAggregatorApp(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def authExceptionRequest(self, project: str, email: str, reason: str) -> object:
+    def authExceptionRequest(self, email: str, reason: str) -> object:
         try:
-            self._send_exception_emails(project, email, reason)
+            self._send_exception_emails(email, reason)
         except AuthError as err:
             return err.to_object()
         except Exception:
@@ -641,30 +621,27 @@ class TestingAggregatorApp(object):
 
         return {'success': True}
 
-    def _send_exception_emails(self, project: str, email: str, reason: str) -> None:
+    def _send_exception_emails(self, email: str, reason: str) -> None:
         for o in AuthAdminEmails.objects():
             id = secrets.token_hex(16)
             AuthExceptionRequests(req_id=id, email=email, approver_email=o.email).save()
-            self._send_exception_email(o.email, project, email, reason, id)
+            self._send_exception_email(o.email, email, reason, id)
 
-    def _send_exception_email(self, to: str, project: str, email: str, reason: str,
-                              id: str) -> None:
-        if project not in AUTH_EMAIL_DATA:
-            raise AuthError('Unknown project: ' + project, email)
+    def _send_exception_email(self, to: str, email: str, reason: str, id: str) -> None:
 
-        approveUrl = AUTH_EMAIL_DATA[project]['callback-url'] \
+        approve_url = self.config['auth-email']['callback-url'] \
                      + '/exception-control.html?action=approve&req_id=' + id
-        rejectUrl = AUTH_EMAIL_DATA[project]['callback-url'] \
+        reject_url = self.config['auth-email']['callback-url'] \
                     + '/exception-control.html?action=reject&req_id=' + id
+        project_name = self.config['project-name']
 
-        msg = self._load_email_bodies(EXCEPTION_EMAIL_BODY, {'project': project, 'email': email,
-                                                             'reason': reason,
-                                                             'approveUrl': approveUrl,
-                                                             'rejectUrl': rejectUrl})
+        msg = self._load_email_bodies(self.config['auth-email']['exception-body'],
+                                      {'project': project_name, 'email': email, 'reason': reason,
+                                       'approveUrl': approve_url, 'rejectUrl': reject_url})
 
-        source = AUTH_EMAIL_DATA[project]['from']
+        source = self.config['auth-email']['from']
 
-        msg['Subject'] = project + ' email exception request'
+        msg['Subject'] = project_name + ' email exception request'
         msg['From'] = source
         msg['To'] = to
 
@@ -672,7 +649,7 @@ class TestingAggregatorApp(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def authExceptionAction(self, project: str, req_id: str, action: str) -> object:
+    def authExceptionAction(self, req_id: str, action: str) -> object:
         try:
             reqs = AuthExceptionRequests.objects(req_id=req_id)
             if len(reqs) == 0:
@@ -687,7 +664,7 @@ class TestingAggregatorApp(object):
                 AuthAllowedEmails(email=req.email, approved_by=req.approver_email,
                                   approved_on=datetime.datetime.utcnow(),
                                   approved_by_ip=ip).save()
-            self._send_exception_confirmation_email(project, req.email, action)
+            self._send_exception_confirmation_email(req.email, action)
             req.delete()
         except AuthError as err:
             return err.to_object()
@@ -697,21 +674,19 @@ class TestingAggregatorApp(object):
 
         return {'success': True}
 
-    def _send_exception_confirmation_email(self, project: str, to: str, action: str) -> None:
-        if project not in AUTH_EMAIL_DATA:
-            raise AuthError('Unknown project: ' + project)
-
-        authpage = AUTH_EMAIL_DATA[project]['callback-url'] + '/auth.html'
+    def _send_exception_confirmation_email(self, to: str, action: str) -> None:
+        authpage = self.config['auth-email']['callback-url'] + '/auth.html'
+        project_name = self.config['project-name']
         if action == 'approve':
-            msg = self._load_email_bodies(EXCEPTION_APPROVED_BODY, {'email': to,
-                                                                   'authpage': authpage})
-            msg['Subject'] = project + ' email exception approved'
+            msg = self._load_email_bodies(self.config['auth-email']['exception-approved'],
+                                          {'email': to, 'authpage': authpage})
+            msg['Subject'] = project_name + ' email exception approved'
         else:
-            msg = self._load_email_bodies(EXCEPTION_REJECTED_BODY, {'email': to,
-                                                                  'authpage': authpage})
-            msg['Subject'] = project + ' email exception rejected'
+            msg = self._load_email_bodies(self.config['auth-email']['exception-rejected'],
+                                          {'email': to, 'authpage': authpage})
+            msg['Subject'] = project_name + ' email exception rejected'
 
-        source = AUTH_EMAIL_DATA[project]['from']
+        source = self.config['auth-email']['from']
 
         msg['From'] = source
         msg['To'] = to
@@ -719,8 +694,19 @@ class TestingAggregatorApp(object):
         self._send_email(source, to, msg)
 
 class Server:
-    def __init__(self, port: int = 9909) -> None:
+    def __init__(self, port: int = 9909, config_path: str = 'config.json',
+                 secrets_path: str = 'secrets.json') -> None:
         self.port = port
+        self.config = self._read_file(config_path)
+        self.secrets = self._read_file(secrets_path)
+
+    def _read_file(self, path: str) -> Dict[str, object]:
+        if path[0] == '/':
+            abs_path = path
+        else:
+            abs_path = os.path.dirname(__file__) + '/' + path
+        with open(abs_path, 'r') as f:
+            return json.load(f)
 
     def start(self) -> None:
         print('webpath: %s' % (Path().absolute() / 'web'))
@@ -784,8 +770,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description='Starts test aggregation server')
     parser.add_argument('-p', '--port', action='store', type=int, default=9909,
                         help='The port on which to start the server.')
+    parser.add_argument('-c', '--config', action='store', type=str, default='config.json',
+                        help='A configuration file. A relative path points to a file inside the '
+                             'source package.')
+    parser.add_argument('-s', '--secrets', action='store', type=str, default='secrets.json',
+                        help='A file containing authentication keys/tokens.')
     args = parser.parse_args(sys.argv[1:])
-    server = Server(args.port)
+    server = Server(args.port, args.config, args.secrets)
     server.start()
 
 
