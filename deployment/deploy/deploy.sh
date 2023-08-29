@@ -140,8 +140,9 @@ deploySite() {
     ln -f -s "/etc/nginx/sites-available/$NAME" "/etc/nginx/sites-enabled/$NAME"
 }
 
+DOMAIN_NAME=`cat DOMAIN_NAME | tr -d '\n'`
+
 if [ "$UPDATE_NGINX" != "0" ]; then
-    DOMAIN_NAME=`cat DOMAIN_NAME | tr -d '\n'`
     filterConf nginx/headers.conf /etc/nginx/snippets/headers.conf
     filterConf nginx/nginx.conf /etc/nginx/nginx.conf
     filterConf nginx/ssl.conf /etc/nginx/ssl.conf
