@@ -19,7 +19,7 @@ COPY psi-j-testing-service /etc/init.d
 COPY entrypoint.sh /
 COPY update-psi-j-testing-service /usr/bin
 RUN mkdir /etc/psij-testing-service
-COPY fs/* /
+COPY fs /
 RUN mkdir /var/log/psi-j-testing-service
 RUN chown testsrv:testsrv /var/log/psi-j-testing-service
 
