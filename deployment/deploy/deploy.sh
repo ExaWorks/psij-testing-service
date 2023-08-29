@@ -84,6 +84,11 @@ deployContainer() {
         getId $TYPE
         ID=$OUT
         run docker exec -it $ID bash -c "echo $FQDN > /etc/hostname"
+        if [ ! -f ../docker/fs/etc/psij-testing-service/secrets.json ]; then
+            error "No secrets.json found. Please edit/create secrets.json in ../docker/fs/etc/psij-testing-service"
+        fi
+        run docker exec -it $ID mkdir -p /etc/psij-testing-service
+        run docker cp ../docker/fs/etc/psij-testing-service/secrets.json $ID:/etc/psij-testing-service/
     fi
     if [ "$UPDATE_CONTAINER" != "0" ]; then
         if [ "$DEV" == "1" ]; then
