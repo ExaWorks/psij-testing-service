@@ -9,12 +9,13 @@ error() {
 
 usage() {
     echo "Usage:"
-    echo "    upgrade.sh [-h|--help] [-f|--force] [-c | --component]"
+    echo "    upgrade.sh [-h|--help] [-f|--force] [-c | --component] [-y | --assume-yes]"
     exit 1
 }
 
 
 FORCE=""
+DONTASK=""
 COMPONENTS="psij sdk"
 
 while [ "$1" != "" ]; do
@@ -23,7 +24,11 @@ while [ "$1" != "" ]; do
             usage
             ;;
         -f | --force)
-            FORCE=1
+            FORCE="--force"
+            shift
+            ;;
+        -y | --assume-yes)
+            DONTASK="-y"
             shift
             ;;
         -c | --component)
@@ -32,22 +37,17 @@ while [ "$1" != "" ]; do
             shift
             ;;
         *)
-            error "Unrecognized option $1"
+            TARGET_VERSION=$1
+            shift
             ;;
     esac
 done
-
-if [ "$1" == "--force" ]; then
-    FORCE="--force"
-fi
 
 if [ ! -f ../config ]; then
     error "This script must be run from the deploy directory"
 fi
 
 source ../config
-
-TARGET_VERSION=$1
 
 
 getId() {
@@ -73,10 +73,10 @@ update() {
             python setup.py sdist
             popd
             docker cp ../../dist/$PACKAGE_NAME-$SERVICE_VERSION.tar.gz $ID:/tmp/$PACKAGE_NAME-$SERVICE_VERSION.tar.gz
-            docker exec -it $ID update-psi-j-testing-service $FORCE --src /tmp/$PACKAGE_NAME-$SERVICE_VERSION.tar.gz $TYPE $TARGET_VERSION
+            docker exec -it $ID update-psi-j-testing-service $DONTASK $FORCE --src /tmp/$PACKAGE_NAME-$SERVICE_VERSION.tar.gz $TYPE $TARGET_VERSION
         else
             # Actual update
-            docker exec -it $ID update-psi-j-testing-service $FORCE $TYPE $TARGET_VERSION
+            docker exec -it $ID update-psi-j-testing-service $DONTASK $FORCE $TYPE $TARGET_VERSION
         fi
     else
         echo "Service $TYPE not running."

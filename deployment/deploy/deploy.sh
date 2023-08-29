@@ -79,14 +79,18 @@ deployContainer() {
             --volume=$DATA_DIR/$TYPE/mongodb:/var/lib/mongodb \
             --volume=$DATA_DIR/$TYPE/web:/var/www/html \
             $EXTRA_VOL \
-            $IMAGE:latest
+            $IMAGE:$SERVICE_VERSION
         UPDATE_CONTAINER=1
         getId $TYPE
         ID=$OUT
         run docker exec -it $ID bash -c "echo $FQDN > /etc/hostname"
     fi
     if [ "$UPDATE_CONTAINER" != "0" ]; then
-        ./upgrade.sh --component $TYPE
+        if [ "$DEV" == "1" ]; then
+            ./upgrade.sh -y --force --component $TYPE /psi-j-testing-service-dev
+        else
+            ./upgrade.sh -y --force --component $TYPE $SERVICE_VERSION
+        fi
     fi
 }
 
