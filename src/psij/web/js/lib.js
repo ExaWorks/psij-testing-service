@@ -121,6 +121,11 @@ var makeSetting = function(name, callback, type) {
         },
 
         set: function(val) {
+            if (typeof type === "function") {
+                if (type(val) != true) {
+                    return;
+                }
+            }
             localStorage.setItem(name, val);
             if (callback) {
                 callback(name, val);
@@ -144,6 +149,17 @@ var settings = function(...names) {
 
     return obj;
 };
+
+var validatePositiveInt = function(val) {
+    num = Number(val);
+    if (val == String(num) && Number.isInteger(num) && num >= 0) {
+        // the first check is because Number("") is 0
+        return true;
+    }
+    else {
+        return "Must be a positive integer";
+    }
+}
 
 var ansi_up = new AnsiUp();
 ansi_up.use_classes = true;
@@ -819,7 +835,8 @@ var globalMethods = {
     updateRender: function() {
         this.$forceUpdate();
     },
-    setting: setting
+    setting: setting,
+    validatePositiveInt: validatePositiveInt
 }
 
 $(document).ready(function() {

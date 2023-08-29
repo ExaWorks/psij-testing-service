@@ -127,6 +127,7 @@
                             <v-row>
                                 <v-col cols="12" sm="6" md="12">
                                     <v-text-field label="Hide inactive sites after" required type="number"
+                                                  :rules="[validatePositiveInt]"
                                                   suffix="days" v-model="inactiveTimeout"></v-text-field>
                                 </v-col>
                             </v-row>

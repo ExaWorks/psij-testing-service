@@ -58,7 +58,7 @@ var Summary = function() {
         },
         methods: globalMethods,
         computed: {
-            inactiveTimeout: makeSetting("inactiveTimeout", function() {update()}),
+            inactiveTimeout: makeSetting("inactiveTimeout", function() {update()}, validatePositiveInt),
             showBranchBubbles: makeSetting("showBranchBubbles",
                 function(name, value) {updateSetting(name, value)}, "bool"),
             showAllRows: makeSetting("showAllRows",
