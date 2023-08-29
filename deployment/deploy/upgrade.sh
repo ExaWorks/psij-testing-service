@@ -84,6 +84,6 @@ update() {
 }
 
 
-for COMPONENT in COMPONENTS; do
+for COMPONENT in $COMPONENTS; do
     update $COMPONENT
 done
