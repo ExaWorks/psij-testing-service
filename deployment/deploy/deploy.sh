@@ -91,14 +91,15 @@ deployContainer() {
     fi
 }
 
-if [ "$USER" != "root" ]; then
-    error "You need root permissions to run this script."
-fi
 
 if service nginx status >/dev/null 2>&1; then
     echo "Nginx is already running. Skipping deployment."
     UPDATE_NGINX=$FORCED_UPDATE
 else
+    if [ "$USER" != "root" ]; then
+        error "You need root permissions to run this script."
+    fi
+
     run apt-get update
     run apt-get install -y nginx
     UPDATE_NGINX=1
