@@ -86,13 +86,7 @@ deployContainer() {
         run docker exec -it $ID bash -c "echo $FQDN > /etc/hostname"
     fi
     if [ "$UPDATE_CONTAINER" != "0" ]; then
-        getId $TYPE
-        ID=$OUT
-        if [ "$DEV" == "1" ]; then
-            run docker exec -it $ID update-psi-j-testing-service -y $TYPE /psi-j-testing-service-dev
-        else
-            run docker exec -it $ID update-psi-j-testing-service -y $TYPE $SERVICE_VERSION
-        fi
+        ./upgrade.sh --component $TYPE
     fi
 }
 

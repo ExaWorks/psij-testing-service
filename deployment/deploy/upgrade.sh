@@ -7,7 +7,35 @@ error() {
     exit 1
 }
 
+usage() {
+    echo "Usage:"
+    echo "    upgrade.sh [-h|--help] [-f|--force] [-c | --component]"
+    exit 1
+}
+
+
 FORCE=""
+COMPONENTS="psij sdk"
+
+while [ "$1" != "" ]; do
+    case "$1" in
+        -h | --help)
+            usage
+            ;;
+        -f | --force)
+            FORCE=1
+            shift
+            ;;
+        -c | --component)
+            COMPONENTS="$2"
+            shift
+            shift
+            ;;
+        *)
+            error "Unrecognized option $1"
+            ;;
+    esac
+done
 
 if [ "$1" == "--force" ]; then
     FORCE="--force"
@@ -55,5 +83,7 @@ update() {
     fi
 }
 
-update psij
-update sdk
+
+for COMPONENT in COMPONENTS; do
+    update $COMPONENT
+done
