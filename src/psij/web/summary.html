@@ -1,266 +1,270 @@
 <html>
-    <head>
-        <title>Summary</title>
-        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0/dist/vue.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vuetify@2.6.0/dist/vuetify.js"></script>
-        <script src="https://code.jquery.com/jquery-3.6.0.js"
-                integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
-                crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.3/ansi_up.js"></script>
-        <script src="lib.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <link rel="stylesheet" href="style.css">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
-        <script src="/instance/customization.js"></script>
-    </head>
-    <body>
-        <div id="container">
-<div id="breadcrumbs">
-    <v-breadcrumbs :items="breadcrumbs()"></v-breadcrumbs>
-</div>
-<div id="toolbar">
-    <div class="highlightable button view-mode-group" id="view-mode-calendar" title="Calendar View" onclick="setViewMode('calendar')">
-        <span class="material-icons">calendar_today</span>
-    </div>
-    <div class="highlightable button view-mode-group" id="view-mode-tiles" title="Tiles View" onclick="setViewMode('tiles')">
-        <span class="material-icons">grid_view</span>
-    </div>
-    <div class="highlightable button view-mode-group" id="view-mode-table" title="Table View" onclick="setViewMode('table')">
-        <span class="material-icons">table_view</span>
-    </div>
-    <div class="spacer">&nbsp;</div>
-    <span data-app="true">
-        <v-dialog v-model="settingsDialog" width="500">
-            <template v-slot:activator="{on, attrs}">
-                <div class="highlightable button" id="settings" title="Settings..." v-bind="attrs" v-on="on">
-                    <span class="material-icons">settings</span>
+<head>
+    <title>Summary</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.6.0/dist/vuetify.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+            integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.3/ansi_up.js"></script>
+
+    <script src="js/lib.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <script src="instance/customization.js"></script>
+</head>
+<body>
+
+<script type="text/html" id="item-row-template">
+    <tr>
+        <th class="calendar-site clickable" :onclick="navigate('site.html?site_id=' + siteId)">
+            <span :class="item.inGroup ? 'indicator-in-group' : 'indicator-not-in-group'" class="group-indicator"></span>
+            <span class="site-label">{{siteId}}</span>
+        </th>
+        <td v-for="column in item.cols" class="status-table-cell">
+            <t-status-tile :column="column" :show-branches="showBranches"></t-status-tile>
+        </td>
+    </tr>
+</script>
+<script type="text/html" id="group-header-template">
+    <th v-if="isOpen" v-on:click="toggle()" class="table-group-header group-open" colspan="100%">
+        {{setInGroup(items)}}
+        <v-icon>mdi-menu-down</v-icon><span class="group-name">{{items[0].domain}}</span>
+    </th>
+    <th v-else v-on:click="toggle()" class="table-group-header group-closed">
+        <v-icon>mdi-menu-right</v-icon><span class="group-name">{{items[0].domain}}</span>
+    </th>
+</script>
+<script type="text/html" id="status-tile-template">
+    <div class="status-table-tile">
+        <div v-if="!column.length" class="status-bubble empty bubble-large">&nbsp;</div>
+        <template v-else>
+            <div class="status-bubble" :class="column[0].class" :style="column[0].style">&nbsp;</div>
+            <div class="branches-container" v-if="showBranches">
+                <div class="status-bubble" v-for="branch in column.slice(1)"
+                     :class="branch.class"
+                     :style="branch.style">
+                    &nbsp;
                 </div>
-            </template>
-
-            <v-card>
-                <v-card-title class="text-h5 grey lighten-2">
-                    Settings
-                </v-card-title>
-
-                <v-card-text>
-                    <v-container>
-                        <v-row>
-                            <v-col cols="12" sm="6" md="12">
-                                <v-text-field label="Hide inactive sites after" required type="number"
-                                              :rules="[validatePositiveInt]"
-                                              suffix="days" v-model="inactiveTimeout"></v-text-field>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col cols="12" sm="6" md="12">
-                                <v-checkbox label="Show branch bubbles in calendar view"
-                                              v-model="showBranchBubbles"></v-checkbox>
-                            </v-col>
-                        </v-row>
-                    </v-container>
-                </v-card-text>
-
-                <v-divider></v-divider>
-
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" text @click="settingsDialog = false">Close</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-    </span>
-
-</div>
-<div id="status">
-    <div id="status-calendar" v-if="mode == 'calendar'">
-        <table>
-            <tr>
-                <th class="bg">&nbsp;</th>
-                <th class="bg" v-for="day in daysRange(now, 8)">
-                    <div class="calendar-month">{{ day.month }}</div>
-                    <div class="calendar-day">{{ day.day }}</div>
-                </th>
-            </tr>
-            <tr v-for="site in sitesSort(sites)">
-                <th class="calendar-site highlightable clickable"
-                    :onclick="navigate('site.html?site_id=' + site.site_id)">
-                    {{ site.site_id }}
-                </th>
-                <td class="calendar-cell" v-for="day in daysRange(now, 8)">
-                    <div class="calendar-tile">
-                        <div class="calendar-bubble" v-for="branch in branchSort(getDayData(site, day).branches)"
-                                   :class="calendarBubbleClass(site, day, branch)" :style="calendarBubbleStyle(site, day, branch)">
-                            &nbsp;
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </table>
+            </div>
+        </template>
     </div>
-    <div id="status-tiles" v-if="mode == 'tiles'">
-        <div class="status-tile highlightable clickable" :class="badnessClass(site)" v-for="site in sort('site_id', sites)"
-             :onclick="navigate('site.html?site_id=' + site.site_id)">
-            <div class="site-id">
-                <div class="site-running" v-if="site.running"><span class="material-icons">cached</span></div>
-                <div class="site-label">
-                    {{ site.site_id }}
-                </div>
-                <div class="branch-tiles">
-                    <div class="branch-tile highlightable clickable" :class="badnessClass(branch)" v-for="branch in limit(badnessSort(site.branches), 6)"
-                        :onclick="navigate('run.html?site_id=' + site.site_id + '&run_id=' + site.run_id + '#branch-' + branch.name)">
-                        <div class="branch-tile-name">
-                            {{ branch.name }}
-                        </div>
-                        <div class="counts">
-                            <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
-                            <img class="check-mark" src="checkmark.png" v-if="branch.failed_count == 0"/>
-                        </div>
+</script>
+<script type="text/html" id="footer-template">
+    <div class="footer" v-if="props.pagination.itemsPerPage > 0 && !showAllRows">
+        {{props.pagination.itemsPerPage + " of " + props.pagination.itemsLength + " items."}}
+        <div class="highlightable button" @click="props.options.itemsPerPage = -1">
+            Show All
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    Vue.component("t-item-row", {
+        template: "#item-row-template",
+        props: ["siteId", "item", "showBranches"],
+        methods: globalMethods
+    });
+    Vue.component("t-group-header", {
+        template: "#group-header-template",
+        props: ["items", "toggle", "isOpen"],
+        methods: globalMethods
+    });
+    Vue.component("t-status-tile", {
+        template: "#status-tile-template",
+        props: ["column", "showBranches"]
+    });
+    Vue.component("t-footer", {
+        template: "#footer-template",
+        props: ["props", "showAllRows"]
+    });
+</script>
+
+<div id="container">
+    <div id="breadcrumbs">
+        <v-breadcrumbs :items="breadcrumbs()"></v-breadcrumbs>
+    </div>
+
+
+    <div id="toolbar">
+
+        <div class="highlightable button icon-button view-mode-group" id="view-mode-tests" title="Tests View" onclick="setViewMode('tests')">
+            <span class="material-icons">home</span>
+        </div>
+
+        <div class="highlightable button icon-button view-mode-group" id="view-mode-calendar" title="Calendar View" onclick="setViewMode('calendar')">
+            <span class="material-icons">calendar_today</span>
+        </div>
+        <div class="highlightable button icon-button view-mode-group" id="view-mode-tiles" title="Tiles View" onclick="setViewMode('tiles')">
+            <span class="material-icons">grid_view</span>
+        </div>
+
+        <div class="spacer">&nbsp;</div>
+
+        <span data-app="true">
+            <v-dialog v-model="settingsDialog" width="500">
+                <template v-slot:activator="{on, attrs}">
+                    <div class="highlightable button" id="settings" title="Settings..." v-bind="attrs" v-on="on">
+                        <span class="material-icons">settings</span>
                     </div>
-                    <div class="branch-ellipsis" v-if="site.branches.length > 6">
-                        ...
+                </template>
+
+                <v-card>
+                    <v-card-title class="text-h5 grey lighten-2">
+                        Settings
+                    </v-card-title>
+
+                    <v-card-text>
+                        <v-container>
+                            <v-row>
+                                <v-col cols="12" sm="6" md="12">
+                                    <v-text-field label="Hide inactive sites after" required type="number"
+                                                  :rules="[validatePositiveInt]"
+                                                  suffix="days" v-model="inactiveTimeout"></v-text-field>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12" sm="6" md="12">
+                                    <v-checkbox label="Show branch bubbles in calendar view"
+                                                v-model="showBranchBubbles"></v-checkbox>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12" sm="6" md="12">
+                                    <v-checkbox label="Show all rows in tables by default"
+                                                v-model="showAllRows"></v-checkbox>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                    </v-card-text>
+
+                    <v-divider></v-divider>
+
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="primary" text @click="settingsDialog = false">Close</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+        </span>
+    </div>
+
+
+    <div id="status">
+        <div id="tests-view" v-if="mode == 'tests'" class="main-section status-table">
+
+            <v-data-table :headers="testsHeader" :items="testsItems"
+                          class="elevation-1" hide-default-header hide-default-footer
+                          width="300pt" group-by="groupIndex" :custom-sort="sitesSort"
+                          :disable-pagination="settings.showAllRows">
+                <template v-slot:header="{props}">
+                    <thead>
+                        <tr class="top-row">
+                            <th v-for="h in props.headers" class="bg">
+                                <div class="test-header">{{h.text}}</div>
+                            </th>
+                        </tr>
+                    </thead>
+                </template>
+                <template v-slot:item="{item}">
+                    <t-item-row :site-id="item.site_id" :item="item" :show-branches="false"></t-item-row>
+                </template>
+                <template v-slot:group.header="{group, items, isOpen, toggle}">
+                    <t-group-header v-if="items.length > 1" :items="items" :is-open="isOpen" :toggle="toggle"></t-group-header>
+
+                    <template v-if="items.length > 1 && !isOpen">
+                        <td v-for="column in tableSiteGroups(items)" class="status-table-cell">
+                            <t-status-tile :column="column"></t-status-tile>
+                        </td>
+                    </template>
+                </template>
+                <template v-slot:group.summary="{group, items, isOpen}">
+                   <td v-if="items.length > 1 && isOpen" colspan="100%"><div class="group-footer"></div></td>
+                </template>
+                <template v-slot:footer="{props}">
+                    <t-footer :props="props" :show-all-rows="settings.showAllRows"></t-footer>
+                </template>
+            </v-data-table>
+
+        </div>
+
+        <div id="status-calendar" v-if="mode == 'calendar'" class="main-section status-table">
+
+            <v-data-table :headers="calendarHeader" :items="calendarItems"
+                          class="elevation-1" hide-default-header hide-default-footer
+                          width="400pt" group-by="groupIndex" :custom-sort="sitesSort"
+                          :disable-pagination="settings.showAllRows">
+                <template v-slot:header="{props}">
+                    <thead>
+                        <tr class="top-row">
+                            <th v-for="h in props.headers" class="bg">
+                                <div class="calendar-month">{{h.month}}</div>
+                                <div class="calendar-day">{{h.day}}</div>
+                            </th>
+                        </tr>
+                    </thead>
+                </template>
+                <template v-slot:item="{item, isExpanded}">
+                    <t-item-row :site-id="item.site_id" :item="item" :m="isExpanded" :show-branches="settings.showBranchBubbles"></t-item-row>
+                </template>
+                <template v-slot:group.header="{group, items, isOpen, toggle}">
+                    <t-group-header v-if="items.length > 1" :items="items" :is-open="isOpen" :toggle="toggle"></t-group-header>
+                    <td v-if="items.length == 1" colspan="9" class="hline"></td>
+
+                    <template v-if="items.length > 1 && !isOpen">
+                        <td v-for="column in tableSiteGroups(items)" class="status-table-cell">
+                            <t-status-tile :column="column" :show-branches="settings.showBranchBubbles"></t-status-tile>
+                        </td>
+                    </template>
+                </template>
+                <template v-slot:group.summary="{group, items, isOpen}">
+                    <td v-if="items.length > 1 && isOpen" colspan="100%"><div class="group-footer"></div></td>
+                </template>
+                <template v-slot:footer="{props}">
+                    <t-footer :props="props" :show-all-rows="settings.showAllRows"></t-footer>
+                </template>
+            </v-data-table>
+        </div>
+
+        <div id="status-tiles" v-if="mode == 'tiles'"  class="main-section">
+            <div class="status-tile highlightable clickable" :class="siteStateCSSClass(site)" v-for="site in sort('site_id', sites)"
+                 :onclick="navigate('site.html?site_id=' + site.site_id)">
+                <div class="site-id">
+                    <div class="site-running" v-if="site.running"><span class="material-icons">cached</span></div>
+                    <div class="site-label">
+                        {{ site.site_id }}
+                    </div>
+                    <div class="branch-tiles">
+                        <div class="branch-tile highlightable clickable" :class="siteStateCSSClass(branch)" v-for="branch in limit(badnessSort(site.branches), 6)"
+                             :onclick="navigate('run.html?site_id=' + site.site_id + '&run_id=' + site.run_id + '#branch-' + branch.name)">
+                            <div class="branch-tile-name">
+                                {{ branch.name }}
+                            </div>
+                            <div class="counts">
+                                <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
+                                <img class="check-mark" src="imgs/checkmark.png" v-if="branch.failed_count == 0"/>
+                            </div>
+                        </div>
+                        <div class="branch-ellipsis" v-if="site.branches.length > 6">
+                            ...
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div id="status-table" v-if="mode == 'table'">
-        <table>
-            <tr>
-                <th class="split-cell">
-                    <span class="split-cell-top-right">Branch</span>
-                    <span class="split-cell-bottom-left">Site</span>
-                </th>
-                <th v-for="branch in allBranches">
-                    <div class="branch-heading highlightable clickable" :class="badnessClass(branch)"
-                         :onclick="navigate('branch.html?branch=' + branch.name)">
-                        {{ branch.name }}
-                        <div class="counts">
-                            <span class="failed-count" v-if="branch.failed_count > 0">{{ branch.failed_count }}</span>
-                            <img class="check-mark" src="checkmark.png" v-if="branch.failed_count == 0"/>
-                        </div>
-                    </div>
-                </th>
-            </tr>
-            <tr v-for="site in sites">
-                <th>
-                    <div class="site-heading highlightable clickable" :class="badnessClass(site)"
-                         :onclick="navigate('site.html?site_id=' + site.site_id)">
-                        {{ site.site_id }}
-                        <div class="counts">
-                            <span class="failed-count" v-if="site.failed_count > 0">{{ site.failed_count }}</span>
-                            <img class="check-mark" src="checkmark.png" v-if="site.failed_count == 0"/>
-                        </div>
-                    </div>
-                </th>
-                <td class="branch-status" v-for="branch in allBranches">
-                    <div class="site-branch-cell highlightable clickable" :class="badnessClass(branch.sites[site.site_id])" v-if="site.site_id in branch.sites"
-                        :onclick="navigate('branch.html?site_id=' + site.site_id + '&branch=' + branch.name)">
-                        &nbsp;
-                        <div class="counts">
-                            <span class="failed-count" v-if="branch.sites[site.site_id].failed_count > 0">{{ branch.sites[site.site_id].failed_count }}</span>
-                            <img class="check-mark" src="checkmark.png" v-if="branch.sites[site.site_id].failed_count == 0"/>
-                        </div>
-                    </div>
-                    <div class="site-branch-cell absent" v-if="!(site.site_id in branch.sites)">
-                        &nbsp;
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </div>
 </div>
-        </div>
-    <script>
 
-        var sites = [
-        ];
+<script src="js/common.js"></script>
+<script src="js/summary.js"></script>
 
-        settingsDefaults({"viewMode": "calendar", "inactiveTimeout": 10, "showBranchBubbles": false});
-
-        set = function(dst, src) {
-            dst.length = 0;
-            for (var i = 0; i < src.length; i++) {
-                dst.push(src[i]);
-            }
-        }
-
-        update = function() {
-            $.get("summary", settings("inactiveTimeout"), function(data) {
-                set(sites, data);
-            });
-        };
-
-        update();
-
-        var siteStatus = new Vue({
-            el: "#container",
-            vuetify: new Vuetify(),
-            data: {
-                sites: sites,
-                mode: '',
-                now: moment().utc().startOf("day"),
-                settingsDialog: false
-            },
-            methods: globalMethods,
-            computed: {
-                inactiveTimeout: makeSetting("inactiveTimeout", update, validatePositiveInt),
-                showBranchBubbles: makeSetting("showBranchBubbles", update, "bool"),
-                allBranches: function() {
-                    var unique = {};
-                    for (var i = 0; i < this.sites.length; i++) {
-                        var site = this.sites[i];
-                        var branches = site.branches;
-                        for (var j = 0; j < branches.length; j++) {
-                            var branch = branches[j];
-                            if (branch.name in unique) {
-                                var existing = unique[branch.name];
-                                existing['failed_count'] += branch['failed_count'];
-                                existing['completed_count'] += branch['completed_count'];
-                            }
-                            else {
-                                unique[branch.name] = {... branch};
-                                unique[branch.name]['sites'] = {};
-                            }
-                            unique[branch.name]['sites'][site.site_id] = branch;
-                        }
-                    }
-
-                    values = [];
-                    for (var k in unique) {
-                        values.push(unique[k]);
-                    }
-                    return this.sort('name', values);
-                },
-                branchIndexMap: function() {
-                    var all = this.allBranches;
-                    var map = {};
-                    for (var i = 0; i < all.length; i++) {
-                        map[all[i].name] = i;
-                    }
-                    return map;
-                }
-            }
-        });
-
-        var setViewMode = function(viewMode) {
-            if (viewMode === undefined) {
-                viewMode = Cookies.get('viewMode');
-            }
-            if (viewMode === undefined) {
-                viewMode = 'calendar';
-            }
-            Cookies.set('viewMode', viewMode);
-            $('.view-mode-group').removeClass('selected');
-            $('#view-mode-' + viewMode).addClass('selected');
-            siteStatus.mode = viewMode;
-        }
-
-        setViewMode();
-
-    </script>
-    </body>
+</body>
 </html>

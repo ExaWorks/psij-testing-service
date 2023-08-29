@@ -12,9 +12,6 @@ from mongoengine import Document, StringField, DateTimeField, connect, DictField
     IntField
 
 
-logger = logging.getLogger(__name__)
-
-
 CODE_DB_VERSION = 2
 
 
@@ -142,7 +139,7 @@ class TestingAggregatorApp(object):
 
             self._update_totals(site_id, data)
         except:
-            logger.info('Request json: %s' % json)
+            cherrypy.log('Request json: %s' % json)
             raise
 
     def _update_totals(self, site_id, data: Dict[str, object]) -> None:
@@ -207,7 +204,6 @@ class TestingAggregatorApp(object):
 
     def _update(self, entry: Site) -> Site:
         entry.last_seen = datetime.datetime.utcnow()
-        print(entry.site_id)
         entry.save()
         return entry
 
@@ -217,6 +213,7 @@ class TestingAggregatorApp(object):
         # get latest batch of tests on each site and return totals for passed/failed
 
         now = datetime.datetime.now(datetime.timezone.utc)
+
         try:
             iInactiveTimeout = int(inactiveTimeout)
             date_limit = now - datetime.timedelta(days=iInactiveTimeout)
@@ -385,77 +382,34 @@ class TestingAggregatorApp(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def tests(self, sites_to_get, tests_to_match) -> object:
-
+        # should probably use json_in and pass all parameters as json
         import json
         sites_to_get = json.loads(sites_to_get)
-        tests_to_match = json.loads( tests_to_match)
+        tests_to_match = json.loads(tests_to_match)
 
-        # Example sites_to_get = ["mothra.hidden.uoregon.edu", "reptar.hidden.uoregon.edu", "saturn.hidden.uoregon.edu"]
+        now = datetime.datetime.now(datetime.timezone.utc)
+        time_limit = now - datetime.timedelta(hours=24)
+
+        tests = Test.objects(site_id__in=sites_to_get,
+                             branch__in=['main', 'master'],
+                             test_start_time__gt=time_limit,
+                             test_name__in=tests_to_match).order_by('-test_start_time')
+
         resp = {}
 
-        for site_id in sites_to_get:
-            resp[site_id] = self.getSite(site_id, tests_to_match)
+        for test in tests:
+            if test.site_id not in resp:
+                resp[test.site_id] = {}
+            # only store the more recent test
+            if test.test_name not in resp[test.site_id]:
+                test_dict = test.to_mongo().to_dict()
+                resp[test.site_id][test.test_name] = test_dict
+                for key in ['_id', "stdout", "stderr", "log"]:
+                    if key in test_dict:
+                        del test_dict[key]
 
         add_cors_headers()
         return resp
-
-
-    def getSite(self, site_id, tests_to_match):
-        #  Example site_id="mothra.hidden.uoregon.edu"
-        run_id = ""
-
-        try:
-            run_id = RunEnv.objects(site_id=site_id).order_by('-test_start_time')[0].run_id
-        except:
-            run_id = ""
-
-
-        resp = {}
-        resp['site_id'] = site_id
-        resp['run_id'] = run_id
-        branches = []
-        resp['branches'] = branches
-
-        runs = RunEnv.objects(site_id=site_id, run_id=run_id).order_by('+test_start_time')
-
-        for run in runs:
-            test_list = []
-            branch = run.to_mongo().to_dict()
-            branch['tests'] = test_list
-            branch['name'] = run.branch
-            branches.append(branch)
-
-            tests = Test.objects(site_id=site_id, run_id=run_id,
-                                 branch=run.branch,
-                                 test_name__in=tests_to_match).order_by('-test_start_time')
-
-            for test in tests:
-                test_dict = test.to_mongo().to_dict()
-                del test_dict['_id']
-                test_list.append(test_dict)
-
-        resBySiteIdAndTestName = {}
-        brs = resp['branches']
-
-
-        for testContainer in brs:
-
-            for oneTest in testContainer['tests']:
-
-                testName = oneTest['test_name']
-
-                foundMatch = 0
-
-                for test in tests_to_match:
-                    if testName == test:
-                        foundMatch = 1
-
-                if oneTest['branch'] == 'main' and foundMatch == 1:
-                    resBySiteIdAndTestName[testName] = oneTest['results']
-                    resBySiteIdAndTestName[testName]['branch'] = oneTest['branch']
-                    resBySiteIdAndTestName[testName]['test_start_time'] = oneTest['test_start_time']
-
-        return resBySiteIdAndTestName
 
 
 class Server:
@@ -481,18 +435,13 @@ class Server:
                 'tools.staticdir.on': True,
                 'tools.staticdir.dir': '',
                 'tools.json_out.handler': json_handler
-            },
-            '/instance': {
-                'tools.staticdir.root': '/var/www/html',
-                'tools.staticdir.on': True,
-                'tools.staticdir.dir': '',
             }
         })
 
 
 def upgrade_db(v: Version) -> Version:
     if v.version in DB_UPGRADES:
-        logger.info('Upgrading DB from %s to %s' % (v.version, v.version + 1))
+        cherrypy.log('Upgrading DB from %s to %s' % (v.version, v.version + 1))
         DB_UPGRADES[v.version]()
         v.update(inc__version=1)
         v.reload()

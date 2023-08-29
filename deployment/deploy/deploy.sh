@@ -84,9 +84,9 @@ deployContainer() {
         getId $TYPE
         ID=$OUT
         if [ "$DEV" == "1" ]; then
-            run docker exec -it $ID update-psi-j-testing-service -y /psi-j-testing-service-dev
+            run docker exec -it $ID update-psi-j-testing-service -y $TYPE /psi-j-testing-service-dev
         else
-            run docker exec -it $ID update-psi-j-testing-service -y $SERVICE_VERSION
+            run docker exec -it $ID update-psi-j-testing-service -y $TYPE $SERVICE_VERSION
         fi
     fi
 }
@@ -104,8 +104,46 @@ else
     UPDATE_NGINX=1
 fi
 
+filterConf() {
+    SRC="$1"
+    DST="$2"
+    SERVER_NAME="$3"
+    PROXY_REDIRECT="$4"
+    INTERNAL_PORT="$5"
+
+    if [ ! -f "$DST" ]; then
+        sed -e "s/\${DOMAIN_NAME}/${DOMAIN_NAME}/g" "$SRC" | \
+        sed -e "s/\${SERVER_NAME}/${SERVER_NAME}/g" | \
+        sed -e "s/\${PROXY_REDIRECT}/${PROXY_REDIRECT}/g" | \
+        sed -e "s/\${INTERNAL_PORT}/${INTERNAL_PORT}/g" >"$DST"
+    fi
+}
+
+deploySite() {
+    NAME="$1"
+    SERVER_NAME="$2"
+    PROXY_REDIRECT="$2"
+    INTERNAL_PORT="$3"
+
+    echo "Deploying site $NAME"
+    filterConf nginx/site-template "/etc/nginx/sites-available/$NAME" "$SERVER_NAME" "$PROXY_REDIRECT" "$INTERNAL_PORT"
+    ln -f -s "/etc/nginx/sites-available/$NAME" "/etc/nginx/sites-enabled/$NAME"
+}
+
 if [ "$UPDATE_NGINX" != "0" ]; then
-    run cp -u *.conf /etc/nginx
+    DOMAIN_NAME=`cat DOMAIN_NAME | tr -d '\n'`
+    filterConf nginx/headers.conf /etc/nginx/snippets/headers.conf
+    filterConf nginx/nginx.conf /etc/nginx/nginx.conf
+    filterConf nginx/ssl.conf /etc/nginx/ssl.conf
+
+    filterConf nginx/site-default /etc/nginx/sites-available/default
+    run ln -f -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+    # psij is default
+    deploySite "$DOMAIN_NAME" "psij.$DOMAIN_NAME" 9901
+    deploySite "psij.$DOMAIN_NAME" "psij.$DOMAIN_NAME" 9901
+    deploySite "sdk.$DOMAIN_NAME" "sdk.$DOMAIN_NAME" 9902
+
     run service nginx restart
 fi
 

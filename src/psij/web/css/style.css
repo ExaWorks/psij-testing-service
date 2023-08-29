@@ -23,7 +23,7 @@ body {
     background-color: #e0e0e0;
     border: 1pt solid #a0a0a0;
     border-radius: 4pt;
-    width: 190pt;
+    width: 220pt;
     height: 80pt;
     z-index: 20;
 }
@@ -45,7 +45,7 @@ body {
 .branch-tile {
     position: relative;
     display: inline-block;
-    width: 95pt;
+    width: 110pt;
     height: 16pt;
     font-size: 8.5pt;
     padding: 2pt;
@@ -176,12 +176,20 @@ body {
 }
 
 
-#toolbar .button {
+.button {
     display: inline-block;
     box-shadow: 1pt 1pt 3pt #606060;
     cursor: pointer;
     background-color: #ffffff;
     padding: 3pt;
+    font-size: 11pt;
+    padding-left: 8pt;
+    padding-right: 8pt;
+}
+
+.button.icon-button {
+    padding-left: 3pt;
+    padding-right: 3pt;
 }
 
 .button.selected {
@@ -461,9 +469,7 @@ td.run-id {
     color: rgb(180, 0, 0);
 }
 
-#status-calendar table {
-    position: relative;
-}
+
 
 #status-calendar table tr:first-child th {
     position: sticky;
@@ -482,68 +488,215 @@ td.run-id {
     font-weight: normal;
     font-size: 11pt;
     padding-bottom: 4pt;
-    border-bottom: 2pt solid #e0e0e0;
     margin-bottom: 2pt;
 }
 
 .calendar-site {
-    text-align: right;
-    font-weight: normal;
+    text-align: left;
+    font-weight: 300;
     font-size: 11pt;
     height: 24pt;
     padding: 4pt;
     border-radius: 4pt;
 }
 
-.calendar-tile {
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+.status-table-tile {
+    text-align: left;
     height: 10pt;
-    align-content: center;
+    align-content: left;
+    margin-left: calc(50% - 4pt);
 }
 
-.calendar-bubble {
+.status-bubble {
     border-radius: 100pt;
     border: 0.5px solid rgba(0, 0, 0, 0.2);
     display: inline-block;
 }
 
-.calendar-bubble.bubble-large {
+.status-bubble.bubble-large {
     width: 8pt;
     height: 8pt;
-    margin-right: 2pt;
+    margin-right: 0pt;
 }
 
-.calendar-bubble.bubble-small {
+.status-bubble.bubble-small {
     width: 3pt;
     height: 3pt;
     margin-right: 1pt;
     margin-bottom: 1pt;
+    left: 0;
 }
 
-.calendar-tile.state-somewhat-bad {
-    background-color: #f0f0d0;
+.status-bubble.state-good {
+	background-color: rgb(106, 255, 77);
 }
 
-.calendar-tile.state-really-bad {
-    background-color: #ff4d4d;
+.status-bubble.state-somewhat-bad {
+	background-color: rgb(242, 219, 73);
 }
 
-.calendar-tile.state-good {
-    background-color: #6aff4d;
+.status-bubble.state-really-bad {
+	background-color: #ffb0a0;
 }
 
-.calendar-tile.state-unknown {
-    background-color: #e0e0e0;
+.status-bubble.state-missing-and-good {
+    background: linear-gradient(90deg, rgb(106, 255, 77) 35%, rgba(0, 0, 0, 0.2) 35%, rgba(0, 0, 0, 0.2) 55%, #e0e0e0 55%);
 }
+
+.status-bubble.state-missing-and-bad {
+    background: linear-gradient(90deg, #ffb0a0 35%, rgba(0, 0, 0, 0.2) 35%, rgba(0, 0, 0, 0.2) 55%, #e0e0e0 55%);
+}
+
+
 
 .bg {
     background-color: #f0f0f0;
 }
 
-.calendar-cell {
+.status-table-cell {
     text-align: center;
 }
+
+.status-table .status-header-cell {
+    width: 60pt;
+}
+
+.status-table th.status-header-cell {
+	text-align: center;
+}
+
+.status-table .status-cell {
+    padding: 0;
+    width: 60pt;
+    min-width: 60pt;
+}
+
+.status-table th, .status-table td {
+    font-size: 11pt;
+}
+
+.status-table th {
+    font-weight: normal;
+}
+
+.status-table .status-table-header {
+    border-bottom: 2pt solid #e0e0e0;
+}
+
+#status {
+    margin-top: 16pt;
+}
+
+.status-table .scheduler-header-cell, .status-table .scheduler-cell {
+    width: 100pt;
+}
+
+.status-table .scheduler-header-cell {
+    text-align: left;
+}
+
+#status .status-table .v-data-table {
+    background-color: #f0f0f0;
+}
+
+#status .status-table .v-data-table table, .status-table .v-data-table__wrapper {
+    width: 700pt;
+    border-collapse: collapse;
+    overflow-x: hidden;
+}
+
+#status .status-table .v-data-table td,
+#status .status-table .v-data-table th{
+    padding-left: 4pt;
+    padding-right: 4pt;
+    height: 20pt;
+    font-size: 11pt;
+    border-bottom: none;
+}
+
+#status .status-table .v-data-table td.hline {
+    height: 8pt;
+}
+
+#status .status-table .v-row-group__header th.group-open {
+}
+
+#status .status-table .v-row-group__summary {
+    height: 8pt;
+}
+
+#status .status-table .v-row-group__summary td {
+    height: 8pt;
+}
+
+#status .status-table .v-row-group__summary .group-footer {
+    margin-left: 10pt;
+    width: 100%;
+    height: 8pt;
+    border-top: thin solid #e0e0e0;
+}
+
+#status .status-table .top-row {
+    border-bottom: 2pt solid #e0e0e0;
+}
+
+#status .status-table .v-data-table th.calendar-site {
+    padding-left: 12pt;
+    white-space: nowrap;
+}
+
+#status .status-table .v-data-table th.calendar-site .site-label {
+    display: inline-block;
+    font-size: 11pt;
+    font-weight: normal;
+    height: 100%;
+    vertical-align: middle;
+}
+
+#status .status-table .v-data-table th.table-group-header {
+    text-align: left;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#status .status-table .v-data-table .expander {
+    display: inline-block;
+    width: 6pt;
+    margin: 2pt;
+}
+
+#status .status-table .v-data-table .group-name {
+    padding-left: 0pt;
+}
+
+#status .status-table .calendar-site:hover {
+    background-color: #80a0ff10;
+}
+
+#status .status-table .footer {
+    font-size: 11pt;
+    margin-top: 8pt;
+    margin-left: 24pt;
+}
+
+#status .status-table .group-indicator {
+    width: 8pt;
+    height: 100%;
+    display: inline-block;
+}
+
+.indicator-in-group {
+    border-left: thin solid #e0e0e0;
+}
+
+.branches-container {
+    display: inline-flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-content: flex-start;
+    width: 40%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
