@@ -1,8 +1,8 @@
 {
     "project-name": "ExaWorks SDK",
     "auth-email": {
-        "from": "noreply@testing.sdk.exaworks.org",
-        "callback-url": "https://testing.sdk.exaworks.org",
+        "from": "noreply@sdk.testing.exaworks.org",
+        "callback-url": "https://sdk.testing.exaworks.org",
         "body": "/etc/psij-testing-service/auth-sdk",
         "exception-body": "mailtemplates/exception",
         "exception-approved": "mailtemplates/exception-approved",
