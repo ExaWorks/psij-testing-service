@@ -2,6 +2,7 @@ CUSTOMIZATION = {
     projectName: "SDK",
     title: "Exascale dashboard testing service",
     backendURL: "https://sdk.testing.exaworks.org/",
+    reCaptchaSiteKey: "",
     testsTable: {
         tests: [
             "flux",
