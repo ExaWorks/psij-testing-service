@@ -21,7 +21,6 @@ PACKAGE_NAME="psij-testing-service"
 URL_BASE=https://github.com/ExaWorks/$PACKAGE_NAME/archive/refs/tags/v
 FORCE=0
 DONTASK=0
-PACKAGE="$URL_BASE$TARGET_VERSION.tar.gz"
 
 
 while [ "$1" != "" ]; do
@@ -56,6 +55,8 @@ if [ "$TARGET_VERSION" == "" ] || [ "$TYPE" == "" ]; then
     echo "Usage: update-psi-j-testing-service [--force] [--src path] <type> <target_version>"
     exit 1
 fi
+
+PACKAGE="$URL_BASE$TARGET_VERSION.tar.gz"
 
 set -e
 
