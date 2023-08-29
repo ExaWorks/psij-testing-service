@@ -1,6 +1,7 @@
 {
     "project-name": "PSI/J",
     "auth-email": {
+        "fallback-admin-email": <none>,
         "from": "noreply@testing.psij.io",
         "callback-url": "https://testing.psij.io",
         "body": "/etc/psij-testing-service/auth-psij",
