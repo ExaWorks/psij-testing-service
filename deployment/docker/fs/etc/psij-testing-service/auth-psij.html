@@ -1,0 +1,24 @@
+<html>
+    <head></head>
+    <body>
+        <style>
+            body{{width:400pt;}}
+            .key{{display:inline-block;padding:8pt;background-color:#f0f0f0;margin-left:16pt;}}
+            .terminal{{padding:8pt;background-color:#404040;color:#f0f0f0;width:65ch;margin-left:16pt}}
+        </style>
+        <p>Here is your dashboard authentication key:</p>
+
+        <pre class="key">{id}:{token}</pre>
+
+        <p>Please place it in a file named <code>key</code> in the <code>~/.psij</code> directory
+        and ensure that it is only visible to you. You can do so by running the following commands
+        in a terminal:</p>
+
+        <pre class="terminal">
+cat &lt;&lt;EOF &gt;~/.psij/key
+{id}:{token}
+EOF
+
+chmod 600 ~/.psij/key</pre>
+    </body>
+</html>

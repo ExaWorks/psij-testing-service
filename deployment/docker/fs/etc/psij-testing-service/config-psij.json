@@ -1,0 +1,11 @@
+{
+    "project-name": "PSI/J",
+    "auth-email": {
+        "from": "noreply@testing.psij.io",
+        "callback-url": "https://testing.psij.io",
+        "body": "/etc/psij-testing-service/auth-psij",
+        "exception-body": "mailtemplates/exception",
+        "exception-approved": "mailtemplates/exception-approved",
+        "exception-rejected": "mailtemplates/exception-rejected"
+    }
+}

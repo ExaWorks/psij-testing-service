@@ -56,6 +56,7 @@ getId() {
 deployContainer() {
     TYPE=$1
     PORT=$2
+    FQDN=$3
     getId $TYPE
     ID=$OUT
     echo "ID: $OUT"
@@ -71,6 +72,7 @@ deployContainer() {
         mkdir -p $DATA_DIR/$TYPE/mongodb
         mkdir -p $DATA_DIR/$TYPE/web
         cp $ROOT/web/$TYPE/* $DATA_DIR/$TYPE/web
+
         run docker run \
             -d -p $PORT:9909 --name "service-$TYPE" \
             --restart=on-failure:3 \
@@ -79,6 +81,9 @@ deployContainer() {
             $EXTRA_VOL \
             $IMAGE:latest
         UPDATE_CONTAINER=1
+        getId $TYPE
+        ID=$OUT
+        run docker exec -it $ID bash -c "echo $FQDN > /etc/hostname"
     fi
     if [ "$UPDATE_CONTAINER" != "0" ]; then
         getId $TYPE
@@ -148,5 +153,5 @@ if [ "$UPDATE_NGINX" != "0" ]; then
     run service nginx restart
 fi
 
-deployContainer psij 9901
-deployContainer sdk 9902
+deployContainer psij 9901 "psij.$DOMAIN_NAME"
+deployContainer sdk 9902 "sdk.$DOMAIN_NAME"

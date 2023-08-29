@@ -1,0 +1,164 @@
+# Global Postfix configuration file. This file lists only a subset
+# of all parameters. For the syntax, and for a complete parameter
+# list, see the postconf(5) manual page (command: "man 5 postconf").
+#
+# For common configuration examples, see BASIC_CONFIGURATION_README
+# and STANDARD_CONFIGURATION_README. To find these documents, use
+# the command "postconf html_directory readme_directory", or go to
+# http://www.postfix.org/BASIC_CONFIGURATION_README.html etc.
+#
+# For best results, change no more than 2-3 parameters at a time,
+# and test if Postfix still works after every change.
+
+# COMPATIBILITY
+#
+# The compatibility_level determines what default settings Postfix
+# will use for main.cf and master.cf settings. These defaults will
+# change over time.
+#
+# To avoid breaking things, Postfix will use backwards-compatible
+# default settings and log where it uses those old backwards-compatible
+# default settings, until the system administrator has determined
+# if any backwards-compatible default settings need to be made
+# permanent in main.cf or master.cf.
+#
+# When this review is complete, update the compatibility_level setting
+# below as recommended in the RELEASE_NOTES file.
+#
+# The level below is what should be used with new (not upgrade) installs.
+#
+compatibility_level = 2
+
+
+# soft_bounce = no
+
+# queue_directory = /var/spool/postfix
+
+command_directory = /usr/sbin
+
+daemon_directory = /usr/lib/postfix/sbin
+
+data_directory = /var/lib/postfix
+
+# mail_owner = postfix
+
+# default_privs = nobody
+
+# myhostname =
+
+# mydomain =
+
+# myorigin = /etc/mailname
+myorigin = $myhostname
+# myorigin = $mydomain
+
+inet_interfaces = all
+# inet_interfaces = $myhostname
+# inet_interfaces = $myhostname, localhost
+
+# proxy_interfaces =
+# proxy_interfaces = 1.2.3.4
+
+mydestination = $myhostname, localhost.$mydomain, localhost
+# mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+# mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain,
+#	mail.$mydomain, www.$mydomain, ftp.$mydomain
+
+# local_recipient_maps = unix:passwd.byname $alias_maps
+# local_recipient_maps = proxy:unix:passwd.byname $alias_maps
+local_recipient_maps = $alias_maps
+
+unknown_local_recipient_reject_code = 550
+
+# mynetworks_style = class
+# mynetworks_style = subnet
+mynetworks_style = host
+
+# mynetworks = 168.100.189.0/28, 127.0.0.0/8
+# mynetworks = $config_directory/mynetworks
+# mynetworks = hash:/etc/postfix/network_table
+mynetworks = 127.0.0.0/8
+
+# relay_domains = $mydestination
+
+# relayhost = $mydomain
+# relayhost = [gateway.my.domain]
+# relayhost = [mailserver.isp.tld]
+# relayhost = uucphost
+# relayhost = [an.ip.add.ress]
+
+# relay_recipient_maps = hash:/etc/postfix/relay_recipients
+
+# in_flow_delay = 1s
+
+alias_maps = hash:/etc/aliases
+# alias_maps = hash:/etc/aliases
+# alias_maps = hash:/etc/aliases, nis:mail.aliases
+# alias_maps = netinfo:/aliases
+
+alias_database = hash:/etc/aliases
+# alias_database = dbm:/etc/mail/aliases
+# alias_database = hash:/etc/aliases
+# alias_database = hash:/etc/aliases, hash:/opt/majordomo/aliases
+
+# recipient_delimiter = +
+
+# home_mailbox = Mailbox
+# home_mailbox = Maildir/
+ 
+mail_spool_directory = /var/mail
+# mail_spool_directory = /var/spool/mail
+
+mailbox_command = /usr/bin/procmail
+# mailbox_command = /usr/bin/procmail -a "$EXTENSION"
+
+# mailbox_transport = lmtp:unix:/var/imap/socket/lmtp
+# mailbox_transport = cyrus
+
+# fallback_transport = lmtp:unix:/file/name
+# fallback_transport = cyrus
+# fallback_transport =
+
+# luser_relay = $user@other.host
+# luser_relay = $local@other.host
+# luser_relay = admin+$local
+  
+header_checks = regexp:/etc/postfix/header_checks
+
+# fast_flush_domains = $relay_domains
+
+# smtpd_banner = $myhostname ESMTP $mail_name
+# smtpd_banner = $myhostname ESMTP $mail_name ($mail_version)
+smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)
+
+# local_destination_concurrency_limit = 2
+
+# default_destination_concurrency_limit = 20
+
+# debug_peer_level = 2
+
+# debug_peer_list = 127.0.0.1
+# debug_peer_list = some.domain
+
+debugger_command =
+	PATH=/bin:/usr/bin:/usr/local/bin; export PATH; (echo cont;
+	echo where) | gdb $daemon_directory/$process_name $process_id 2>&1
+	>$config_directory/$process_name.$process_id.log & sleep 5
+
+# sendmail_path =
+
+# newaliases_path =
+
+# mailq_path =
+
+# setgid_group =
+
+# html_directory =
+
+# manpage_directory =
+
+# sample_directory =
+
+# readme_directory =
+
+inet_protocols = ipv4

@@ -21,6 +21,8 @@ PACKAGE_NAME="psij-testing-service"
 URL_BASE=https://github.com/ExaWorks/$PACKAGE_NAME/archive/refs/tags/v
 FORCE=0
 DONTASK=0
+PACKAGE="$URL_BASE$TARGET_VERSION.tar.gz"
+
 
 while [ "$1" != "" ]; do
     case "$1" in
@@ -30,6 +32,11 @@ while [ "$1" != "" ]; do
             ;;
         -y)
             DONTASK=1
+            shift
+            ;;
+        --src)
+            PACKAGE="$2"
+            shift
             shift
             ;;
         -*)
@@ -46,18 +53,16 @@ while [ "$1" != "" ]; do
 done
 
 if [ "$TARGET_VERSION" == "" ] || [ "$TYPE" == "" ]; then
-    echo "Usage: update-psi-j-testing-service [--force] <type> <target_version>"
+    echo "Usage: update-psi-j-testing-service [--force] [--src path] <type> <target_version>"
     exit 1
 fi
 
 set -e
 
-PACKAGE="$URL_BASE$TARGET_VERSION.tar.gz"
-if [ "${TARGET_VERSION::1}" == "/" ]; then
+if [ "${PACKAGE::1}" == "/" ]; then
     # install from source
-    echo "Installing from source in $TARGET_VERSION"
-    PACKAGE="$TARGET_VERSION"
-elif ! wget -q --method=HEAD "$URL_BASE$TARGET_VERSION.tar.gz"; then
+    echo "Installing from source in $PACKAGE"
+elif ! wget -q --method=HEAD "$PACKAGE"; then
     echo "Error: no such version. Please check that the repo has a 'v$TARGET_VERSION' tag"
     exit 2
 fi
@@ -85,14 +90,58 @@ else
     ANSWER="y"
 fi
 
+makeLink() {
+    LINK_NAME="$1"
+    if [ ! -h "$LINK_NAME" ] && [ ! -f "$LINK_NAME" ]; then
+        DIR=`dirname $LINK_NAME`
+        BASE=`basename $LINK_NAME`
+        NAME="${BASE%.*}"
+        EXT="${BASE##*.}"
+        ln -s "$NAME-$TYPE.$EXT" "$LINK_NAME"
+    fi
+}
+
+
+UPGRADES="0.4.0"
+
+doUpgrade_0_4_0() {
+    apt-get install -y postfix
+    cp -n /tmp/fs/etc/postfix/main.cf /etc/postfix
+    service postfix restart
+    mkdir -p /etc/psij-testing-service
+    cp -n /tmp/fs/etc/psij-testing-service/* /etc/psij-testing-service
+    if [ ! -f /etc/psij-testing-service/secrets.json ]; then
+        echo "Error. No secrets.json file found for the service."
+        exit 1
+    fi
+    PACKAGE_LOC=`pip show $PACKAGE_NAME | grep "Location: " | sed 's/Location: //'`
+    makeLink "$PACKAGE_LOC/psij/web/instance/customization.js"
+    makeLink "/etc/psij-testing-service/config.json"
+}
+
+doUpgrades() {
+    D=`echo -e "$CURRENT_VERSION\n$TARGET_VERSION" | sort -V | tail -n 1`
+    if [ "$D" == "$TARGET_VERSION" ]; then
+        for UPGRADE in $UPGRADES; do
+            T=`echo -e "$CURRENT_VERSION\n$UPGRADE\n$TARGET_VERSION" | sort -V | head -n 2 | tail -n 1`
+            if [ "$UPGRADE" == "$T" ]; then
+                echo "Performing $UPGRADE upgrades..."
+                SUFFIX=`echo $UPGRADE | tr "." "_"`
+                "doUpgrade_$SUFFIX"
+            fi
+        done
+    else
+        # downgrading
+        echo Skipping upgrades
+    fi
+}
+
 if [ "$ANSWER" == "y" ]; then
     pip install "$PACKAGE"
-    PACKAGE_LOC=`pip show $PACKAGE_NAME | grep "Location: " | sed 's/Location: //'`
-    LINK_NAME="$PACKAGE_LOC/psij/web/instance/customization.js"
-    if [ ! -e "$LINK_NAME" ]; then
-        ln -s "customization-$TYPE.js" "$LINK_NAME"
-    fi
-    try 3 timeout 10s service psi-j-testing-service restart
+
+    try 3 timeout 10s service psi-j-testing-service stop
+    doUpgrades
+    try 3 timeout 10s service psi-j-testing-service start
 else
     echo "OK. Bailing out..."
 fi
