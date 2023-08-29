@@ -117,12 +117,13 @@ filterConf() {
     PROXY_REDIRECT="$4"
     INTERNAL_PORT="$5"
 
-    if [ ! -f "$DST" ]; then
-        sed -e "s/\${DOMAIN_NAME}/${DOMAIN_NAME}/g" "$SRC" | \
-        sed -e "s/\${SERVER_NAME}/${SERVER_NAME}/g" | \
-        sed -e "s/\${PROXY_REDIRECT}/${PROXY_REDIRECT}/g" | \
-        sed -e "s/\${INTERNAL_PORT}/${INTERNAL_PORT}/g" >"$DST"
+    if [ -f "$DST" ]; then
+        cp "$DST" "$DST.bk"
     fi
+    sed -e "s/\${DOMAIN_NAME}/${DOMAIN_NAME}/g" "$SRC" | \
+    sed -e "s/\${SERVER_NAME}/${SERVER_NAME}/g" | \
+    sed -e "s/\${PROXY_REDIRECT}/${PROXY_REDIRECT}/g" | \
+    sed -e "s/\${INTERNAL_PORT}/${INTERNAL_PORT}/g" >"$DST"
 }
 
 deploySite() {
