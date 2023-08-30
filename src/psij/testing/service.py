@@ -517,14 +517,14 @@ class TestingAggregatorApp(object):
 
     def _verify_captcha_token(self, ctoken: str) -> None:
         r = requests.post('https://www.google.com/recaptcha/api/siteverify',
-                          data = {'secret': self.secrets['reCAPTHCA-secret-key'],
+                          data = {'secret': self.secrets['reCAPTCHA-secret-key'],
                                   'response': ctoken})
         if r.status_code != 200:
             print(r.json())
-            raise AuthError('reCAPTHCA verify error', email='')
+            raise AuthError('reCAPTCHA verify error', email='')
         rj = r.json()
         if not rj['success']:
-            raise AuthError('reCAPTHCA verify error', email='')
+            raise AuthError('reCAPTCHA verify error', email='')
 
     def _perform_auth_request(self, email: str) -> None:
         salt = bcrypt.gensalt()
