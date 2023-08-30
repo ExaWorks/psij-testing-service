@@ -94,8 +94,8 @@
                 var reqId = params.get("req_id");
                 var action = params.get("action");
 
-                genericSubmit(vue, "authExceptionAction", {project: CUSTOMIZATION.projectName,
-                            req_id: reqId, action: action}, "Success");
+                genericSubmit(vue, "authExceptionAction", {req_id: reqId, action: action},
+                    "Success");
             }
             catch (error) {
                 vue.showErrorDialog(error);
