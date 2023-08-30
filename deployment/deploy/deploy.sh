@@ -69,7 +69,7 @@ waitForContainer() {
 deployContainer() {
     TYPE=$1
     PORT=$2
-    FQDN=$3
+    HOST_NAME=$3
     getId $TYPE
     ID=$OUT
     echo "ID: $OUT"
@@ -87,7 +87,7 @@ deployContainer() {
         cp $ROOT/web/$TYPE/* $DATA_DIR/$TYPE/web
 
         run docker run \
-            -d -p $PORT:9909 --name "service-$TYPE" -h $FQDN \
+            -d -p $PORT:9909 --name "service-$TYPE" -h $HOST_NAME \
             --restart=on-failure:3 \
             --volume=$DATA_DIR/$TYPE/mongodb:/var/lib/mongodb \
             --volume=$DATA_DIR/$TYPE/web:/var/www/html \
