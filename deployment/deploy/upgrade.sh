@@ -62,11 +62,7 @@ update() {
         # Make sure everything is up to date
         docker exec -it $ID apt-get update
         docker exec -it $ID apt-get upgrade -y
-        # Make sure latest update script is in the container
-        docker cp ../docker/update-psi-j-testing-service $ID:/usr/bin
-        # Make sure that the latest service script is there
-        docker cp ../docker/psi-j-testing-service $ID:/etc/init.d
-        # Also make sure that all files are there if needed
+        # Make sure that all files are there if needed
         docker cp ../docker/fs/* $ID:/tmp/fs/
         if [ "$DEV" == "1" ]; then
             pushd ../..
