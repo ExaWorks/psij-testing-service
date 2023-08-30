@@ -107,6 +107,7 @@ deployContainer() {
         run docker cp ../docker/fs/. $ID:/
         run docker exec -it $ID sed -i "s/\$myhostname/$HOST_NAME/g" /etc/postfix/main.cf
         run docker exec -it $ID sed -i "s/\$mydomain/$DOMAIN_NAME/g" /etc/postfix/main.cf
+        run docker exec -it $ID postmap -v hash:/etc/postfix/sasl_passwd
         run docker exec -it $ID bash -c "pip show $PACKAGE_NAME | grep 'Location: ' | sed 's/Location: //' | tr -d '\n'"
         PACKAGE_LOC=$OUT
         run docker cp ../web/. "$ID:$PACKAGE_LOC/psij/web/"

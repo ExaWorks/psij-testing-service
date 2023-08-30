@@ -123,6 +123,11 @@ doUpgrade_0_4_0() {
 
     sed -i 's/system()/system(exclude-kmsg(yes))/g' /etc/syslog-ng/syslog-ng.conf
     cp -n /tmp/fs/etc/postfix/header_checks /etc/postfix
+    if [ -f /tmp/fs/etc/postfix/sasl_passwd ]; then
+        cp -n /tmp/fs/etc/postfix/sasl_passwd /etc/postfix
+        chmod 600 /etc/postfix/sasl_passwd
+        postmap -v hash:/etc/postfix/sasl_passwd
+    fi
 
     service syslog-ng start
     service postfix start

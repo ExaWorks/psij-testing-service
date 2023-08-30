@@ -170,3 +170,10 @@ smtpd_tls_security_level=may
 smtp_tls_CApath=/etc/ssl/certs
 smtp_tls_security_level=may
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+
+# May need this for relaying
+# relayhost = email-smtp.us-west-2.amazonaws.com:587
+# smtp_sasl_auth_enable = yes
+# smtp_sasl_security_options = noanonymous
+# smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+# smtp_tls_note_starttls_offer = yes
