@@ -632,10 +632,10 @@ class TestingAggregatorApp(object):
         emails = [o.email for o in AuthAdminEmails.objects()]
         if len(emails) == 0:
             emails = [self.config['auth-email']['fallback-admin-email']]
-        for email in emails:
+        for admin in emails:
             id = secrets.token_hex(16)
-            AuthExceptionRequests(req_id=id, email=email, approver_email=email).save()
-            self._send_exception_email(email, email, reason, id)
+            AuthExceptionRequests(req_id=id, email=email, approver_email=admin).save()
+            self._send_exception_email(admin, email, reason, id)
 
     def _send_exception_email(self, to: str, email: str, reason: str, id: str) -> None:
 
