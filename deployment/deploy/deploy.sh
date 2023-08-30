@@ -38,9 +38,10 @@ run() {
     echo -n "Running $@..."
     echo "> $@" >>deploy.log
     OUT=`"$@" 2>&1`
+    EC=$?
     # `
     if [ "$?" != "0" ]; then
-        echo "FAILED"
+        echo "FAILED ($EC)"
         echo $OUT
         exit 2
     fi
@@ -51,6 +52,18 @@ run() {
 getId() {
     TYPE=$1
     run docker ps -f "name=service-$TYPE" --format "{{.ID}}"
+}
+
+waitForContainer() {
+    ID=$1
+    echo "Waiting for container $ID..."
+    while true; do
+        STATUS=`docker inspect -f '{{.State.Status}}' $ID`
+        if [ "$STATUS" == "running" ]; then
+            break
+        fi
+        sleep 1
+    done
 }
 
 deployContainer() {
@@ -84,11 +97,16 @@ deployContainer() {
         UPDATE_CONTAINER=1
         getId $TYPE
         ID=$OUT
-        run docker exec -it $ID bash -c "echo $FQDN > /etc/hostname"
+        sleep 5
+        waitForContainer $ID
+        run docker exec -it $ID bash -c "echo $HOST_NAME > /etc/hostname"
+
         if [ ! -f ../docker/fs/etc/psij-testing-service/secrets.json ]; then
             error "No secrets.json found. Please edit/create secrets.json in ../docker/fs/etc/psij-testing-service"
         fi
         run docker cp ../docker/fs/. $ID:/
+        run docker exec -it $ID sed -i "s/\$myhostname/$HOST_NAME/g" /etc/postfix/main.cf
+        run docker exec -it $ID sed -i "s/\$mydomain/$DOMAIN_NAME/g" /etc/postfix/main.cf
         run docker exec -it $ID bash -c "pip show $PACKAGE_NAME | grep 'Location: ' | sed 's/Location: //' | tr -d '\n'"
         PACKAGE_LOC=$OUT
         run docker cp ../web/. "$ID:$PACKAGE_LOC/psij/web/"

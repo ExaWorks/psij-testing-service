@@ -108,12 +108,17 @@ makeLink() {
 UPGRADES="0.4.0"
 
 doUpgrade_0_4_0() {
+    echo "Warning! updates through 0.4.0 need an additional volume attached to the container."
+    echo "It is not generally possible to add a volume to an existing container. You should  "
+    echo "consider re-deploying the containers from scratch."
+    read -p "Press a key..."
+
     HOST_NAME=`cat /etc/hostname | tr -d '\n'`
     DOMAIN_NAME=${HOST_NAME%%.*}
     apt-get install -y postfix procmail syslog-ng
     cp -n /tmp/fs/etc/postfix/main.cf /etc/postfix
-    sed -i "s/$myhostname/$HOST_NAME/g" /etc/postfix/main.cf
-    sed -i "s/$mydomain/$DOMAIN_NAME/g" /etc/postfix/main.cf
+    sed -i "s/\$myhostname/$HOST_NAME/g" /etc/postfix/main.cf
+    sed -i "s/\$mydomain/$DOMAIN_NAME/g" /etc/postfix/main.cf
 
 
     sed -i 's/system()/system(exclude-kmsg(yes))/g' /etc/syslog-ng/syslog-ng.conf
