@@ -40,7 +40,7 @@ if __name__ == '__main__':
         
         package_data={
             '': ['README.md', 'LICENSE', 'RELEASE'],
-            'psij': get_files('src/psij/web')
+            'psij': get_files('src/psij')
         },
 
         scripts=[],
