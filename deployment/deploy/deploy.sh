@@ -74,7 +74,7 @@ deployContainer() {
         cp $ROOT/web/$TYPE/* $DATA_DIR/$TYPE/web
 
         run docker run \
-            -d -p $PORT:9909 --name "service-$TYPE" \
+            -d -p $PORT:9909 --name "service-$TYPE" -h $FQDN \
             --restart=on-failure:3 \
             --volume=$DATA_DIR/$TYPE/mongodb:/var/lib/mongodb \
             --volume=$DATA_DIR/$TYPE/web:/var/www/html \
