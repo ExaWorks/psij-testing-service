@@ -162,3 +162,11 @@ debugger_command =
 # readme_directory =
 
 inet_protocols = ipv4
+
+smtpd_tls_cert_file=/etc/letsencrypt/live/$mydomain/fullchain.pem
+smtpd_tls_key_file=/etc/letsencrypt/live/$mydomain/privkey.pem
+smtpd_tls_security_level=may
+
+smtp_tls_CApath=/etc/ssl/certs
+smtp_tls_security_level=may
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache

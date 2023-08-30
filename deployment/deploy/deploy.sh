@@ -78,6 +78,7 @@ deployContainer() {
             --restart=on-failure:3 \
             --volume=$DATA_DIR/$TYPE/mongodb:/var/lib/mongodb \
             --volume=$DATA_DIR/$TYPE/web:/var/www/html \
+            --volume=/etc/letsencrypt:/etc/letsencrypt \
             $EXTRA_VOL \
             $IMAGE:$SERVICE_VERSION
         UPDATE_CONTAINER=1
