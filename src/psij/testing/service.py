@@ -177,8 +177,10 @@ class AuthError(Exception):
 
 
 class TestingAggregatorApp(object):
-    def __init__(self):
+    def __init__(self, config: Dict[str, object], secrets: Dict[str, object]) -> None:
         self.seq = 0
+        self.config = config
+        self.secrets = secrets
 
     @cherrypy.expose
     def index(self) -> None:
@@ -543,8 +545,13 @@ class TestingAggregatorApp(object):
         raise AuthError('Failed to generate authentication key', email)
 
     def _load_email_body(self, file_name: str) -> str:
-        dir = os.path.dirname(__file__)
-        with open(dir + '/' + file_name) as f:
+        if file_name[0] == '/':
+            path = file_name
+        else:
+            dir = os.path.dirname(__file__)
+            path = dir + '/' + file_name
+
+        with open(path) as f:
             return f.read()
 
     def _load_email_bodies(self, file_prefix: str, params: Dict[str, str]) -> MIMEMultipart:
@@ -624,7 +631,7 @@ class TestingAggregatorApp(object):
     def _send_exception_emails(self, email: str, reason: str) -> None:
         emails = [o.email for o in AuthAdminEmails.objects()]
         if len(emails) == 0:
-            emails = [self.config['fallback-admin-email']]
+            emails = [self.config['auth-email']['fallback-admin-email']]
         for email in emails:
             id = secrets.token_hex(16)
             AuthExceptionRequests(req_id=id, email=email, approver_email=email).save()
@@ -724,7 +731,7 @@ class Server:
             'server.socket_port': self.port,
             'server.socket_host': '0.0.0.0'
         })
-        cherrypy.quickstart(TestingAggregatorApp(), '/', {
+        cherrypy.quickstart(TestingAggregatorApp(self.config, self.secrets), '/', {
             '/': {
                 'tools.staticdir.root': str(Path(__file__).parent.parent.absolute() / 'web'),
                 'tools.staticdir.on': True,
