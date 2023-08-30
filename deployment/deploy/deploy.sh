@@ -40,7 +40,7 @@ run() {
     OUT=`"$@" 2>&1`
     EC=$?
     # `
-    if [ "$?" != "0" ]; then
+    if [ "$EC" != "0" ]; then
         echo "FAILED ($EC)"
         echo $OUT
         exit 2
