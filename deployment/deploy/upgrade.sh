@@ -63,7 +63,7 @@ update() {
         docker exec -it $ID apt-get update
         docker exec -it $ID apt-get upgrade -y
         # Make sure that all files are there if needed
-        docker cp ../docker/fs/* $ID:/tmp/fs/
+        docker cp ../docker/fs/. $ID:/tmp/fs/
         if [ "$DEV" == "1" ]; then
             pushd ../..
             python setup.py sdist

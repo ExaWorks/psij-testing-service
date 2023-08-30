@@ -87,9 +87,10 @@ deployContainer() {
         if [ ! -f ../docker/fs/etc/psij-testing-service/secrets.json ]; then
             error "No secrets.json found. Please edit/create secrets.json in ../docker/fs/etc/psij-testing-service"
         fi
-        run docker cp ../docker/fs/* $ID:/
+        run docker cp ../docker/fs/. $ID:/
         run docker exec -it $ID bash -c "pip show $PACKAGE_NAME | grep 'Location: ' | sed 's/Location: //' | tr -d '\n'"
-        run docker cp ../web/* "$ID:$PACKAGE_LOC/psij/web/"
+        PACKAGE_LOC=$OUT
+        run docker cp ../web/. "$ID:$PACKAGE_LOC/psij/web/"
     fi
     if [ "$UPDATE_CONTAINER" != "0" ]; then
         if [ "$DEV" == "1" ]; then
