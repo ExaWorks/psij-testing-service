@@ -12,7 +12,15 @@ To make a release of the service:
 
 To deploy the service(s):
 - make a release as above for deployment
-- edit config and fill in appropriate values if necessary
+- check out the psij-testing-service repo on the target machine
+- edit the following and populate with appropriate values:
+    - config
+    - deploy/DOMAIN_NAME
+    - docker/fs/etc; make sure you:
+        - create a secrets.json in psij-testing-service
+        - the config-*.json files are valid and have proper values
+    - web/instance; add reCapthcaSiteKey
+
 - run deploy.sh from the deploy directory. This will:
     - install or upgrade nginx
     - start or upgrade the PSI/J and SDK containers to the version
