@@ -17,6 +17,7 @@ usage() {
 FORCE=""
 DONTASK=""
 COMPONENTS="psij sdk"
+DOMAIN_NAME=`cat DOMAIN_NAME | tr -d '\n'`
 
 while [ "$1" != "" ]; do
     case "$1" in
@@ -64,6 +65,7 @@ update() {
         docker exec -it $ID apt-get upgrade -y
         # Make sure that all files are there if needed
         docker cp ../docker/fs/. $ID:/tmp/fs/
+        docker exec -it $ID bash -c "echo $TYPE.$DOMAIN_NAME > /etc/hostname"
         if [ "$DEV" == "1" ]; then
             pushd ../..
             python setup.py sdist

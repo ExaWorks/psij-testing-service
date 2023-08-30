@@ -108,9 +108,19 @@ makeLink() {
 UPGRADES="0.4.0"
 
 doUpgrade_0_4_0() {
-    apt-get install -y postfix
+    HOST_NAME=`cat /etc/hostname | tr -d '\n'`
+    DOMAIN_NAME=${HOST_NAME%%.*}
+    apt-get install -y postfix procmail syslog-ng
     cp -n /tmp/fs/etc/postfix/main.cf /etc/postfix
-    service postfix restart
+    sed -i "s/$myhostname/$HOST_NAME/g" /etc/postfix/main.cf
+    sed -i "s/$mydomain/$DOMAIN_NAME/g" /etc/postfix/main.cf
+
+
+    sed -i 's/system()/system(exclude-kmsg(yes))/g' /etc/syslog-ng/syslog-ng.conf
+    cp -n /tmp/fs/etc/postfix/header_checks /etc/postfix
+
+    service syslog-ng start
+    service postfix start
     mkdir -p /etc/psij-testing-service
     cp -n /tmp/fs/etc/psij-testing-service/* /etc/psij-testing-service
     if [ ! -f /etc/psij-testing-service/secrets.json ]; then
