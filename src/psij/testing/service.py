@@ -565,7 +565,7 @@ class TestingAggregatorApp(object):
 
     def _send_key_email(self, email: str, id: str, token: str) -> None:
 
-        msg = self._load_email_bodies(self.config['auth-email']['body'], {'id': id, 'key': token})
+        msg = self._load_email_bodies(self.config['auth-email']['body'], {'id': id, 'token': token})
 
         source = self.config['auth-email']['from']
 
