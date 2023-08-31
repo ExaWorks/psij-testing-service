@@ -199,12 +199,10 @@ class TestingAggregatorApp(object):
         data = json['data']
 
         if ':' in key:
-            site = self._check_authorized(site_id, key)
-            if not site:
+            if not self._check_authorized(site_id, key):
                 raise cherrypy.HTTPError(403, 'Invalid key. Please go to /auth.html to request a new key.')
         else:
-            site = self._check_authorized_legacy(site_id, key)
-            if not site:
+            if not self._check_authorized_legacy(site_id, key):
                 raise cherrypy.HTTPError(403, 'This ID is associated with another key')
 
         try:
@@ -215,7 +213,7 @@ class TestingAggregatorApp(object):
             function = data['function']
             if module == '_conftest':
                 if function == '_discover_environment':
-                    self._save_environment(site, data)
+                    self._save_environment(site_id, data)
                 if function == '_end':
                     self._end_tests(site_id, data)
 
@@ -265,30 +263,28 @@ class TestingAggregatorApp(object):
                          run_start_time=env['start_time'], branch=env['git_branch'])
         run_env.save()
 
-    def _check_authorized(self, id:str, key: str) -> Optional[Site]:
+    def _check_authorized(self, site_id:str, key: str) -> bool:
         id, token = self._split_key(key)
-        if not self._verify_key(id, token):
-            return None
-        return Site.objects(site_id=id).first()
+        return self._verify_key(id, token)
 
-    def _check_authorized_legacy(self, id: str, key: str) -> Optional[Site]:
+    def _check_authorized_legacy(self, site_id: str, key: str) -> bool:
         entries = Site.objects(site_id=id)
         entry = entries.first()
         if entry:
             entry.ip = cherrypy.request.remote.ip
             if key == entry.key:
-                return self._update(entry)
+                self._update(entry)
+                return True
             else:
                 # we do not allow ad-hoc keys any more
-                return None
+                return False
         else:
             # nothing yet
-            return None
+            return False
 
-    def _update(self, entry: Site) -> Site:
+    def _update(self, entry: Site) -> None:
         entry.last_seen = datetime.datetime.utcnow()
         entry.save()
-        return entry
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
