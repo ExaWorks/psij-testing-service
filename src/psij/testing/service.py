@@ -12,7 +12,7 @@ import json
 import secrets
 import sys
 from pathlib import Path
-from typing import Optional, Dict, cast, Tuple
+from typing import Optional, Dict, cast, Tuple, Any, List
 
 import cherrypy
 import requests
@@ -177,7 +177,7 @@ class AuthError(Exception):
 
 
 class TestingAggregatorApp(object):
-    def __init__(self, config: Dict[str, object], secrets: Dict[str, object]) -> None:
+    def __init__(self, config: Dict[str, Any], secrets: Dict[str, object]) -> None:
         self.seq = 0
         self.config = config
         self.secrets = secrets
@@ -222,7 +222,7 @@ class TestingAggregatorApp(object):
             cherrypy.log('Request json: %s' % json)
             raise
 
-    def _update_totals(self, site_id, data: Dict[str, object]) -> None:
+    def _update_totals(self, site_id, data: Dict[str, Any]) -> None:
         run_id = data['run_id']
         branch = data['branch']
 
@@ -230,6 +230,7 @@ class TestingAggregatorApp(object):
         failed = False
         skipped = False
         for k, v in results.items():
+
             if v['status'] == 'failed':
                 failed = True
             if k == 'call' and v['status'] == 'skipped':
@@ -299,7 +300,7 @@ class TestingAggregatorApp(object):
         except ValueError:
             iInactiveTimeout = 0
         if iInactiveTimeout <= 0:
-            date_limit = datetime.date.min
+            date_limit = datetime.datetime.min
 
         time_limit = datetime.datetime.combine(date_limit, datetime.datetime.min.time())
         resp = []
@@ -315,7 +316,7 @@ class TestingAggregatorApp(object):
             # now find all envs/branches with this run id
             envs = RunEnv.objects(site_id=site.site_id, run_id=run_id)
 
-            branches = []
+            branches: List[Dict[str, Any]] = []
             site_data = {
                 'site_id': site.site_id,
                 'run_id': run_id,
@@ -359,7 +360,7 @@ class TestingAggregatorApp(object):
 
                 month = date_start.month
                 if month not in site_data['months']:
-                    month_data = {}  # type Dict[int, object]
+                    month_data: Dict[int, object] = {}
                     site_data['months'][month] = month_data
                 else:
                     month_data = site_data['months'][month]
@@ -400,12 +401,12 @@ class TestingAggregatorApp(object):
         s = Site.objects(site_id=site_id).first()
         resp = {}
         resp['site_id'] = site_id
-        test_runs = []
+        test_runs: List[Dict[str, object]] = []
         resp['test_runs'] = test_runs
 
         runs = RunEnv.objects(site_id=site_id).order_by('-run_start_time', '+branch')[:100]
 
-        seen = {}
+        seen: Dict[str, Dict[str, Any]] = {}
         for run in runs:
             if run.run_id in seen:
                 run_set = seen[run.run_id]
@@ -430,16 +431,16 @@ class TestingAggregatorApp(object):
     @cherrypy.tools.json_out()
     def run(self, site_id, run_id) -> object:
         s = Site.objects(site_id=site_id).first()
-        resp = {}
+        resp: Dict[str, object] = {}
         resp['site_id'] = site_id
         resp['run_id'] = run_id
-        branches = []
+        branches: List[Dict[str, object]] = []
         resp['branches'] = branches
 
         runs = RunEnv.objects(site_id=site_id, run_id=run_id).order_by('+branch')
 
         for run in runs:
-            test_list = []
+            test_list: List[Dict[str, object]] = []
             branch = run.to_mongo().to_dict()
             branch['tests'] = test_list
             branch['name'] = run.branch
@@ -472,7 +473,7 @@ class TestingAggregatorApp(object):
                              test_start_time__gt=time_limit,
                              test_name__in=tests_to_match).order_by('-test_start_time')
 
-        resp = {}
+        resp: Dict[str, Dict[str, object]] = {}
 
         for test in tests:
             if test.site_id not in resp:
@@ -594,7 +595,7 @@ class TestingAggregatorApp(object):
 
         return {'success': True}
 
-    def _verify_key(self, id: str, key: str) -> None:
+    def _verify_key(self, id: str, key: str) -> bool:
         auth = Auth.objects(key_id=id).first()
 
         encrypted_key = bcrypt.hashpw(key.encode('ascii'), auth.hash.encode('ascii'))
