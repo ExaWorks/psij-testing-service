@@ -222,7 +222,7 @@ class TestingAggregatorApp(object):
             cherrypy.log('Request json: %s' % json)
             raise
 
-    def _update_totals(self, site_id, data: Dict[str, Any]) -> None:
+    def _update_totals(self, site_id: str, data: Dict[str, Any]) -> None:
         run_id = data['run_id']
         branch = data['branch']
 
@@ -252,11 +252,12 @@ class TestingAggregatorApp(object):
         data['site_id'] = site_id
         Test(**data).save()
 
-    def _save_environment(self, site: Site, data: Dict[str, object]) -> None:
+    def _save_environment(self, site_id: str, data: Dict[str, object]) -> None:
         env = cast(Dict[str, object], data['extras'])
         config = cast(Dict[str, object], env['config'])
         del env['config']
         maintainer_email = config['maintainer_email']
+        site = Site.objects(site_id=site_id).first()
         if maintainer_email:
             site.crt_maintainer_email = maintainer_email
             site.save()
