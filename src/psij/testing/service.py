@@ -258,10 +258,12 @@ class TestingAggregatorApp(object):
         del env['config']
         maintainer_email = config['maintainer_email']
         site = Site.objects(site_id=site_id).first()
+        if site is None:
+            self._update(site = Site(site_id=id, key='', ip=cherrypy.request.remote.ip))
         if maintainer_email:
             site.crt_maintainer_email = maintainer_email
             site.save()
-        run_env = RunEnv(run_id=data['run_id'], site_id=site.site_id, config=config, env=env,
+        run_env = RunEnv(run_id=data['run_id'], site_id=site_id, config=config, env=env,
                          run_start_time=env['start_time'], branch=env['git_branch'])
         run_env.save()
 
