@@ -38,9 +38,10 @@ run() {
     echo -n "Running $@..."
     echo "> $@" >>deploy.log
     OUT=`"$@" 2>&1`
+    EC=$?
     # `
-    if [ "$?" != "0" ]; then
-        echo "FAILED"
+    if [ "$EC" != "0" ]; then
+        echo "FAILED ($EC)"
         echo $OUT
         exit 2
     fi
@@ -53,9 +54,22 @@ getId() {
     run docker ps -f "name=service-$TYPE" --format "{{.ID}}"
 }
 
+waitForContainer() {
+    ID=$1
+    echo "Waiting for container $ID..."
+    while true; do
+        STATUS=`docker inspect -f '{{.State.Status}}' $ID`
+        if [ "$STATUS" == "running" ]; then
+            break
+        fi
+        sleep 1
+    done
+}
+
 deployContainer() {
     TYPE=$1
     PORT=$2
+    HOST_NAME=$3
     getId $TYPE
     ID=$OUT
     echo "ID: $OUT"
@@ -71,34 +85,51 @@ deployContainer() {
         mkdir -p $DATA_DIR/$TYPE/mongodb
         mkdir -p $DATA_DIR/$TYPE/web
         cp $ROOT/web/$TYPE/* $DATA_DIR/$TYPE/web
+
         run docker run \
-            -d -p $PORT:9909 --name "service-$TYPE" \
+            -d -p $PORT:9909 --name "service-$TYPE" -h $HOST_NAME \
             --restart=on-failure:3 \
             --volume=$DATA_DIR/$TYPE/mongodb:/var/lib/mongodb \
             --volume=$DATA_DIR/$TYPE/web:/var/www/html \
+            --volume=/etc/letsencrypt:/etc/letsencrypt \
             $EXTRA_VOL \
-            $IMAGE:latest
+            $IMAGE:$SERVICE_VERSION
         UPDATE_CONTAINER=1
-    fi
-    if [ "$UPDATE_CONTAINER" != "0" ]; then
         getId $TYPE
         ID=$OUT
+        sleep 5
+        waitForContainer $ID
+        run docker exec -it $ID bash -c "echo $HOST_NAME > /etc/hostname"
+
+        if [ ! -f ../docker/fs/etc/psij-testing-service/secrets.json ]; then
+            error "No secrets.json found. Please edit/create secrets.json in ../docker/fs/etc/psij-testing-service"
+        fi
+        run docker cp ../docker/fs/. $ID:/
+        run docker exec -it $ID sed -i "s/\$myhostname/$HOST_NAME/g" /etc/postfix/main.cf
+        run docker exec -it $ID sed -i "s/\$mydomain/$DOMAIN_NAME/g" /etc/postfix/main.cf
+        run docker exec -it $ID postmap -v hash:/etc/postfix/sasl_passwd
+        run docker exec -it $ID bash -c "pip show $PACKAGE_NAME | grep 'Location: ' | sed 's/Location: //' | tr -d '\n'"
+        PACKAGE_LOC=$OUT
+        run docker cp ../web/. "$ID:$PACKAGE_LOC/psij/web/"
+    fi
+    if [ "$UPDATE_CONTAINER" != "0" ]; then
         if [ "$DEV" == "1" ]; then
-            run docker exec -it $ID update-psi-j-testing-service -y $TYPE /psi-j-testing-service-dev
+            ./upgrade.sh -y --force --component $TYPE /psi-j-testing-service-dev
         else
-            run docker exec -it $ID update-psi-j-testing-service -y $TYPE $SERVICE_VERSION
+            ./upgrade.sh -y --force --component $TYPE $SERVICE_VERSION
         fi
     fi
 }
 
-if [ "$USER" != "root" ]; then
-    error "You need root permissions to run this script."
-fi
 
 if service nginx status >/dev/null 2>&1; then
     echo "Nginx is already running. Skipping deployment."
     UPDATE_NGINX=$FORCED_UPDATE
 else
+    if [ "$USER" != "root" ]; then
+        error "You need root permissions to run this script."
+    fi
+
     run apt-get update
     run apt-get install -y nginx
     UPDATE_NGINX=1
@@ -111,12 +142,13 @@ filterConf() {
     PROXY_REDIRECT="$4"
     INTERNAL_PORT="$5"
 
-    if [ ! -f "$DST" ]; then
-        sed -e "s/\${DOMAIN_NAME}/${DOMAIN_NAME}/g" "$SRC" | \
-        sed -e "s/\${SERVER_NAME}/${SERVER_NAME}/g" | \
-        sed -e "s/\${PROXY_REDIRECT}/${PROXY_REDIRECT}/g" | \
-        sed -e "s/\${INTERNAL_PORT}/${INTERNAL_PORT}/g" >"$DST"
+    if [ -f "$DST" ]; then
+        cp "$DST" "$DST.bk"
     fi
+    sed -e "s/\${DOMAIN_NAME}/${DOMAIN_NAME}/g" "$SRC" | \
+    sed -e "s/\${SERVER_NAME}/${SERVER_NAME}/g" | \
+    sed -e "s/\${PROXY_REDIRECT}/${PROXY_REDIRECT}/g" | \
+    sed -e "s/\${INTERNAL_PORT}/${INTERNAL_PORT}/g" >"$DST"
 }
 
 deploySite() {
@@ -130,8 +162,9 @@ deploySite() {
     ln -f -s "/etc/nginx/sites-available/$NAME" "/etc/nginx/sites-enabled/$NAME"
 }
 
+DOMAIN_NAME=`cat DOMAIN_NAME | tr -d '\n'`
+
 if [ "$UPDATE_NGINX" != "0" ]; then
-    DOMAIN_NAME=`cat DOMAIN_NAME | tr -d '\n'`
     filterConf nginx/headers.conf /etc/nginx/snippets/headers.conf
     filterConf nginx/nginx.conf /etc/nginx/nginx.conf
     filterConf nginx/ssl.conf /etc/nginx/ssl.conf
@@ -147,5 +180,5 @@ if [ "$UPDATE_NGINX" != "0" ]; then
     run service nginx restart
 fi
 
-deployContainer psij 9901
-deployContainer sdk 9902
+deployContainer psij 9901 "psij.$DOMAIN_NAME"
+deployContainer sdk 9902 "sdk.$DOMAIN_NAME"

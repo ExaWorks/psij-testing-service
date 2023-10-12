@@ -1,0 +1,8 @@
+Here is your dashboard authentication key: {id}:{token}
+
+Please place it in a file named "key" in the "~/.psij" directory and ensure
+that it is only visible to you. You can do so by running the following
+commands in a terminal:
+
+echo "{id}:{token}" > ~/.psij/key
+chmod 600 ~/.psij/key

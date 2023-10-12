@@ -1,0 +1,23 @@
+<html>
+    <head></head>
+    <body>
+        <style>
+            body{{width:400pt;}}
+            .email{{display:inline-block;padding:8pt;background-color:#f0f0f0;margin-left:16pt;font-size:110%}}
+            .reason{{padding:8pt;background-color:#f0f0f0;width:65ch;margin-left:16pt}}
+            .action{{display:block;padding: 8pt;}}
+            .approve{{background-color:#80ff80;}}
+            .reject{{background-color: #ff9090;}}
+        </style>
+        <p>Request for email exception:</p>
+
+        <pre class="email">{email}</pre>
+
+        <p>Reason provided by user:</p>
+
+        <p class="reason">{reason}</p>
+
+        <span class="action reject">Reject: <a href="{rejectUrl}">{rejectUrl}</a></span>
+        <span class="action approve">Approve: <a href="{approveUrl}">{approveUrl}</a></span>
+    </body>
+</html>

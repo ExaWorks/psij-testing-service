@@ -700,3 +700,15 @@ td.run-id {
     padding: 0;
 }
 
+#auth .sep {
+    display: block;
+    height: 36pt;
+}
+
+#auth .theme--light.v-application {
+    background-color: #f0f0f0;
+}
+
+#auth .v-tabs {
+    flex: none;
+}

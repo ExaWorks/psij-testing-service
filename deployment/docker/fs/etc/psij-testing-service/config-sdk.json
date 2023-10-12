@@ -1,0 +1,12 @@
+{
+    "project-name": "ExaWorks SDK",
+    "auth-email": {
+        "fallback-admin-email": <none>,
+        "from": "noreply@sdk.testing.exaworks.org",
+        "callback-url": "https://sdk.testing.exaworks.org",
+        "body": "/etc/psij-testing-service/auth-sdk",
+        "exception-body": "mailtemplates/exception",
+        "exception-approved": "mailtemplates/exception-approved",
+        "exception-rejected": "mailtemplates/exception-rejected"
+    }
+}

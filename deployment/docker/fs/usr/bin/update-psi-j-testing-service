@@ -1,0 +1,171 @@
+#!/bin/bash
+
+set -e
+
+try() {
+    N=$1
+    shift
+    
+    for ((I=1; I<=$N; I++)) do
+        set +e
+        "$@"
+        EC=$?
+        set -e
+        if [ "$EC" == "0" ]; then
+            return 0
+        fi
+        echo -n $I...
+    done
+    return 1
+}
+
+PACKAGE_NAME="psij-testing-service"
+URL_BASE=https://github.com/ExaWorks/$PACKAGE_NAME/archive/refs/tags/v
+FORCE=0
+DONTASK=0
+
+
+while [ "$1" != "" ]; do
+    case "$1" in
+        --force)
+            FORCE=1
+            shift
+            ;;
+        -y)
+            DONTASK=1
+            shift
+            ;;
+        --src)
+            PACKAGE="$2"
+            shift
+            shift
+            ;;
+        -*)
+            echo "Unrecognized option $1"
+            exit 1
+            ;;
+        *)
+            TYPE="$1"
+            TARGET_VERSION="$2"
+            shift
+            shift
+            ;;
+    esac
+done
+
+if [ "$TARGET_VERSION" == "" ] || [ "$TYPE" == "" ]; then
+    echo "Usage: update-psi-j-testing-service [--force] [--src path] <type> <target_version>"
+    exit 1
+fi
+
+PACKAGE="$URL_BASE$TARGET_VERSION.tar.gz"
+
+set -e
+
+if [ "${PACKAGE::1}" == "/" ]; then
+    # install from source
+    echo "Installing from source in $PACKAGE"
+elif ! wget -q --method=HEAD "$PACKAGE"; then
+    echo "Error: failed to download $PACKAGE. Please check that the repo has a 'v$TARGET_VERSION' tag"
+    exit 2
+fi
+
+CURRENT_VERSION=`pip show $PACKAGE_NAME|grep Version|awk '{print $2}'`
+
+LOWER_VERSION=`echo -e "$CURRENT_VERSION\n$TARGET_VERSION"| sort -V | head -n 1`
+
+if [ "$FORCE" == "0" ]; then
+    if [ "$TARGET_VERSION" == "$LOWER_VERSION" ]; then
+        if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+            echo "Error: target version ($TARGET_VERSION) is lower than the currently"
+            echo "installed version ($CURRENT_VERSION). If you are sure you want to "
+            echo "downgrade, use the --force flag."
+            exit 3
+        fi
+    fi
+fi
+
+if [ "$DONTASK" == "0" ]; then
+    echo "Upgrade from $CURRENT_VERSION to $TARGET_VERSION (y/n)?"
+
+    read ANSWER
+else
+    ANSWER="y"
+fi
+
+makeLink() {
+    LINK_NAME="$1"
+    if [ ! -h "$LINK_NAME" ] && [ ! -f "$LINK_NAME" ]; then
+        DIR=`dirname $LINK_NAME`
+        BASE=`basename $LINK_NAME`
+        NAME="${BASE%.*}"
+        EXT="${BASE##*.}"
+        ln -s "$NAME-$TYPE.$EXT" "$LINK_NAME"
+    fi
+}
+
+
+UPGRADES="0.4.0"
+
+doUpgrade_0_4_0() {
+    echo "Warning! updates through 0.4.0 need an additional volume attached to the container."
+    echo "It is not generally possible to add a volume to an existing container. You should  "
+    echo "consider re-deploying the containers from scratch."
+    read -p "Press a key..."
+
+    HOST_NAME=`cat /etc/hostname | tr -d '\n'`
+    DOMAIN_NAME=${HOST_NAME%%.*}
+    apt-get install -y postfix procmail syslog-ng
+    cp -n /tmp/fs/etc/postfix/main.cf /etc/postfix
+    sed -i "s/\$myhostname/$HOST_NAME/g" /etc/postfix/main.cf
+    sed -i "s/\$mydomain/$DOMAIN_NAME/g" /etc/postfix/main.cf
+
+
+    sed -i 's/system()/system(exclude-kmsg(yes))/g' /etc/syslog-ng/syslog-ng.conf
+    cp -n /tmp/fs/etc/postfix/header_checks /etc/postfix
+    if [ -f /tmp/fs/etc/postfix/sasl_passwd ]; then
+        cp -n /tmp/fs/etc/postfix/sasl_passwd /etc/postfix
+        chmod 600 /etc/postfix/sasl_passwd
+        postmap -v hash:/etc/postfix/sasl_passwd
+    fi
+
+    service syslog-ng start
+    service postfix start
+    mkdir -p /etc/psij-testing-service
+    cp -n /tmp/fs/etc/psij-testing-service/* /etc/psij-testing-service
+    if [ ! -f /etc/psij-testing-service/secrets.json ]; then
+        echo "Error. No secrets.json file found for the service."
+        exit 1
+    fi
+}
+
+doUpgrades() {
+    D=`echo -e "$CURRENT_VERSION\n$TARGET_VERSION" | sort -V | tail -n 1`
+    if [ "$D" == "$TARGET_VERSION" ]; then
+        for UPGRADE in $UPGRADES; do
+            T=`echo -e "$CURRENT_VERSION\n$UPGRADE\n$TARGET_VERSION" | sort -V | head -n 2 | tail -n 1`
+            if [ "$UPGRADE" == "$T" ]; then
+                echo "Performing $UPGRADE upgrades..."
+                SUFFIX=`echo $UPGRADE | tr "." "_"`
+                "doUpgrade_$SUFFIX"
+            fi
+        done
+    else
+        # downgrading
+        echo Skipping upgrades
+    fi
+}
+
+if [ "$ANSWER" == "y" ]; then
+    pip install "$PACKAGE"
+
+    PACKAGE_LOC=`pip show $PACKAGE_NAME | grep "Location: " | sed 's/Location: //'`
+    makeLink "$PACKAGE_LOC/psij/web/instance/customization.js"
+    makeLink "/etc/psij-testing-service/config.json"
+
+    try 3 timeout 10s service psi-j-testing-service stop
+    doUpgrades
+    try 3 timeout 10s service psi-j-testing-service start
+else
+    echo "OK. Bailing out..."
+fi

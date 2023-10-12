@@ -1,3 +1,0 @@
-CUSTOMIZATION = {
-    projectName: "PSI/J"
-}

@@ -31,9 +31,11 @@ start() {
         log_progress_msg "already running"
         errorcode=0
     else
+        # without this, errors get delayed in the log
+        export PYTHONUNBUFFERED=1
         start-stop-daemon --background --start --quiet --pidfile $PIDFILE \
             --make-pidfile --chuid $DAEMONUSER \
-            --startas /bin/bash -- -c "exec psi-j-testing-service >>/var/log/psi-j-testing-service/service.log 2>&1"
+            --startas /bin/bash -- -c "exec psi-j-testing-service -c /etc/psij-testing-service/config.json -s /etc/psij-testing-service/secrets.json >>/var/log/psi-j-testing-service/service.log 2>&1"
         errorcode=$?
     fi
     return $errorcode

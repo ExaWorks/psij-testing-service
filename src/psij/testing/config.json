@@ -1,0 +1,12 @@
+{
+    "project-name": "Example",
+    "auth-email": {
+        "fallback-admin-email": "admin@example.org",
+        "from": "noreply@example.org",
+        "callback-url": "https://example.org",
+        "body": "mailtemplates/auth",
+        "exception-body": "mailtemplates/exception",
+        "exception-approved": "mailtemplates/exception-approved",
+        "exception-rejected": "mailtemplates/exception-rejected"
+    }
+}
