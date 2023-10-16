@@ -268,11 +268,11 @@ class TestingAggregatorApp(object):
         run_env.save()
 
     def _check_authorized(self, site_id:str, key: str) -> bool:
-        id, token = self._split_key(key)
-        return self._verify_key(id, token)
+        key_id, token = self._split_key(key)
+        return self._verify_key(key_id, token)
 
     def _check_authorized_legacy(self, site_id: str, key: str) -> bool:
-        entries = Site.objects(site_id=id)
+        entries = Site.objects(site_id=site_id)
         entry = entries.first()
         if entry:
             entry.ip = cherrypy.request.remote.ip
@@ -598,8 +598,8 @@ class TestingAggregatorApp(object):
 
         return {'success': True}
 
-    def _verify_key(self, id: str, key: str) -> bool:
-        auth = Auth.objects(key_id=id).first()
+    def _verify_key(self, key_id: str, key: str) -> bool:
+        auth = Auth.objects(key_id=key_id).first()
 
         encrypted_key = bcrypt.hashpw(key.encode('ascii'), auth.hash.encode('ascii'))
         if encrypted_key.decode('ascii') == auth.hash:
