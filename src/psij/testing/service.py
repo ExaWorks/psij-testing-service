@@ -734,7 +734,9 @@ class Server:
 
         cherrypy.config.update({
             'server.socket_port': self.port,
-            'server.socket_host': '0.0.0.0'
+            'server.socket_host': '0.0.0.0',
+            'tools.proxy.on': True,
+            'tools.proxy.local': 'Host'
         })
         cherrypy.quickstart(TestingAggregatorApp(self.config, self.secrets), '/', {
             '/': {
