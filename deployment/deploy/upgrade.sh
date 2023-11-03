@@ -70,6 +70,9 @@ update() {
         docker exec -it $ID apt-get upgrade -y
         # Make sure that all files are there if needed
         docker cp ../docker/fs/. $ID:/tmp/fs/
+        if [ -d ../docker/fs.$TYPE ]; then
+            cp ../docker/fs.$TYPE/. $ID:/tmp/fs/
+        fi
         docker exec -it $ID bash -c "echo $TYPE.$LOCAL_DN > /etc/hostname"
         if [ "$DEV" == "1" ]; then
             pushd ../..
