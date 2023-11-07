@@ -191,8 +191,10 @@ class TestingAggregatorApp(object):
     def result(self) -> None:
         json = cherrypy.request.json
         if not 'id' in json:
+            cherrypy.log('Request does not have an ID. JSON was %s' % json)
             raise cherrypy.HTTPError(400, 'Missing id')
         if not 'key' in json:
+            cherrypy.log('No key in request. JSON was %s' % json)
             raise cherrypy.HTTPError(400, 'Missing key. Please go to /auth.html to request a key.')
         site_id = json['id']
         key = json['key']
@@ -280,9 +282,11 @@ class TestingAggregatorApp(object):
                 self._update(entry)
                 return True
             else:
+                cherrypy.log('Existing key for %s does not match request key.' % site_id)
                 # we do not allow ad-hoc keys any more
                 return False
         else:
+            cherrypy.log('No key in the DB for site %s' % site_id)
             # nothing yet
             return False
 
@@ -353,7 +357,6 @@ class TestingAggregatorApp(object):
                 t_end = datetime.datetime.combine(date_end, datetime.datetime.min.time())
                 envs = RunEnv.objects(site_id=site.site_id).filter(run_start_time__gte=t_start,
                                                                    run_start_time__lt=t_end)
-                print("%s: %s" % (t_start, len(envs)))
                 total_failed = 0
                 total_completed = 0
 
@@ -522,7 +525,7 @@ class TestingAggregatorApp(object):
                           data = {'secret': self.secrets['reCAPTCHA-secret-key'],
                                   'response': ctoken})
         if r.status_code != 200:
-            print(r.json())
+            cherrypy.log('Recaptcha verification error: %s' % r.json())
             raise AuthError('reCAPTCHA verify error', email='')
         rj = r.json()
         if not rj['success']:
@@ -606,11 +609,13 @@ class TestingAggregatorApp(object):
             auth.update(last_used=datetime.datetime.utcnow())
             return True
         else:
+            cherrypy.log('Key does not match')
             return False
 
     def _split_key(self, key: str) -> Tuple[str, str]:
         ix = key.find(':')
         if ix == -1:
+            cherrypy.log('Invalid key: %s' % key)
             raise AuthError('Invalid code')
 
         return key[:ix], key[ix + 1:]
@@ -719,7 +724,7 @@ class Server:
             return json.load(f)
 
     def start(self) -> None:
-        print('webpath: %s' % (Path().absolute() / 'web'))
+        cherrypy.log('webpath: %s' % (Path().absolute() / 'web'))
 
         json_encoder = CustomJSONEncoder()
 
@@ -729,7 +734,9 @@ class Server:
 
         cherrypy.config.update({
             'server.socket_port': self.port,
-            'server.socket_host': '0.0.0.0'
+            'server.socket_host': '0.0.0.0',
+            'tools.proxy.on': True,
+            'tools.proxy.local': 'Host'
         })
         cherrypy.quickstart(TestingAggregatorApp(self.config, self.secrets), '/', {
             '/': {
@@ -764,7 +771,7 @@ def check_db() -> None:
 
 
 def update_email_blocklist():
-    print('updating blocklist')
+    cherrypy.log('updating blocklist')
     r = requests.get(EMAIL_BLOCKLIST_URL)
     r.raise_for_status()
     for line in r.content.splitlines():
