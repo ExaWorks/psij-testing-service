@@ -53,19 +53,28 @@ source ../config
 
 getId() {
     TYPE=$1
-    run docker ps -f "name=service-$TYPE" --format "{{.ID}}"
+    docker ps -f "name=service-$TYPE" --format "{{.ID}}"
 }
 
 update() {
     TYPE=$1
     ID=`docker ps -f "name=service-$TYPE" --format "{{.ID}}"`
+    if [ -f DOMAIN_NAME.$TYPE ]; then
+        LOCAL_DN=`cat DOMAIN_NAME.$TYPE | tr -d '\n'`
+    else
+        LOCAL_DN=$DOMAIN_NAME
+    fi
     if [ "$ID" != "" ]; then
         # Make sure everything is up to date
         docker exec -it $ID apt-get update
         docker exec -it $ID apt-get upgrade -y
         # Make sure that all files are there if needed
         docker cp ../docker/fs/. $ID:/tmp/fs/
-        docker exec -it $ID bash -c "echo $TYPE.$DOMAIN_NAME > /etc/hostname"
+        if [ -d ../docker/fs.$TYPE ]; then
+            docker cp ../docker/fs.$TYPE/. $ID:/tmp/fs/
+        fi
+        docker cp ../web/. "$ID:/tmp/web/"
+        docker exec -it $ID bash -c "echo $TYPE.$LOCAL_DN > /etc/hostname"
         if [ "$DEV" == "1" ]; then
             pushd ../..
             python setup.py sdist
