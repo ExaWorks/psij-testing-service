@@ -71,7 +71,7 @@ update() {
         # Make sure that all files are there if needed
         docker cp ../docker/fs/. $ID:/tmp/fs/
         if [ -d ../docker/fs.$TYPE ]; then
-            cp ../docker/fs.$TYPE/. $ID:/tmp/fs/
+            docker cp ../docker/fs.$TYPE/. $ID:/tmp/fs/
         fi
         run docker cp ../web/. "$ID:/tmp/web/"
         docker exec -it $ID bash -c "echo $TYPE.$LOCAL_DN > /etc/hostname"
