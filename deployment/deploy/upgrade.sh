@@ -53,7 +53,7 @@ source ../config
 
 getId() {
     TYPE=$1
-    run docker ps -f "name=service-$TYPE" --format "{{.ID}}"
+    docker ps -f "name=service-$TYPE" --format "{{.ID}}"
 }
 
 update() {
@@ -73,7 +73,7 @@ update() {
         if [ -d ../docker/fs.$TYPE ]; then
             docker cp ../docker/fs.$TYPE/. $ID:/tmp/fs/
         fi
-        run docker cp ../web/. "$ID:/tmp/web/"
+        docker cp ../web/. "$ID:/tmp/web/"
         docker exec -it $ID bash -c "echo $TYPE.$LOCAL_DN > /etc/hostname"
         if [ "$DEV" == "1" ]; then
             pushd ../..
