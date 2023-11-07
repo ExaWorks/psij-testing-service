@@ -60,7 +60,7 @@
 </script>
 <script type="text/html" id="footer-template">
     <div class="footer" v-if="props.pagination.itemsPerPage > 0 && !showAllRows">
-        {{props.pagination.itemsPerPage + " of " + props.pagination.itemsLength + " items."}}
+        {{Math.min(props.pagination.itemsPerPage, props.pagination.itemsLength) + " of " + props.pagination.itemsLength + " items."}}
         <div class="highlightable button" @click="props.options.itemsPerPage = -1">
             Show All
         </div>
