@@ -161,7 +161,7 @@ if [ "$ANSWER" == "y" ]; then
 
     PACKAGE_LOC=`pip show $PACKAGE_NAME | grep "Location: " | sed 's/Location: //'`
     # Copy customization files
-    cp /tmp/web/* "$PACKAGE_LOC/psij/web"
+    cp /tmp/web/instance/* "$PACKAGE_LOC/psij/web/instance"
 
     makeLink "$PACKAGE_LOC/psij/web/instance/customization.js"
     makeLink "/etc/psij-testing-service/config.json"
