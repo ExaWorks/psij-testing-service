@@ -261,7 +261,8 @@ class TestingAggregatorApp(object):
         maintainer_email = config['maintainer_email']
         site = Site.objects(site_id=site_id).first()
         if site is None:
-            self._update(Site(site_id=site_id, key='', ip=cherrypy.request.remote.ip))
+            site = Site(site_id=site_id, key='', ip=cherrypy.request.remote.ip)
+            self._update(site)
         if maintainer_email:
             site.crt_maintainer_email = maintainer_email
             site.save()
