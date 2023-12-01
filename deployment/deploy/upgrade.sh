@@ -69,12 +69,15 @@ update() {
         docker exec -it $ID apt-get update
         docker exec -it $ID apt-get upgrade -y
         # Make sure that all files are there if needed
-        docker cp ../docker/fs/. $ID:/tmp/fs/
+        # We need root because some files contain secrets which are 600 and owned by root
+        sudo docker cp ../docker/fs/. $ID:/tmp/fs/
         if [ -d ../docker/fs.$TYPE ]; then
             docker cp ../docker/fs.$TYPE/. $ID:/tmp/fs/
         fi
         docker cp ../web/. "$ID:/tmp/web/"
         docker exec -it $ID bash -c "echo $TYPE.$LOCAL_DN > /etc/hostname"
+        # Ensure we have the latest update script before calling it
+        docker cp ../docker/fs/usr/bin/update-psi-j-testing-service $ID:/usr/bin
         if [ "$DEV" == "1" ]; then
             pushd ../..
             python setup.py sdist
