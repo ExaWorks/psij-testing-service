@@ -262,7 +262,7 @@ class TestingAggregatorApp(object):
         site = Site.objects(site_id=site_id).first()
         if site is None:
             site = Site(site_id=site_id, key='', ip=cherrypy.request.remote.ip)
-            self._update(site)
+        self._update(site)
         if maintainer_email:
             site.crt_maintainer_email = maintainer_email
             site.save()
@@ -606,6 +606,7 @@ class TestingAggregatorApp(object):
         auth = Auth.objects(key_id=key_id).first()
 
         if auth is None:
+            cherrypy.log('Key %s not in the database' % key_id)
             raise cherrypy.HTTPError(403, 'Key %s not found. Please go to /auth.html to request a '
                                           'new key.' % key_id)
         encrypted_key = bcrypt.hashpw(key.encode('ascii'), auth.hash.encode('ascii'))
