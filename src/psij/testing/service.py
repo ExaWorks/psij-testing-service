@@ -177,10 +177,12 @@ class AuthError(Exception):
 
 
 class TestingAggregatorApp(object):
-    def __init__(self, config: Dict[str, Any], secrets: Dict[str, object]) -> None:
+    def __init__(self, config: Dict[str, Any], secrets: Dict[str, object],
+                 noauth: bool = False) -> None:
         self.seq = 0
         self.config = config
         self.secrets = secrets
+        self.noauth = noauth
 
     @cherrypy.expose
     def index(self) -> None:
@@ -200,12 +202,13 @@ class TestingAggregatorApp(object):
         key = json['key']
         data = json['data']
 
-        if ':' in key:
-            if not self._check_authorized(site_id, key):
-                raise cherrypy.HTTPError(403, 'Invalid key. Please go to /auth.html to request a new key.')
-        else:
-            if not self._check_authorized_legacy(site_id, key):
-                raise cherrypy.HTTPError(403, 'This ID is associated with another key')
+        if not self.noauth:
+            if ':' in key:
+                if not self._check_authorized(site_id, key):
+                    raise cherrypy.HTTPError(403, 'Invalid key. Please go to /auth.html to request a new key.')
+            else:
+                if not self._check_authorized_legacy(site_id, key):
+                    raise cherrypy.HTTPError(403, 'This ID is associated with another key')
 
         try:
             self.seq += 1
@@ -715,10 +718,11 @@ class TestingAggregatorApp(object):
 
 class Server:
     def __init__(self, port: int = 9909, config_path: str = 'config.json',
-                 secrets_path: str = 'secrets.json') -> None:
+                 secrets_path: str = 'secrets.json', noauth: bool = False) -> None:
         self.port = port
         self.config = self._read_file(config_path)
         self.secrets = self._read_file(secrets_path)
+        self.noauth = noauth
 
     def _read_file(self, path: str) -> Dict[str, object]:
         if path[0] == '/':
@@ -743,7 +747,7 @@ class Server:
             'tools.proxy.on': True,
             'tools.proxy.local': 'Host'
         })
-        cherrypy.quickstart(TestingAggregatorApp(self.config, self.secrets), '/', {
+        cherrypy.quickstart(TestingAggregatorApp(self.config, self.secrets, self.noauth), '/', {
             '/': {
                 'tools.staticdir.root': str(Path(__file__).parent.parent.absolute() / 'web'),
                 'tools.staticdir.on': True,
@@ -797,8 +801,10 @@ def main() -> None:
                              'source package.')
     parser.add_argument('-s', '--secrets', action='store', type=str, default='secrets.json',
                         help='A file containing authentication keys/tokens.')
+    parser.add_argument('--noauth', action='store_true', help='Do not require '
+                        'authentication. Should only be used for debugging purposes.')
     args = parser.parse_args(sys.argv[1:])
-    server = Server(args.port, args.config, args.secrets)
+    server = Server(args.port, args.config, args.secrets, args.noauth)
     server.start()
 
 
