@@ -24,6 +24,13 @@ CODE_DB_VERSION = 4
 EMAIL_BLOCKLIST_URL = 'https://raw.githubusercontent.com/disposable-email-domains/' \
                       'disposable-email-domains/master/disposable_email_blocklist.conf'
 
+_SCHEDULER_ENV_PROPS = {
+    'has_pbs': 'PBS',
+    'has_slurm': 'Slurm',
+    'has_cobalt': 'Cobalt',
+    'has_lsf': 'LSF',
+    'has_flux': 'Flux'
+}
 
 def upgrade_0_to_1() -> None:
     pass
@@ -332,6 +339,7 @@ class TestingAggregatorApp(object):
                 'site_id': site.site_id,
                 'run_id': run_id,
                 'branches': branches,
+                'scheduler': self._get_scheduler(env)
             }
             site_completed_count = 0
             site_failed_count = 0
@@ -404,6 +412,12 @@ class TestingAggregatorApp(object):
 
         add_cors_headers()
         return resp
+
+    def _get_scheduler(self, env: object) -> Optional[str]:
+        for k, v in _SCHEDULER_ENV_PROPS.items():
+            if k in env:
+                return v
+        return None
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
