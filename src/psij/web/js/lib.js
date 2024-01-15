@@ -478,7 +478,8 @@ var globalMethods = {
                 site_id: site.site_id,
                 domain: domain,
                 groupIndex: this.groupIndex(domain),
-                cols: new Array(ndays)
+                cols: new Array(ndays),
+                scheduler: site.scheduler
             };
             items[i] = row;
 

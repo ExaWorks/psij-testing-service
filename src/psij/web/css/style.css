@@ -500,6 +500,14 @@ td.run-id {
     border-radius: 4pt;
 }
 
+.calendar-site .scheduler {
+    border-radius: 2pt;
+    background-color: #5070ff;
+    padding: 2pt 3pt 1pt 3pt;
+    margin-left: 2pt;
+    color: white;
+}
+
 .status-table-tile {
     text-align: left;
     height: 10pt;
