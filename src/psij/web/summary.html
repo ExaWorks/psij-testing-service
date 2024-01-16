@@ -27,7 +27,7 @@
     <tr>
         <th class="calendar-site clickable" :onclick="navigate('site.html?site_id=' + siteId)">
             <span :class="item.inGroup ? 'indicator-in-group' : 'indicator-not-in-group'" class="group-indicator"></span>
-            <span class="site-label">{{siteId}} <span class="scheduler">{{item.scheduler}}</span></span>
+            <span class="site-label">{{siteId}} <span v-if="item.scheduler" class="scheduler">{{item.scheduler}}</span></span>
         </th>
         <td v-for="column in item.cols" class="status-table-cell">
             <t-status-tile :column="column" :show-branches="showBranches"></t-status-tile>

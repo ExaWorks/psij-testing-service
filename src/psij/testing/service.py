@@ -415,7 +415,7 @@ class TestingAggregatorApp(object):
 
     def _get_scheduler(self, env: object) -> Optional[str]:
         for k, v in _SCHEDULER_ENV_PROPS.items():
-            if k in env:
+            if k in env.env and env.env[k]:
                 return v
         return None
 
