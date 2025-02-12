@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <title>Success</title>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.js"
+                integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+                crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.3/ansi_up.js"></script>
+        <script src="/js/lib.js"></script>
+        <link rel="stylesheet" href="/css/style.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+        <script src="/instance/customization.js"></script>
+        <script src="/js/auth-common.js"></script>
+    </head>
+    <body>
+        <div id="container">
+<div id="auth">
+    <v-app>
+        <v-card id="requestCard">
+            <v-card-title>Email verified.</v-card-title>
+            <v-card-text>
+                <v-alert outlined prominent text type="success">Your email has been verified and a
+                key was generated and sent to the test installation tool. You can now close
+                this window and return to the installer.</v-alert>
+            </v-card-text>
+        </v-card>
+    </v-app>
+</div>
+        </div>
+        <script>
+            var vue = new Vue({
+                el: "#container",
+                vuetify: new Vuetify(),
+                data: {
+                    CUSTOMIZATION: CUSTOMIZATION,
+                },
+            });
+        </script>
+    </body>
+</html>

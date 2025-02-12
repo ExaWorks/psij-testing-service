@@ -31,16 +31,16 @@
                     <v-card id="requestCard">
                         <v-card-title>Request authentication key</v-card-title>
                         <v-card-text>
-                            <div class="help">Enter your email below to receive an authentication key that
+                            <div class="help" id="email-help">Enter your email below to receive an authentication key that
                             will allow you to upload test results to this dashboard. The email you enter here
                             will only be used as part of the process of obtaining a key.</div>
-
+                            <input type="hidden" id="app-mode" name="app-mode" value="false"/>
 
                             <v-container>
                                 <v-row>
                                     <v-col cols="12" md="4">
                                         <v-text-field v-model="email" :rules="emailRules" autocomplete="email"
-                                                      label="E-mail" required>
+                                                      label="E-mail" if="email-input" required>
                                         </v-text-field>
                                     </v-col>
                                 </v-row>
@@ -167,6 +167,8 @@
 
         <script src="js/common.js"></script>
     <script>
+        const PRESET_EMAIL = "{{email}}";
+
         function RequestSuccessMessage(email) {
             return `An email with the authentication key has been sent to ${email}. It may take a
                     few minutes for the email to be delivered. Please follow the instructions in
@@ -229,8 +231,19 @@
                 submitRequest: function() {
                     var vue = this;
                     vue.genericSubmit(vue, "authRequest", {
-                        email: vue.email, ctoken: vue.requestCaptchaToken},
+                        email: vue.email, ctoken: vue.requestCaptchaToken,
+                        req_id: vue.getId()},
                         RequestSuccessMessage(vue.email), crtReCaptcha);
+                },
+                getId: function() {
+                    let myUrl = window.location.href;
+                    let ix = myUrl.indexOf("/auth/");
+                    if (ix == -1) {
+                        return "";
+                    }
+                    else {
+                        return myUrl.substring(ix + 6);
+                    }
                 },
                 genericSubmit: genericSubmit,
                 showErrorDialog: function(message) {
@@ -262,6 +275,13 @@
                 }
             }
         });
+
+        if (!PRESET_EMAIL.startsWith("{{")) {
+            vue.email = PRESET_EMAIL;
+            $("#email-help").hide();
+            $("#app-mode").val("true");
+            $("#email-input").attr("readonly", "true");
+        }
 
         function reCaptchaCB(token) {
             vue.requestCaptchaValid = true;

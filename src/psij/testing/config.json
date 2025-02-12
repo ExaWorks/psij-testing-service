@@ -5,6 +5,7 @@
         "from": "noreply@example.org",
         "callback-url": "https://example.org",
         "body": "mailtemplates/auth",
+        "body_auto": "mailtemplates/auth_auto",
         "exception-body": "mailtemplates/exception",
         "exception-approved": "mailtemplates/exception-approved",
         "exception-rejected": "mailtemplates/exception-rejected"
