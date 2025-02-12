@@ -324,7 +324,7 @@ class TestingAggregatorApp(object):
             return False
 
     def _update(self, entry: Site) -> None:
-        entry.last_seen = datetime.datetime.now(datetime.UTC)
+        entry.last_seen = datetime.datetime.utcnow()
         entry.save()
 
     @cherrypy.expose
@@ -542,7 +542,7 @@ class TestingAggregatorApp(object):
         time.sleep(1)
         id = self._generate_req_id()
         challenge = self._generate_random_challenge()
-        req = AuthKeyRequest(req_id=id, email=email, created=datetime.datetime.now(datetime.UTC),
+        req = AuthKeyRequest(req_id=id, email=email, created=datetime.datetime.utcnow(),
                          status='initialized', challenge=challenge)
         req.save()
 
@@ -588,7 +588,7 @@ class TestingAggregatorApp(object):
             return file('auth.html')
 
     def _purge_old_requests(self):
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.utcnow()
         limit = now - datetime.timedelta(seconds=KEY_REQUEST_PURGE_INTERVAL)
         AuthKeyRequest.objects(created__lte=limit).delete()
 
@@ -679,7 +679,7 @@ class TestingAggregatorApp(object):
             id = secrets.token_hex(8)
             try:
                 Auth.save(Auth(key_id=id, email=email, hash=encrypted_token,
-                               last_used=datetime.datetime.now(datetime.UTC)))
+                               last_used=datetime.datetime.utcnow()))
                 if req:
                     req.key_id = id
                     req.key = f'{id}:{token}'
@@ -774,7 +774,7 @@ class TestingAggregatorApp(object):
                                           'new key.' % key_id)
         encrypted_key = bcrypt.hashpw(key.encode('ascii'), auth.hash.encode('ascii'))
         if encrypted_key.decode('ascii') == auth.hash:
-            auth.update(last_used=datetime.datetime.now(datetime.UTC))
+            auth.update(last_used=datetime.datetime.utcnow())
             return True
         else:
             cherrypy.log('Key does not match')
@@ -845,7 +845,7 @@ class TestingAggregatorApp(object):
                 else:
                     ip = cherrypy.request.remote.ip
                 AuthAllowedEmails(email=req.email, approved_by=req.approver_email,
-                                  approved_on=datetime.datetime.now(datetime.UTC),
+                                  approved_on=datetime.datetime.utcnow(),
                                   approved_by_ip=ip).save()
             self._send_exception_confirmation_email(req.email, action)
             req.delete()
