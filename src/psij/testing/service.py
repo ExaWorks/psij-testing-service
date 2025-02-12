@@ -1,7 +1,7 @@
 import argparse
 import os
 import smtplib
-import tempfile
+import time
 import traceback
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -23,6 +23,9 @@ from mongoengine import Document, StringField, DateTimeField, connect, DictField
 CODE_DB_VERSION = 4
 EMAIL_BLOCKLIST_URL = 'https://raw.githubusercontent.com/disposable-email-domains/' \
                       'disposable-email-domains/master/disposable_email_blocklist.conf'
+
+KEY_REQUEST_PURGE_INTERVAL = 600
+_KEY_REQUEST_ID_CHARS = 'ABCDEFGHJKLMNPQRSTUVXYZ23456789'
 
 _SCHEDULER_ENV_PROPS = {
     'has_pbs': 'PBS',
@@ -144,6 +147,17 @@ class AuthExceptionRequests(Document):
     approver_email = StringField(required=True)
 
 
+# friendlier key requests
+class AuthKeyRequest(Document):
+    req_id = StringField(required=True, unique=True)
+    email = StringField(required=True)
+    created = DateTimeField(required=True)
+    status = StringField(required=True)
+    challenge = StringField(required=True)
+    key_id = StringField()
+    key = StringField()
+
+
 def strtime(d):
     return d.strftime('%a, %b %d, %Y - %H:%M')
 
@@ -181,6 +195,15 @@ class AuthError(Exception):
     def to_object(self):
         return {'success': False, 'error': self.error, 'email': self.email,
                 'bannedDomain': self.banned_domain, 'domain': self.domain}
+
+
+def file(name: str, params: Optional[Dict[str, str]] = None) -> str:
+    with open(Path(__file__).parent.parent.absolute() / 'web' / name) as f:
+        content = f.read()
+    if params:
+        for k, v in params.items():
+            content = content.replace('{{' + k + '}}', v)
+    return content
 
 
 class TestingAggregatorApp(object):
@@ -242,7 +265,6 @@ class TestingAggregatorApp(object):
         failed = False
         skipped = False
         for k, v in results.items():
-
             if v['status'] == 'failed':
                 failed = True
             if k == 'call' and v['status'] == 'skipped':
@@ -302,7 +324,7 @@ class TestingAggregatorApp(object):
             return False
 
     def _update(self, entry: Site) -> None:
-        entry.last_seen = datetime.datetime.utcnow()
+        entry.last_seen = datetime.datetime.now(datetime.UTC)
         entry.save()
 
     @cherrypy.expose
@@ -513,11 +535,99 @@ class TestingAggregatorApp(object):
         add_cors_headers()
         return resp
 
+
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def authRequest(self, email: str, ctoken: str) -> object:
+    def keyRequestInit(self, email: str) -> object:
+        time.sleep(1)
+        id = self._generate_req_id()
+        challenge = self._generate_random_challenge()
+        req = AuthKeyRequest(req_id=id, email=email, created=datetime.datetime.now(datetime.UTC),
+                         status='initialized', challenge=challenge)
+        req.save()
+
+        return {'success': True, 'id': id}
+
+    def _generate_req_id(self) -> str:
+        id = ''
+        for i in range(6):
+            id += secrets.choice(_KEY_REQUEST_ID_CHARS)
+        return id
+
+    def _generate_random_challenge(self) -> str:
+        return secrets.token_urlsafe(16)
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def keyRequestStatus(self, id: str) -> object:
+        reqs = AuthKeyRequest.objects(req_id=id)
+        if reqs.count() == 0:
+            return {'success': False, 'error': f'Unknown request id "{id}"'}
+        req = reqs.first()
+        d = {'success': True, 'status': req.status}
+        if req.status == 'verified':
+            d['key'] = req.key
+            req.delete()
+
+        return d
+
+    @cherrypy.expose
+    def auth(self, id: Optional[str] = None, ) -> object:
+        self._purge_old_requests()
+        if id:
+            reqs = AuthKeyRequest.objects(req_id=id)
+            if reqs.count() == 0:
+                return file('auth-error.html',
+                            {'title': 'Error',
+                             'error': 'The specified request ID was not found.'})
+            req = reqs.first()
+            req.status = 'seen'
+            req.save()
+            return file('auth.html', {'email': req.email})
+        else:
+            return file('auth.html')
+
+    def _purge_old_requests(self):
+        now = datetime.datetime.now(datetime.UTC)
+        limit = now - datetime.timedelta(seconds=KEY_REQUEST_PURGE_INTERVAL)
+        AuthKeyRequest.objects(created__lte=limit).delete()
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def authVerifyKey(self, key: str) -> object:
+        try:
+            if not self._check_authorized('', key):
+                return {'success': False}
+            else:
+                return {'success': True}
+        except cherrypy.HTTPError as ex:
+            return {'success': False, 'error': ex._message}
+
+    @cherrypy.expose
+    def verify(self, c: str) -> object:
+        reqs = AuthKeyRequest.objects(challenge=c)
+        if len(reqs) == 0:
+            return file('auth-error.html',
+                        {'title': 'Invalid challenge',
+                         'error': 'The specified key request challenge was not '
+                                  'found. Please re-run the key request process.'})
+        req = reqs.first()
+        keys = Auth.objects(key_id=req.key_id)
+        if len(keys) == 0:
+            return file('auth-error.html',
+                        {'title': 'Key not found',
+                         'error': 'An internal error occurred. '
+                                  'Please re-run the key request process.'})
+        req.status = 'verified'
+        req.save()
+        return file('auth-auto-success.html')
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def authRequest(self, email: str, ctoken: str, req_id: str) -> object:
         try:
             self._verify_captcha_token(ctoken)
+            req = self._verify_req_id(req_id, email)
             ix = email.find('@')
             if ix == -1:
                 raise AuthError('The email you provided has an incorrect syntax.', email)
@@ -525,11 +635,11 @@ class TestingAggregatorApp(object):
 
             if AuthDisabledDomains.objects(domain=domain).count() > 0:
                 if AuthAllowedEmails.objects(email=email).count() > 0:
-                    self._perform_auth_request(email)
+                    self._perform_auth_request(email, req)
                 else:
                     raise AuthError('Invalid domain', email, banned_domain=True, domain=domain)
             else:
-                self._perform_auth_request(email)
+                self._perform_auth_request(email, req)
         except AuthError as err:
             return err.to_object()
         except Exception:
@@ -537,6 +647,17 @@ class TestingAggregatorApp(object):
             return AuthError('Internal error', email=email).to_object()
 
         return {'success': True}
+
+    def _verify_req_id(self, req_id: str, email: str) -> Optional[AuthKeyRequest]:
+        if req_id == '':
+            return None
+        reqs = AuthKeyRequest.objects(req_id=req_id)
+        if len(reqs) == 0:
+            raise AuthError(f'No such request id: {req_id}')
+        req = reqs.first()
+        if req.email != email:
+            raise AuthError(f'Invalid request id: {req_id}')
+        return req;
 
     def _verify_captcha_token(self, ctoken: str) -> None:
         r = requests.post('https://www.google.com/recaptcha/api/siteverify',
@@ -549,7 +670,7 @@ class TestingAggregatorApp(object):
         if not rj['success']:
             raise AuthError('reCAPTCHA verify error', email='')
 
-    def _perform_auth_request(self, email: str) -> None:
+    def _perform_auth_request(self, email: str, req: Optional[AuthKeyRequest]) -> None:
         salt = bcrypt.gensalt()
         token = secrets.token_hex(24)
         encrypted_token = bcrypt.hashpw(token.encode('ascii'), salt)
@@ -558,8 +679,16 @@ class TestingAggregatorApp(object):
             id = secrets.token_hex(8)
             try:
                 Auth.save(Auth(key_id=id, email=email, hash=encrypted_token,
-                               last_used=datetime.datetime.utcnow()))
-                return self._send_key_email(email, id, token)
+                               last_used=datetime.datetime.now(datetime.UTC)))
+                if req:
+                    req.key_id = id
+                    req.key = f'{id}:{token}'
+                    req.save()
+                self._send_key_email(email, id, token, req)
+                if req:
+                    req.status = 'email_sent'
+                    req.save()
+                return
             except NotUniqueError:
                 pass
 
@@ -583,14 +712,27 @@ class TestingAggregatorApp(object):
         msg.attach(MIMEText(body_html, 'html'))
         return msg
 
+    def _send_key_email(self, email: str, id: str, token: str,
+                        req: Optional[AuthKeyRequest]) -> None:
+        if req:
+            template = 'body_auto'
+            url = self.config['auth-email']['callback-url'] + '/verify?c=' + req.challenge
+        else:
+            template = 'body'
+            url = None
 
-    def _send_key_email(self, email: str, id: str, token: str) -> None:
 
-        msg = self._load_email_bodies(self.config['auth-email']['body'], {'id': id, 'token': token})
+        project_name = self.config['project-name']
+        msg = self._load_email_bodies(self.config['auth-email'][template],
+                                      {'id': id, 'token': token, 'url': url,
+                                       'project-name': project_name})
 
         source = self.config['auth-email']['from']
 
-        msg['Subject'] = 'Your ' + self.config['project-name'] + ' testing dashboard key'
+        if req:
+            msg['Subject'] = f'{project_name} email verification'
+        else:
+            msg['Subject'] = f'Your {project_name} testing dashboard key'
         msg['From'] = source
         msg['To'] = email
 
@@ -598,8 +740,10 @@ class TestingAggregatorApp(object):
 
     def _send_email(self, source: str, email: str, msg: MIMEMultipart) -> None:
         smtp = smtplib.SMTP('localhost')
-        smtp.sendmail(source, email, msg.as_string())
-        smtp.quit()
+        try:
+            smtp.sendmail(source, email, msg.as_string())
+        finally:
+            smtp.quit()
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -623,12 +767,14 @@ class TestingAggregatorApp(object):
         auth = Auth.objects(key_id=key_id).first()
 
         if auth is None:
+            # slow down brute force tries
+            time.sleep(1)
             cherrypy.log('Key %s not in the database' % key_id)
             raise cherrypy.HTTPError(403, 'Key %s not found. Please go to /auth.html to request a '
                                           'new key.' % key_id)
         encrypted_key = bcrypt.hashpw(key.encode('ascii'), auth.hash.encode('ascii'))
         if encrypted_key.decode('ascii') == auth.hash:
-            auth.update(last_used=datetime.datetime.utcnow())
+            auth.update(last_used=datetime.datetime.now(datetime.UTC))
             return True
         else:
             cherrypy.log('Key does not match')
@@ -638,7 +784,7 @@ class TestingAggregatorApp(object):
         ix = key.find(':')
         if ix == -1:
             cherrypy.log('Invalid key: %s' % key)
-            raise AuthError('Invalid code')
+            raise AuthError('Invalid key')
 
         return key[:ix], key[ix + 1:]
 
@@ -699,7 +845,7 @@ class TestingAggregatorApp(object):
                 else:
                     ip = cherrypy.request.remote.ip
                 AuthAllowedEmails(email=req.email, approved_by=req.approver_email,
-                                  approved_on=datetime.datetime.utcnow(),
+                                  approved_on=datetime.datetime.now(datetime.UTC),
                                   approved_by_ip=ip).save()
             self._send_exception_confirmation_email(req.email, action)
             req.delete()
