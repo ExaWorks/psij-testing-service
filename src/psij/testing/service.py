@@ -715,7 +715,7 @@ class TestingAggregatorApp(object):
     def _send_key_email(self, email: str, id: str, token: str,
                         req: Optional[AuthKeyRequest]) -> None:
         if req:
-            template = 'body_auto'
+            template = 'body-auto'
             url = self.config['auth-email']['callback-url'] + '/verify?c=' + req.challenge
         else:
             template = 'body'
