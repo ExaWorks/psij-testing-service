@@ -480,7 +480,7 @@ td.run-id {
     height: 14pt;
     font-weight: normal;
     font-size: 11pt;
-    width: 60pt;
+    width: 50pt;
 }
 
 .calendar-day {
@@ -614,7 +614,7 @@ td.run-id {
 }
 
 #status .status-table .v-data-table td,
-#status .status-table .v-data-table th{
+#status .status-table .v-data-table th {
     padding-left: 4pt;
     padding-right: 4pt;
     height: 20pt;
