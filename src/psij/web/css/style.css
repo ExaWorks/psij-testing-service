@@ -720,3 +720,13 @@ td.run-id {
 #auth .v-tabs {
     flex: none;
 }
+
+.run .v-skeleton-loader > div {
+    margin-top: 16pt;
+}
+
+.run .v-skeleton-loader__text {
+    height: 24pt;
+    margin-left: 32pt;
+    margin-right: 32pt;
+}
