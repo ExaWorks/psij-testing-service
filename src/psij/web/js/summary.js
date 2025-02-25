@@ -54,6 +54,7 @@ var Summary = function() {
             mode: '',
             now: today,
             settingsDialog: false,
+            calendarLoading: false,
             settings: settings("showBranchBubbles:bool", "showAllRows:bool")
         },
         methods: globalMethods,
@@ -66,31 +67,17 @@ var Summary = function() {
         }
     });
 
-    testsUpdated = function(data) {
-        tests = data;
-
-        copyToArray(siteStatus.testsHeader, globalMethods.getTestsTableHeader(sites, tests));
-        copyToArray(siteStatus.testsItems, globalMethods.getTestsTableItems(sites, tests));
-    }
-
     sitesUpdated = function(data) {
         copyToArray(sites, data);
         copyToArray(siteStatus.calendarHeader, globalMethods.getCalendarHeader(sites, today, 8));
         copyToArray(siteStatus.calendarItems, globalMethods.getCalendarItems(sites, today, 8));
-
-        testsUpdated(tests);
     };
 
     update = function() {
+        siteStatus.calendarLoading = true;
         $.get(PS.getURL("summary"), settings("inactiveTimeout"), function(data) {
             sitesUpdated(data);
-
-            /* The second request needs to be chained because the /tests endpoint does not
-             * have an option to return all relevant sites. This should be changed */
-            /* should switch to a different way of encoding parameters */
-            var params = "sites_to_get=" + JSON.stringify(sites.map(site => site.site_id)) +
-                "&tests_to_match=" + JSON.stringify(CUSTOMIZATION.testsTable.tests);
-            $.get(PS.getURL("tests"), params, testsUpdated);
+            siteStatus.calendarLoading = false;
         });
     };
 

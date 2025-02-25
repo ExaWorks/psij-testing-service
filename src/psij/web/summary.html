@@ -95,11 +95,6 @@
 
 
     <div id="toolbar">
-
-        <div class="highlightable button icon-button view-mode-group" id="view-mode-tests" title="Tests View" onclick="setViewMode('tests')">
-            <span class="material-icons">home</span>
-        </div>
-
         <div class="highlightable button icon-button view-mode-group" id="view-mode-calendar" title="Calendar View" onclick="setViewMode('calendar')">
             <span class="material-icons">calendar_today</span>
         </div>
@@ -159,49 +154,15 @@
 
 
     <div id="status">
-        <div id="tests-view" v-if="mode == 'tests'" class="main-section status-table">
-
-            <v-data-table :headers="testsHeader" :items="testsItems"
-                          class="elevation-1" hide-default-header hide-default-footer
-                          width="300pt" group-by="groupIndex" :custom-sort="sitesSort"
-                          :disable-pagination="settings.showAllRows">
-                <template v-slot:header="{props}">
-                    <thead>
-                        <tr class="top-row">
-                            <th v-for="h in props.headers" class="bg">
-                                <div class="test-header">{{h.text}}</div>
-                            </th>
-                        </tr>
-                    </thead>
-                </template>
-                <template v-slot:item="{item}">
-                    <t-item-row :site-id="item.site_id" :item="item" :show-branches="false"></t-item-row>
-                </template>
-                <template v-slot:group.header="{group, items, isOpen, toggle}">
-                    <t-group-header v-if="items.length > 1" :items="items" :is-open="isOpen" :toggle="toggle"></t-group-header>
-
-                    <template v-if="items.length > 1 && !isOpen">
-                        <td v-for="column in tableSiteGroups(items)" class="status-table-cell">
-                            <t-status-tile :column="column"></t-status-tile>
-                        </td>
-                    </template>
-                </template>
-                <template v-slot:group.summary="{group, items, isOpen}">
-                   <td v-if="items.length > 1 && isOpen" colspan="100%"><div class="group-footer"></div></td>
-                </template>
-                <template v-slot:footer="{props}">
-                    <t-footer :props="props" :show-all-rows="settings.showAllRows"></t-footer>
-                </template>
-            </v-data-table>
-
-        </div>
-
         <div id="status-calendar" v-if="mode == 'calendar'" class="main-section status-table">
+            <v-skeleton-loader v-if="calendarLoading" type="table-thead"></v-skeleton-loader>
+            <v-skeleton-loader v-if="calendarLoading" type="table-row@6"></v-skeleton-loader>
 
             <v-data-table :headers="calendarHeader" :items="calendarItems"
                           class="elevation-1" hide-default-header hide-default-footer
                           width="400pt" group-by="groupIndex" :custom-sort="sitesSort"
-                          :disable-pagination="settings.showAllRows">
+                          :disable-pagination="settings.showAllRows"
+                          v-if="!calendarLoading">
                 <template v-slot:header="{props}">
                     <thead>
                         <tr class="top-row">
