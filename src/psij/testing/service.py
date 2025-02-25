@@ -206,6 +206,18 @@ def file(name: str, params: Optional[Dict[str, str]] = None) -> str:
     return content
 
 
+def _mask_email(email: str) -> str:
+    sz = len(email)
+    masked = ''
+    for i in range(sz):
+        c = email[i]
+        if i == 0 or i == sz - 1 or c == '@':
+            masked += c
+        else:
+            masked += '*'
+    return masked
+
+
 class TestingAggregatorApp(object):
     def __init__(self, config: Dict[str, Any], secrets: Dict[str, object],
                  noauth: bool = False) -> None:
@@ -473,6 +485,19 @@ class TestingAggregatorApp(object):
         add_cors_headers()
         return resp
 
+    def mask_email(self, dict, path) -> None:
+        crt = dict
+        for p in path[:-1]:
+            if p in crt:
+                crt = crt[p]
+            else:
+                return
+        last = path[-1]
+        if last in crt:
+            last[crt] = _mask_email(last[crt])
+        else:
+            return
+
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def run(self, site_id, run_id) -> object:
@@ -490,6 +515,7 @@ class TestingAggregatorApp(object):
             branch = run.to_mongo().to_dict()
             branch['tests'] = test_list
             branch['name'] = run.branch
+            self.mask_email(branch, ['config', 'maintainer_email'])
             branches.append(branch)
 
             tests = Test.objects(site_id=site_id, run_id=run_id,
@@ -497,6 +523,8 @@ class TestingAggregatorApp(object):
 
             for test in tests:
                 test_dict = test.to_mongo().to_dict()
+                if test_dict['test_name'] == '_discover_environment':
+                    self.mask_email(test_dict, ['extras', 'config', 'maintainer_email'])
                 del test_dict['_id']
                 test_list.append(test_dict)
 
