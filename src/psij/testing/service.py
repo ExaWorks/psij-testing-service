@@ -207,6 +207,8 @@ def file(name: str, params: Optional[Dict[str, str]] = None) -> str:
 
 
 def _mask_email(email: str) -> str:
+    if email is None:
+        return None
     sz = len(email)
     masked = ''
     for i in range(sz):
