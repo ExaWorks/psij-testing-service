@@ -17,7 +17,7 @@
         <script src="instance/customization.js"></script>
     </head>
     <body>
-        <div id="container">
+        <div id="container" class="run">
 <div id="breadcrumbs">
     <v-breadcrumbs :items="breadcrumbs()"></v-breadcrumbs>
 </div>
@@ -26,7 +26,10 @@
 </div>
 
 <div id="status">
-    <div class="branch-list-summary">
+    <v-skeleton-loader v-if="dataLoading" type="table-thead, heading, text@3, heading, text@12"></v-skeleton-loader>
+
+
+    <div class="branch-list-summary" v-if="!dataLoading">
         Branches:
         <div class="run-branch" v-for="branch in run.branches">
             <div class="site-branch-cell highlightable" :class="siteStateCSSClass(branch)"
@@ -39,7 +42,7 @@
             </div>
         </div>
     </div>
-    <div class="branch-list">
+    <div class="branch-list" v-if="!dataLoading">
         <div class="branch" v-for="branch in run.branches">
             <h2 class="run-branch">
                 <a :name="'branch-' + branch.name"></a>
@@ -132,7 +135,8 @@
             vuetify: new Vuetify(),
             data: {
                 run: {run_id: ""},
-                site: {site_id: ""}
+                site: {site_id: ""},
+                dataLoading: false
             },
             methods: globalMethods,
             updated: function() {
@@ -147,9 +151,11 @@
 
         var url = PS.getURL("run?site_id=" + urlParam("site_id") + "&run_id=" + urlParam("run_id"));
 
+        siteStatus.dataLoading = true;
         $.get(url, function(data) {
             siteStatus.run = data;
             siteStatus.site.site_id = data["site_id"];
+            siteStatus.dataLoading = false;
         });
 
     </script>
