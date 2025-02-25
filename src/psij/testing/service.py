@@ -494,7 +494,7 @@ class TestingAggregatorApp(object):
                 return
         last = path[-1]
         if last in crt:
-            last[crt] = _mask_email(last[crt])
+            crt[last] = _mask_email(crt[last])
         else:
             return
 
